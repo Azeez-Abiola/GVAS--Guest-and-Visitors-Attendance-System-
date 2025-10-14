@@ -8,7 +8,6 @@ import {
   Users, 
   Building2, 
   CheckCircle, 
-  Star,
   Phone,
   Mail,
   MapPin,
@@ -23,6 +22,7 @@ import {
   Lock,
   Eye,
   ChevronRight,
+  ChevronDown,
   PlayCircle,
   FileText,
   Wifi,
@@ -32,6 +32,87 @@ import {
   X
 } from 'lucide-react'
 import GvasLogo from '../components/GvasLogo'
+
+// FAQ Component with animations
+const FAQSection = () => {
+  const [openIndex, setOpenIndex] = useState(null)
+
+  const faqData = [
+    {
+      question: "What is GVAS and how does it work?",
+      answer: "GVAS (Global Visitor Access System) is a comprehensive visitor management platform that streamlines the check-in process for guests. It provides digital registration, photo capture, host notifications, and real-time tracking to enhance security and improve visitor experience."
+    },
+    {
+      question: "Can visitors pre-register before their visit?",
+      answer: "Yes! GVAS supports pre-registration where visitors can submit their information in advance. This creates a faster check-in experience and allows hosts to prepare for their arrival."
+    },
+    {
+      question: "What security features does GVAS provide?",
+      answer: "GVAS includes photo capture, digital signatures, real-time host notifications, visitor tracking, comprehensive audit trails, and integration with existing security systems to ensure maximum safety."
+    },
+    {
+      question: "Is GVAS suitable for different types of buildings?",
+      answer: "Absolutely! GVAS is designed to work in corporate offices, residential complexes, government buildings, educational institutions, and any facility that needs professional visitor management."
+    },
+    {
+      question: "How does the mobile interface work?",
+      answer: "GVAS features a responsive mobile-first design that works seamlessly on tablets and smartphones. The kiosk interface is optimized for touch interactions and provides an intuitive user experience."
+    },
+    {
+      question: "Can GVAS integrate with our existing systems?",
+      answer: "Yes, GVAS is built with integration in mind. It can connect with existing security systems, access control, and notification platforms through our comprehensive API."
+    }
+  ]
+
+  const toggleFAQ = (index) => {
+    setOpenIndex(openIndex === index ? null : index)
+  }
+
+  return (
+    <div className="space-y-4">
+      {faqData.map((faq, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1, duration: 0.5 }}
+          className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
+        >
+          <button
+            onClick={() => toggleFAQ(index)}
+            className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <span className="font-semibold text-gray-900 text-sm sm:text-base">{faq.question}</span>
+            <motion.div
+              animate={{ rotate: openIndex === index ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex-shrink-0 ml-4"
+            >
+              <ChevronDown className="h-5 w-5 text-gray-500" />
+            </motion.div>
+          </button>
+          <AnimatePresence>
+            {openIndex === index && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-6 pb-4">
+                  <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
 
 const LandingPage = () => {
   const navigate = useNavigate()
@@ -135,52 +216,61 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed w-full z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 shadow-lg">
-        <div className="container mx-auto px-4 sm:px-6 py-4">
+      <nav className="fixed w-full z-50 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 backdrop-blur-xl border-b border-blue-500/30 shadow-lg">
+        <div className="absolute inset-0 bg-white/5"></div>
+        <div className="container mx-auto px-4 sm:px-6 py-6 relative">
           <div className="flex items-center justify-between">
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
+              whileHover={{ scale: 1.05, rotate: 1 }}
+              transition={{ duration: 0.3, type: "spring" }}
+              className="flex items-center space-x-3"
             >
-              <GvasLogo />
+              <GvasLogo variant="white" />
+              <div className="hidden sm:block">
+                <h1 className="text-white font-bold text-xl tracking-wide">GVAS</h1>
+                <p className="text-blue-200 text-xs">Visitor Management</p>
+              </div>
             </motion.div>
             
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors font-medium relative group">
+            <div className="hidden lg:flex items-center space-x-1">
+              <a href="#features" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
                 Features
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
               </a>
-              <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 transition-colors font-medium relative group">
+              <a href="#how-it-works" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
                 How It Works
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
               </a>
-              <a href="#security" className="text-gray-700 hover:text-blue-600 transition-colors font-medium relative group">
+              <a href="#security" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
                 Security
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
               </a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors font-medium relative group">
+              <a href="#contact" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
                 Contact
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
               </a>
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(30, 64, 175, 0.3)" }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/kiosk')}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-lg"
-              >
-                <Monitor className="h-4 w-4" />
-                <span>Visit Kiosk</span>
-              </motion.button>
+              <div className="ml-4 pl-4 border-l border-white/20">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/kiosk')}
+                  className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-md hover:shadow-lg"
+                >
+                  <Monitor className="h-4 w-4" />
+                  <span>Visit Kiosk</span>
+                  <ChevronRight className="h-4 w-4 opacity-60" />
+                </motion.button>
+              </div>
             </div>
 
             {/* Mobile Menu Button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="lg:hidden p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-300 text-white border border-white/20 backdrop-blur-sm"
             >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </motion.button>
           </div>
 
@@ -192,34 +282,34 @@ const LandingPage = () => {
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="lg:hidden mt-4 pb-4 border-t border-gray-200"
+                className="lg:hidden mt-6 pb-6 border-t border-white/20 bg-white/5 rounded-b-2xl backdrop-blur-sm"
               >
-                <div className="flex flex-col space-y-4 pt-4">
+                <div className="flex flex-col space-y-2 pt-6">
                   <a 
                     href="#features" 
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
                   >
                     Features
                   </a>
                   <a 
                     href="#how-it-works" 
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
                   >
                     How It Works
                   </a>
                   <a 
                     href="#security" 
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
                   >
                     Security
                   </a>
                   <a 
                     href="#contact" 
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
                   >
                     Contact
                   </a>
@@ -270,7 +360,7 @@ const LandingPage = () => {
                 <motion.button
                   whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(30, 64, 175, 0.3)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-2 shadow-xl transition-all duration-300"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-2 shadow-lg transition-all duration-300"
                 >
                   <span>Request Demo</span>
                   <ArrowRight className="h-5 w-5" />
@@ -298,7 +388,7 @@ const LandingPage = () => {
                 <div className="absolute -bottom-2 sm:-bottom-4 -right-2 sm:-right-4 w-full h-full bg-blue-100/20 rounded-2xl sm:rounded-3xl blur-xl"></div>
                 
                 {/* Dashboard Image */}
-                <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 border border-white/50">
+                <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 border border-white/50">
                   <img 
                     src="/images/dashboard.png" 
                     alt="GVAS Dashboard Interface" 
@@ -317,7 +407,7 @@ const LandingPage = () => {
                 <motion.div
                   animate={{ y: [-10, 10, -10] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -left-4 sm:-left-8 top-1/4 bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-4 border border-white/50"
+                  className="absolute -left-4 sm:-left-8 top-1/4 bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md p-3 sm:p-4 border border-white/50"
                 >
                   <div className="flex items-center space-x-2 sm:space-x-3">
                     <div className="bg-blue-500 p-1.5 sm:p-2 rounded-lg">
@@ -333,7 +423,7 @@ const LandingPage = () => {
                 <motion.div
                   animate={{ y: [10, -10, 10] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-                  className="absolute -right-4 sm:-right-8 bottom-1/4 bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-4 border border-white/50"
+                  className="absolute -right-4 sm:-right-8 bottom-1/4 bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md p-3 sm:p-4 border border-white/50"
                 >
                   <div className="flex items-center space-x-2 sm:space-x-3">
                     <div className="bg-green-500 p-1.5 sm:p-2 rounded-lg">
@@ -352,12 +442,13 @@ const LandingPage = () => {
       </section>
 
       {/* How GVAS Works */}
-      <section id="how-it-works" className="py-20 px-4 sm:px-6 bg-blue-50 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-30">
+      <section id="how-it-works" className="py-16 sm:py-20 px-4 sm:px-6 bg-blue-50 relative overflow-hidden">
+        {/* Enhanced Background Pattern */}
+        <div className="absolute inset-0 opacity-40">
           <div className="absolute top-0 left-0 w-full h-full bg-blue-100/50"></div>
-          <div className="absolute top-1/4 left-1/4 w-20 sm:w-32 h-20 sm:h-32 bg-blue-200/30 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-24 sm:w-40 h-24 sm:h-40 bg-blue-200/30 rounded-full blur-2xl"></div>
+          <div className="absolute top-1/4 left-1/4 w-32 sm:w-48 h-32 sm:h-48 bg-blue-300/30 rounded-full blur-3xl animate-pulse-slow"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-40 sm:w-56 h-40 sm:h-56 bg-blue-300/30 rounded-full blur-3xl animate-pulse-slow"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 sm:w-32 h-24 sm:h-32 bg-blue-300/20 rounded-full blur-2xl"></div>
         </div>
         
         <div className="container mx-auto relative z-10">
@@ -367,16 +458,22 @@ const LandingPage = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-12 sm:mb-16"
           >
-            <div className="text-blue-600 text-xs sm:text-sm font-bold mb-4 uppercase tracking-wider">
-              Simple & Effective
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">How GVAS Works</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+            <motion.div 
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="inline-block text-blue-600 text-xs sm:text-sm font-bold mb-4 uppercase tracking-wider bg-white/80 px-4 py-2 rounded-full shadow-lg"
+            >
+              ✨ Simple & Effective
+            </motion.div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">How GVAS Works</h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4 leading-relaxed">
               Streamlined visitor management in four simple steps
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {/* Mobile-first responsive grid */}
+          <div className="space-y-8 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 lg:gap-8">
             {processSteps.map((step, index) => (
               <motion.div
                 key={index}
@@ -385,25 +482,38 @@ const LandingPage = () => {
                 transition={{ delay: index * 0.1, duration: 0.6 }}
                 className="text-center relative group"
               >
+                {/* Connection line for desktop */}
                 {index < 3 && (
-                  <div className="hidden lg:block absolute top-12 left-full w-full h-1 bg-blue-400 transform -translate-y-1/2 rounded-full"></div>
+                  <div className="hidden lg:block absolute top-14 left-full w-full h-0.5 bg-blue-400 transform -translate-y-1/2 rounded-full opacity-60"></div>
                 )}
+                
+                {/* Step number circle */}
                 <motion.div 
                   whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white w-20 sm:w-24 h-20 sm:h-24 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 text-xl sm:text-2xl font-bold shadow-xl group-hover:shadow-2xl transition-all duration-300"
+                  className="bg-blue-600 hover:bg-blue-700 text-white w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 text-lg sm:text-xl lg:text-2xl font-bold shadow-md group-hover:shadow-lg transition-all duration-300 relative"
                 >
+                  <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   {step.number}
                 </motion.div>
+                
+                {/* Content card */}
                 <motion.div 
                   whileHover={{ y: -5 }}
-                  className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-white/50 group-hover:shadow-xl transition-all duration-300"
+                  className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-sm border border-white/50 group-hover:shadow-md group-hover:border-blue-200/50 transition-all duration-300 mx-2 sm:mx-0"
                 >
-                  <div className="text-blue-600 mb-3 flex justify-center group-hover:text-blue-700 transition-colors">
+                  <div className="text-blue-600 mb-3 flex justify-center group-hover:text-blue-700 transition-colors duration-300 transform group-hover:scale-110">
                     {step.icon}
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-gray-600 text-sm">{step.description}</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors">{step.title}</h3>
+                  <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{step.description}</p>
                 </motion.div>
+                
+                {/* Mobile connection arrow */}
+                {index < 3 && (
+                  <div className="sm:hidden flex justify-center mt-6 mb-2">
+                    <ChevronDown className="h-6 w-6 text-blue-400 animate-bounce" />
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -440,7 +550,7 @@ const LandingPage = () => {
                 whileInView={{ y: 0, opacity: 1 }}
                 transition={{ delay: index * 0.1, duration: 0.6 }}
                 whileHover={{ y: -10, scale: 1.02 }}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 group relative overflow-hidden"
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 group relative overflow-hidden"
               >
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
@@ -462,7 +572,7 @@ const LandingPage = () => {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(30, 64, 175, 0.3)" }}
               whileTap={{ scale: 0.95 }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-2xl font-semibold flex items-center space-x-2 mx-auto transition-all duration-300 shadow-xl"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-2xl font-semibold flex items-center space-x-2 mx-auto transition-all duration-300 shadow-lg"
             >
               <span>See Full Feature List</span>
               <ChevronRight className="h-4 w-4" />
@@ -503,7 +613,7 @@ const LandingPage = () => {
                   onClick={() => setActiveTab(index)}
                   className={`p-4 sm:p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
                     activeTab === index
-                      ? 'bg-blue-600 text-white shadow-2xl'
+                      ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-white/80 backdrop-blur-sm text-gray-900 hover:bg-white shadow-lg border border-white/50'
                   }`}
                 >
@@ -527,7 +637,7 @@ const LandingPage = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
-              className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/50 relative overflow-hidden order-1 lg:order-2"
+              className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg border border-white/50 relative overflow-hidden order-1 lg:order-2"
             >
               {/* Background overlay */}
               <div className="absolute inset-0 bg-blue-50/50 rounded-3xl"></div>
@@ -665,8 +775,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 px-4 sm:px-6">
+      {/* FAQ Section */}
+      <section className="py-20 px-4 sm:px-6 bg-gray-50">
         <div className="container mx-auto">
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -674,50 +784,14 @@ const LandingPage = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">What Our Clients Say</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Find answers to common questions about GVAS and how it can transform your visitor management
+            </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              {
-                quote: "GVAS streamlined our guest check-ins across three towers — a total game-changer.",
-                author: "Sarah Johnson",
-                title: "Facility Manager",
-                company: "Lagos Tower Group"
-              },
-              {
-                quote: "The security features and real-time notifications have transformed our operations.",
-                author: "Michael Chen",
-                title: "Security Director",
-                company: "Premium Office Complex"
-              },
-              {
-                quote: "Our tenants love the seamless pre-registration. Professional and efficient.",
-                author: "Adebayo Okafor",
-                title: "Property Manager",
-                company: "Victoria Island Plaza"
-              }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                className="bg-white rounded-xl p-6 sm:p-8 shadow-md border border-gray-100"
-              >
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 sm:h-5 w-4 sm:w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6 italic text-sm sm:text-base">"{testimonial.quote}"</p>
-                <div>
-                  <p className="font-semibold text-gray-900 text-sm sm:text-base">{testimonial.author}</p>
-                  <p className="text-xs sm:text-sm text-gray-600">{testimonial.title}</p>
-                  <p className="text-xs sm:text-sm text-blue-600">{testimonial.company}</p>
-                </div>
-              </motion.div>
-            ))}
+          <div className="max-w-4xl mx-auto">
+            <FAQSection />
           </div>
         </div>
       </section>
@@ -754,7 +828,7 @@ const LandingPage = () => {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 20px 50px rgba(255, 255, 255, 0.2)" }}
               whileTap={{ scale: 0.95 }}
-              className="bg-white text-blue-700 px-8 sm:px-10 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all shadow-2xl inline-flex items-center space-x-3"
+              className="bg-white text-blue-700 px-8 sm:px-10 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all shadow-lg inline-flex items-center space-x-3"
             >
               <span>Book a Free Demo</span>
               <ArrowRight className="h-5 w-5" />

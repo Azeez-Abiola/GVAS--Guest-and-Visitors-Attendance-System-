@@ -603,91 +603,123 @@ const WalkInForm = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="p-6 flex items-center justify-between">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/kiosk')}
-          className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Back to Kiosk</span>
-        </motion.button>
+    <div className="min-h-screen flex">
+      {/* Left Sidebar */}
+      <div className="w-1/2 relative overflow-hidden">
+        <img 
+          src="/images/gvasblack.jpg" 
+          alt="GVAS Logo" 
+          className="w-full h-screen object-cover"
+        />
         
-        <div className="text-gray-500">
-          Step {currentStep} of 5
+        {/* Step indicator at bottom */}
+        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-center z-20">
+          <div className="text-gray-800 mb-2 font-semibold">Step {currentStep} of 5</div>
+          <div className="w-32 bg-gray-300 rounded-full h-2 mx-auto">
+            <motion.div
+              className="bg-blue-600 h-2 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${(currentStep / 5) * 100}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="px-6 mb-8">
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <motion.div
-            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${(currentStep / 5) * 100}%` }}
-            transition={{ duration: 0.5 }}
-          />
+      {/* Right Content Area */}
+      <div className="w-1/2 bg-gray-50 flex flex-col">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
+          <div className="p-6 flex items-center justify-between">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/kiosk')}
+              className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Back to Kiosk</span>
+            </motion.button>
+            
+            <h2 className="text-xl font-semibold text-gray-800">Walk-In Guest Registration</h2>
+            
+            <div className="text-gray-500">
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-2xl">
-          <motion.div
-            key={currentStep}
-            className="card"
-          >
-            {renderStep()}
-          </motion.div>
+        {/* Main Content */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-2xl">
+            <motion.div
+              key={currentStep}
+              className="bg-white rounded-xl shadow-lg p-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {renderStep()}
+            </motion.div>
+          </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <div className="p-6 flex justify-between">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={prevStep}
-          className={`btn-secondary ${currentStep === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-          disabled={currentStep === 1}
-        >
-          Previous
-        </motion.button>
-        
-        {currentStep < 5 ? (
+        {/* Navigation */}
+        <div className="bg-white border-t p-6 flex justify-between">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={nextStep}
-            className={`btn-primary ${!canProceed() ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={!canProceed()}
+            onClick={prevStep}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              currentStep === 1 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            disabled={currentStep === 1}
           >
-            Next
+            Previous
           </motion.button>
-        ) : (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSubmit}
-            className={`btn-primary ${!canProceed() || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={!canProceed() || loading}
-          >
-            {loading ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Checking In...</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Check className="h-5 w-5" />
-                <span>Complete Check-In</span>
-              </div>
-            )}
-          </motion.button>
-        )}
+          
+          {currentStep < 5 ? (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={nextStep}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                !canProceed() 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+              disabled={!canProceed()}
+            >
+              Next
+            </motion.button>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSubmit}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                !canProceed() || loading 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+              disabled={!canProceed() || loading}
+            >
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Checking In...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Check className="h-5 w-5" />
+                  <span>Complete Check-In</span>
+                </div>
+              )}
+            </motion.button>
+          )}
+        </div>
       </div>
     </div>
   )
