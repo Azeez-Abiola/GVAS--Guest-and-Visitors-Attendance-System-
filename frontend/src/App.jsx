@@ -6,6 +6,7 @@ import WalkInForm from './pages/WalkInForm'
 import PreRegisteredFlow from './pages/PreRegisteredFlow'
 import AdminDashboard from './pages/AdminDashboard'
 import CheckInSuccess from './pages/CheckInSuccess'
+import CheckoutFlow from './pages/CheckoutFlow'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/kiosk" element={<KioskHome />} />
             <Route path="/walk-in" element={<WalkInForm />} />
             <Route path="/pre-registered" element={<PreRegisteredFlow />} />
+            <Route path="/checkout" element={<CheckoutFlow />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/success" element={<CheckInSuccess />} />
           </Routes>

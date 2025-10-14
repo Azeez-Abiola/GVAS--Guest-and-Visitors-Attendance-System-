@@ -1,15 +1,26 @@
 import { motion } from 'framer-motion'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CheckCircle, Home, User, Clock, Building } from 'lucide-react'
+import { CheckCircle, Home, User, Clock, Building, Hash, Copy } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 const CheckInSuccess = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const [copiedId, setCopiedId] = useState(false)
   
   const { visitorData, message } = location.state || {}
 
+  // Generate a visitor ID (in real app, this would come from backend)
+  const visitorId = `V${String(Math.floor(Math.random() * 9000) + 1000)}`
+
   const getCurrentTime = () => {
     return new Date().toLocaleString()
+  }
+
+  const copyVisitorId = () => {
+    navigator.clipboard.writeText(visitorId)
+    setCopiedId(true)
+    setTimeout(() => setCopiedId(false), 2000)
   }
 
   return (
@@ -80,12 +91,40 @@ const CheckInSuccess = () => {
                 </p>
               </motion.div>
 
+              {/* Visitor ID Card - Prominent Display */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white"
+              >
+                <div className="text-center space-y-3">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Hash className="h-6 w-6" />
+                    <span className="text-xl font-semibold">Your Visitor ID</span>
+                  </div>
+                  <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                    <div className="text-3xl font-bold tracking-wider">{visitorId}</div>
+                  </div>
+                  <button
+                    onClick={copyVisitorId}
+                    className="inline-flex items-center space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all duration-200"
+                  >
+                    <Copy className="h-4 w-4" />
+                    <span className="text-sm">{copiedId ? 'Copied!' : 'Copy ID'}</span>
+                  </button>
+                  <p className="text-blue-100 text-sm">
+                    Keep this ID safe - you'll need it for checkout
+                  </p>
+                </div>
+              </motion.div>
+
               {/* Visitor Details */}
               {visitorData && (
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.7, duration: 0.5 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
                   className="bg-gray-50 rounded-xl p-6 space-y-4"
                 >
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">Visit Summary</h2>
@@ -151,8 +190,9 @@ const CheckInSuccess = () => {
                   <div className="text-gray-700 text-sm space-y-2 text-left">
                     <p>• Your host has been notified of your arrival</p>
                     <p>• Please wait in the reception area until escorted</p>
+                    <p>• <strong>Save your Visitor ID ({visitorId})</strong> - you'll need it for checkout</p>
+                    <p>• When leaving, use the "Guest Checkout" option at any kiosk</p>
                     <p>• Keep your visitor information accessible for security</p>
-                    <p>• Remember to check out when leaving the building</p>
                   </div>
                 </div>
               </motion.div>

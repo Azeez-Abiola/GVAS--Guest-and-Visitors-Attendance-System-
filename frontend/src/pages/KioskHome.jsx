@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building2, Users, Clock, QrCode } from 'lucide-react'
+import { Building2, Users, Clock, QrCode, UserMinus } from 'lucide-react'
 import GvasLogo from '../components/GvasLogo'
 
 const KioskHome = () => {
@@ -79,7 +79,7 @@ const KioskHome = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl w-full px-8"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl w-full px-8"
         >
             {/* Walk-in Option */}
             <motion.div
@@ -134,6 +134,35 @@ const KioskHome = () => {
                 <div className="text-center">
                   <span className="inline-block px-4 py-2 bg-green-600 group-hover:bg-green-700 text-white rounded-full text-sm font-medium transition-colors duration-300">
                     Quick Check-In →
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Checkout Option */}
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ scale: 1.02, y: -5 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate('/checkout')}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl cursor-pointer group relative overflow-hidden border border-gray-200 transition-all duration-300"
+            >
+              <div className="absolute inset-0 bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="bg-red-100 group-hover:bg-red-200 p-4 rounded-full transition-colors duration-300">
+                    <UserMinus className="h-12 w-12 text-red-600" />
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold text-center mb-4 text-gray-900 group-hover:text-red-700 transition-colors duration-300">
+                  Guest Checkout
+                </h2>
+                <p className="text-gray-600 text-center mb-6">
+                  Leaving? Quick checkout to complete your visit securely.
+                </p>
+                <div className="text-center">
+                  <span className="inline-block px-4 py-2 bg-red-600 group-hover:bg-red-700 text-white rounded-full text-sm font-medium transition-colors duration-300">
+                    Checkout Now →
                   </span>
                 </div>
               </div>
