@@ -390,7 +390,7 @@ const LandingPage = () => {
                 {/* Dashboard Image */}
                 <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 border border-white/50">
                   <img 
-                    src="/images/dashboard.png" 
+                    src="/images/dashboard.jpeg" 
                     alt="GVAS Dashboard Interface" 
                     className="w-full h-auto rounded-xl sm:rounded-2xl shadow-lg"
                   />
