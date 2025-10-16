@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import LandingPage from './pages/LandingPage'
-import KioskHome from './pages/KioskHome'
+import DeskHome from './pages/DeskHome'
 import WalkInForm from './pages/WalkInForm'
 import PreRegisteredFlow from './pages/PreRegisteredFlow'
 import AdminDashboard from './pages/AdminDashboard'
@@ -20,7 +20,8 @@ function App() {
         >
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/kiosk" element={<KioskHome />} />
+            <Route path="/desk" element={<DeskHome />} />
+            <Route path="/kiosk" element={<DeskHome />} /> {/* Legacy route */}
             <Route path="/walk-in" element={<WalkInForm />} />
             <Route path="/pre-registered" element={<PreRegisteredFlow />} />
             <Route path="/checkout" element={<CheckoutFlow />} />
