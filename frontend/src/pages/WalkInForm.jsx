@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Camera, User, Building, Phone, Mail, FileText, ArrowLeft, Check } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import ApiService from '../services/api'
+import ProgressBar from '../components/ProgressBar'
 
 const WalkInForm = () => {
   const navigate = useNavigate()
@@ -602,6 +603,15 @@ const WalkInForm = () => {
     }
   }
 
+  // Step labels for better UX
+  const stepLabels = [
+    'Personal Information',
+    'Visit Details',
+    'Photo Capture',
+    'Digital Signature',
+    'Terms & Consent'
+  ]
+
   return (
     <div className="min-h-screen flex">
       {/* Left Sidebar */}
@@ -612,33 +622,43 @@ const WalkInForm = () => {
           className="w-full h-screen object-cover"
         />
         
-        {/* Step indicator at bottom */}
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-center z-20">
-          <div className="text-gray-800 mb-2 font-semibold">Step {currentStep} of 5</div>
-          <div className="w-32 bg-gray-300 rounded-full h-2 mx-auto">
-            <motion.div
-              className="bg-blue-600 h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${(currentStep / 5) * 100}%` }}
-              transition={{ duration: 0.5 }}
-            />
+        {/* Powered by Hovidastechnologies - Below Logo */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center z-20">
+          <div className="text-white text-sm drop-shadow-lg">
+            Powered by{' '}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
+              className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+            >
+              Hovidastechnologies
+            </motion.button>
           </div>
         </div>
       </div>
 
       {/* Right Content Area */}
       <div className="w-1/2 bg-gray-50 flex flex-col">
+        {/* Progress Bar at Top */}
+        <ProgressBar 
+          currentStep={currentStep} 
+          totalSteps={5} 
+          stepLabels={stepLabels}
+          variant="top-right"
+        />
+        
         {/* Header */}
         <div className="bg-white shadow-sm">
           <div className="p-6 flex items-center justify-between">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/kiosk')}
+              onClick={() => navigate('/desk')}
               className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
-              <span>Back to Kiosk</span>
+              <span>Back to Desk</span>
             </motion.button>
             
             <h2 className="text-xl font-semibold text-gray-800">Walk-In Guest Registration</h2>

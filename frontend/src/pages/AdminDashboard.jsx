@@ -5,7 +5,7 @@ import {
   Users, 
   Plus, 
   Search, 
-  Filter, 
+  Filter,
   Download, 
   Eye, 
   UserCheck, 
@@ -183,11 +183,11 @@ const AdminDashboard = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/kiosk')}
+            onClick={() => navigate('/desk')}
             className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>Back to Kiosk</span>
+            <span>Back to Desk</span>
           </motion.button>
         </div>
         
@@ -663,7 +663,7 @@ const AdminDashboard = () => {
                         <div className="text-3xl font-bold text-blue-700 mb-2 tracking-wider font-mono bg-white px-4 py-2 rounded-lg shadow-sm border">
                           {showGuestCode}
                         </div>
-                        <p className="text-xs text-blue-600">Guest should enter this code at the kiosk</p>
+                        <p className="text-xs text-blue-600">Guest should enter this code at the desk</p>
                       </div>
                     </div>
 
@@ -688,7 +688,7 @@ const AdminDashboard = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => {
-                        const fullInfo = `Guest Entry Code: ${showGuestCode}\nVisitor ID: ${generatedVisitorId}\n\nUse the Entry Code to check in at the kiosk.\nUse the Visitor ID to check out when leaving.`
+                        const fullInfo = `Guest Entry Code: ${showGuestCode}\nVisitor ID: ${generatedVisitorId}\n\nUse the Entry Code to check in at the desk.\nUse the Visitor ID to check out when leaving.`
                         navigator.clipboard.writeText(fullInfo)
                         alert('Guest information copied to clipboard!')
                       }}

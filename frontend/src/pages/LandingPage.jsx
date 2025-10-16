@@ -56,7 +56,7 @@ const FAQSection = () => {
     },
     {
       question: "How does the mobile interface work?",
-      answer: "GVAS features a responsive mobile-first design that works seamlessly on tablets and smartphones. The kiosk interface is optimized for touch interactions and provides an intuitive user experience."
+      answer: "GVAS features a responsive mobile-first design that works seamlessly on tablets and smartphones. The desk interface is optimized for touch interactions and provides an intuitive user experience."
     },
     {
       question: "Can GVAS integrate with our existing systems?",
@@ -194,7 +194,7 @@ const LandingPage = () => {
     },
     {
       number: "03",
-      title: "Scan at reception kiosk",
+      title: "Scan at reception desk",
       description: "Quick check-in with photo capture and signature",
       icon: <Monitor className="h-6 w-6" />
     },
@@ -254,11 +254,11 @@ const LandingPage = () => {
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/kiosk')}
+                  onClick={() => navigate('/desk')}
                   className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-md hover:shadow-lg"
                 >
                   <Monitor className="h-4 w-4" />
-                  <span>Visit Kiosk</span>
+                  <span>Visit Desk</span>
                   <ChevronRight className="h-4 w-4 opacity-60" />
                 </motion.button>
               </div>
@@ -316,13 +316,13 @@ const LandingPage = () => {
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      navigate('/kiosk')
+                      navigate('/desk')
                       setIsMobileMenuOpen(false)
                     }}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-lg mx-4"
                   >
                     <Monitor className="h-4 w-4" />
-                    <span>Visit Kiosk</span>
+                    <span>Visit Desk</span>
                   </motion.button>
                 </div>
               </motion.div>
@@ -682,7 +682,7 @@ const LandingPage = () => {
                   <Monitor className="h-6 sm:h-8 w-6 sm:w-8 text-blue-600 mx-auto" />
                 </div>
                 <h4 className="font-semibold text-gray-900 text-sm sm:text-base">Frontend</h4>
-                <p className="text-xs sm:text-sm text-gray-600">Web + Kiosk</p>
+                <p className="text-xs sm:text-sm text-gray-600">Web + Desk</p>
               </div>
               <div className="hidden sm:flex justify-center">
                 <ChevronRight className="h-6 w-6 text-gray-400" />

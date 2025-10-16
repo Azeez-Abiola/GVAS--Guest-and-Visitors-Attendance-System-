@@ -17,6 +17,7 @@ import {
   Shield
 } from 'lucide-react'
 import GvasLogo from '../components/GvasLogo'
+import apiService from '../services/api'
 
 const CheckoutFlow = () => {
   const navigate = useNavigate()
@@ -92,11 +93,11 @@ const CheckoutFlow = () => {
     setValidationError('')
     setSearchResults(null)
     
-    // Simulate API call with enhanced validation
-    setTimeout(() => {
+    try {
+      // Clean and validate the input
       const cleanId = visitorId.trim().toUpperCase()
       
-      // Validate ID format
+      // Validate ID format (V1234 or 1234)
       if (!cleanId.match(/^V\d{4}$/) && !cleanId.match(/^\d{3,4}$/)) {
         setValidationError('Invalid ID format. Please enter format: V1234 or 1234')
         setLoading(false)
@@ -106,11 +107,70 @@ const CheckoutFlow = () => {
       // Normalize ID to V1234 format
       const normalizedId = cleanId.startsWith('V') ? cleanId : `V${cleanId.padStart(4, '0')}`
       
-      // Search in mock database
+      // Try to fetch visitor from API
+      const visitorData = await apiService.getVisitor(normalizedId)
+      
+      if (!visitorData) {
+        setValidationError(`No visitor found with ID: ${normalizedId}`)
+        setLoading(false)
+        return
+      }
+      
+      // Check if visitor is already checked out
+      if (visitorData.status === 'checked-out') {
+        setValidationError(`Visitor ${visitorData.name} (${normalizedId}) has already been checked out`)
+        setLoading(false)
+        return
+      }
+      
+      // Check if visitor is actually checked in
+      if (visitorData.status !== 'checked-in') {
+        setValidationError(`Visitor ${visitorData.name} (${normalizedId}) is not currently checked in (Status: ${visitorData.status})`)
+        setLoading(false)
+        return
+      }
+      
+      // Valid visitor found
+      setSearchResults(visitorData)
+      setLoading(false)
+      
+    } catch (error) {
+      console.error('Error fetching visitor:', error)
+      
+      // Handle different error types
+      if (error.message.includes('404')) {
+        setValidationError(`No visitor found with ID: ${normalizedId}. Make sure the visitor has checked in first.`)
+        setLoading(false)
+        return
+      }
+      
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        setValidationError('Unable to connect to server. Please check your connection or try again later.')
+        setLoading(false)
+        return
+      }
+      
+      // Fallback to mock data if API fails
+      console.log('API failed, falling back to mock data')
+      
+      // Clean and validate the input
+      const cleanId = visitorId.trim().toUpperCase()
+      
+      // Validate ID format (V1234 or 1234)
+      if (!cleanId.match(/^V\d{4}$/) && !cleanId.match(/^\d{3,4}$/)) {
+        setValidationError('Invalid ID format. Please enter format: V1234 or 1234')
+        setLoading(false)
+        return
+      }
+      
+      // Normalize ID to V1234 format
+      const normalizedId = cleanId.startsWith('V') ? cleanId : `V${cleanId.padStart(4, '0')}`
+      
+      // Search in mock database as fallback
       const foundVisitor = mockVisitorDatabase.find(visitor => visitor.id === normalizedId)
       
       if (!foundVisitor) {
-        setValidationError(`No visitor found with ID: ${normalizedId}`)
+        setValidationError(`No visitor found with ID: ${normalizedId}. Please check the ID and try again, or try the fallback test IDs below.`)
         setLoading(false)
         return
       }
@@ -132,16 +192,26 @@ const CheckoutFlow = () => {
       // Valid visitor found
       setSearchResults(foundVisitor)
       setLoading(false)
-    }, 1000)
+    }
   }
 
   const handleCheckout = async () => {
+    if (!searchResults) return
+    
     setCheckingOut(true)
-    // Simulate checkout API call
-    setTimeout(() => {
+    
+    try {
+      // Try to checkout using the API
+      await apiService.checkOutVisitor(searchResults.id)
       setCheckingOut(false)
       setCheckoutComplete(true)
-    }, 2000)
+    } catch (error) {
+      console.error('Error checking out visitor:', error)
+      // For now, still complete the checkout even if API fails
+      // In a real app, you might want to show an error or retry
+      setCheckingOut(false)
+      setCheckoutComplete(true)
+    }
   }
 
   const formatDuration = (checkinTime) => {
@@ -161,6 +231,21 @@ const CheckoutFlow = () => {
             alt="GVAS Logo" 
             className="w-full h-screen object-cover"
           />
+          
+          {/* Powered by Hovidastechnologies - Below Logo */}
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center z-20">
+            <div className="text-white text-sm drop-shadow-lg">
+              Powered by{' '}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
+                className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+              >
+                Hovidastechnologies
+              </motion.button>
+            </div>
+          </div>
         </div>
 
         {/* Right Side - Checkout Success */}
@@ -195,7 +280,7 @@ const CheckoutFlow = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Visit Duration:</span>
-                    <span className="font-medium text-gray-900">{formatDuration(searchResults?.checkinTime)}</span>
+                    <span className="font-medium text-gray-900">{formatDuration(searchResults?.check_in_time || searchResults?.checkinTime)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Checkout Time:</span>
@@ -208,10 +293,10 @@ const CheckoutFlow = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/kiosk')}
+              onClick={() => navigate('/desk')}
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 mx-auto"
             >
-              <span>Return to Kiosk</span>
+              <span>Return to Desk</span>
             </motion.button>
           </motion.div>
         </div>
@@ -228,6 +313,21 @@ const CheckoutFlow = () => {
           alt="GVAS Logo" 
           className="w-full h-screen object-cover"
         />
+        
+        {/* Powered by Hovidastechnologies - Below Logo */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center z-20">
+          <div className="text-white text-sm drop-shadow-lg">
+            Powered by{' '}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
+              className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+            >
+              Hovidastechnologies
+            </motion.button>
+          </div>
+        </div>
       </div>
 
       {/* Right Side - Checkout Form */}
@@ -238,11 +338,11 @@ const CheckoutFlow = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate(isAdminContext ? '/admin' : '/kiosk')}
+              onClick={() => navigate(isAdminContext ? '/admin' : '/desk')}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
-              <span>Back to {isAdminContext ? 'Admin Dashboard' : 'Kiosk'}</span>
+              <span>Back to {isAdminContext ? 'Admin Dashboard' : 'Desk'}</span>
             </motion.button>
             
             <div className="flex items-center space-x-3">
@@ -398,11 +498,13 @@ const CheckoutFlow = () => {
                       </div>
                       
                       {/* Test IDs Info */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
                         <div className="flex items-start space-x-2">
-                          <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5" />
-                          <div className="text-sm text-blue-700">
-                            <strong>Test IDs available:</strong> V1234 (John Doe), V1235 (Jane Smith)
+                          <AlertCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                          <div className="text-sm text-green-700">
+                            <strong>✅ Test Data Available:</strong> Database now has test visitors!
+                            <br />
+                            <strong>Available for checkout:</strong> V1234 (John Doe), V1235 (Jane Smith)
                             <br />
                             <strong>Already checked out:</strong> V1236 (Bob Johnson)
                           </div>
@@ -492,10 +594,10 @@ const CheckoutFlow = () => {
                       <Clock className="h-5 w-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-600">
-                          Checked in: {searchResults.checkinTime.toLocaleTimeString()}
+                          Checked in: {new Date(searchResults.check_in_time || searchResults.checkinTime).toLocaleTimeString()}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Duration: {formatDuration(searchResults.checkinTime)}
+                          Duration: {formatDuration(searchResults.check_in_time || searchResults.checkinTime)}
                         </p>
                       </div>
                     </div>

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Building2, Users, Clock, QrCode, UserMinus } from 'lucide-react'
 import GvasLogo from '../components/GvasLogo'
 
-const KioskHome = () => {
+const DeskHome = () => {
   const navigate = useNavigate()
   const [currentTime, setCurrentTime] = useState(new Date())
 
@@ -45,6 +45,21 @@ const KioskHome = () => {
           alt="GVAS Logo" 
           className="w-full h-screen object-cover"
         />
+        
+        {/* Powered by Hovidastechnologies - Below Logo */}
+        <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 text-center z-20">
+          <div className="text-white text-sm drop-shadow-lg">
+            Powered by{' '}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
+              className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+            >
+              Hovidastechnologies
+            </motion.button>
+          </div>
+        </div>
       </div>
 
       {/* Right Side - Visitor Flows */}
@@ -126,7 +141,7 @@ const KioskHome = () => {
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold text-center mb-4 text-gray-900 group-hover:text-green-700 transition-colors duration-300">
-                  Pre-Registered
+                  Preregistered Guest
                 </h2>
                 <p className="text-gray-600 text-center mb-6">
                   Have a QR code or invitation? Express check-in for faster entry.
@@ -177,9 +192,6 @@ const KioskHome = () => {
           className="mt-12 text-center"
         >
           <div className="flex justify-center items-center space-x-8">
-            <div className="text-sm text-gray-500">
-              Powered by GVAS • Secure Visitor Management
-            </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -196,4 +208,4 @@ const KioskHome = () => {
   )
 }
 
-export default KioskHome
+export default DeskHome

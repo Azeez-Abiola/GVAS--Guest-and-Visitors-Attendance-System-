@@ -12,7 +12,7 @@ const CheckInSuccess = () => {
 
   // Generate a visitor ID (in real app, this would come from backend)
   const visitorId = `V${String(Math.floor(Math.random() * 9000) + 1000)}`
-
+ 
   const getCurrentTime = () => {
     return new Date().toLocaleString()
   }
@@ -34,9 +34,24 @@ const CheckInSuccess = () => {
         />
         
         {/* Success indicator at bottom */}
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-center z-20">
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-center z-20">
           <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
           <div className="text-gray-800 font-semibold">Check-in Complete</div>
+        </div>
+        
+        {/* Powered by Hovidastechnologies - Below Logo */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center z-20">
+          <div className="text-white text-sm drop-shadow-lg">
+            Powered by{' '}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
+              className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+            >
+              Hovidastechnologies
+            </motion.button>
+          </div>
         </div>
       </div>
 
@@ -191,7 +206,7 @@ const CheckInSuccess = () => {
                     <p>• Your host has been notified of your arrival</p>
                     <p>• Please wait in the reception area until escorted</p>
                     <p>• <strong>Save your Visitor ID ({visitorId})</strong> - you'll need it for checkout</p>
-                    <p>• When leaving, use the "Guest Checkout" option at any kiosk</p>
+                    <p>• When leaving, use the "Guest Checkout" option at any desk</p>
                     <p>• Keep your visitor information accessible for security</p>
                   </div>
                 </div>
@@ -207,11 +222,11 @@ const CheckInSuccess = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/kiosk')}
+                  onClick={() => navigate('/desk')}
                   className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 w-full"
                 >
                   <Home className="h-5 w-5" />
-                  <span>Return to Kiosk</span>
+                  <span>Return to Desk</span>
                 </motion.button>
                 
                 <motion.button
