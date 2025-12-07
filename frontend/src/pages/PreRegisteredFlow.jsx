@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { QrCode, User, ArrowLeft, Search, Camera, Check, Clock } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import ApiService from '../services/api'
+import showToast from '../utils/toast'
 import ProgressBar from '../components/ProgressBar'
 
 const PreRegisteredFlow = () => {
@@ -228,6 +229,9 @@ const PreRegisteredFlow = () => {
         isPreRegistered: true
       })
       
+      // Show success toast
+      showToast(`Welcome ${visitorData.name}! Check-in successful!`, 'success');
+      
       // Notify host
       await ApiService.notifyHost(response.id, `${visitorData.name} has arrived`)
       
@@ -264,8 +268,10 @@ const PreRegisteredFlow = () => {
             className="space-y-8"
           >
             <div className="text-center">
-              <QrCode className="h-20 w-20 text-blue-500 mx-auto mb-6" />
-              <h2 className="text-4xl font-bold gradient-text mb-4">
+              <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <QrCode className="h-12 w-12 text-blue-600" />
+              </div>
+              <h2 className="text-4xl font-bold text-blue-900 mb-4">
                 Pre-Registered Guest
               </h2>
               <p className="text-gray-600 text-lg">
@@ -282,17 +288,17 @@ const PreRegisteredFlow = () => {
                   type="text"
                   value={guestCode}
                   onChange={(e) => setGuestCode(e.target.value.toUpperCase())}
-                  className="input-field text-center text-2xl font-mono tracking-widest"
+                  className="w-full px-4 py-4 text-center text-2xl font-mono tracking-widest border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="ABCD1234"
                   maxLength={8}
                 />
               </div>
               
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={lookupGuest}
-                className={`w-full btn-primary ${!guestCode.trim() || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10 ${!guestCode.trim() || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={!guestCode.trim() || loading}
               >
                 {loading ? (
@@ -321,28 +327,28 @@ const PreRegisteredFlow = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Confirm Your Details
             </h2>
             
             {visitorData && (
-              <div className="glass rounded-xl p-6 space-y-4">
+              <div className="bg-white border border-gray-100 shadow-sm rounded-xl p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-600 text-sm">Name</label>
-                    <p className="text-gray-900 font-medium">{visitorData.name}</p>
+                    <label className="block text-gray-500 text-sm mb-1">Name</label>
+                    <p className="text-gray-900 font-medium text-lg">{visitorData.name}</p>
                   </div>
                   <div>
-                    <label className="block text-gray-600 text-sm">Email</label>
-                    <p className="text-gray-900 font-medium">{visitorData.email || 'Not provided'}</p>
+                    <label className="block text-gray-500 text-sm mb-1">Email</label>
+                    <p className="text-gray-900 font-medium text-lg">{visitorData.email || 'Not provided'}</p>
                   </div>
                   <div>
-                    <label className="block text-gray-600 text-sm">Host</label>
-                    <p className="text-gray-900 font-medium">{visitorData.host}</p>
+                    <label className="block text-gray-500 text-sm mb-1">Host</label>
+                    <p className="text-gray-900 font-medium text-lg">{visitorData.host}</p>
                   </div>
                   <div>
-                    <label className="block text-gray-600 text-sm">Purpose</label>
-                    <p className="text-gray-900 font-medium">{visitorData.purpose}</p>
+                    <label className="block text-gray-500 text-sm mb-1">Purpose</label>
+                    <p className="text-gray-900 font-medium text-lg">{visitorData.purpose}</p>
                   </div>
                 </div>
               </div>
@@ -353,10 +359,10 @@ const PreRegisteredFlow = () => {
                 Please confirm these details are correct, then proceed to photo capture.
               </p>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setCurrentStep(3)}
-                className="btn-primary"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10"
               >
                 Details are Correct - Continue
               </motion.button>
@@ -374,7 +380,7 @@ const PreRegisteredFlow = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Photo Verification
             </h2>
             
@@ -388,13 +394,15 @@ const PreRegisteredFlow = () => {
               
               {!cameraActive && !cameraActiveRef.current && !photoTaken && (
                 <div className="space-y-4">
-                  <div className="bg-gray-100 rounded-2xl p-8 text-center">
-                    <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
+                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                      <Camera className="h-12 w-12 text-gray-400" />
+                    </div>
                     <p className="text-gray-600 mb-6">We need to take your photo for security purposes</p>
                     
                     {permissionStatus === 'requesting' && (
                       <div className="mb-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
                         <p className="text-blue-600 font-medium">Requesting camera access...</p>
                       </div>
                     )}
@@ -413,10 +421,10 @@ const PreRegisteredFlow = () => {
                     )}
                     
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={startCamera}
-                      className={`btn-primary mx-auto flex items-center space-x-2 ${cameraLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`w-full max-w-xs mx-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10 flex items-center justify-center space-x-2 ${cameraLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                       disabled={cameraLoading}
                     >
                       {cameraLoading ? (
@@ -427,7 +435,7 @@ const PreRegisteredFlow = () => {
                       ) : (
                         <>
                           <Camera className="h-5 w-5" />
-                          <span>📷 Start Camera & Take Photo</span>
+                          <span>Start Camera & Take Photo</span>
                         </>
                       )}
                     </motion.button>
@@ -445,7 +453,7 @@ const PreRegisteredFlow = () => {
               
               {(cameraActive || cameraActiveRef.current) && (
                 <div className="space-y-6">
-                  <div className="bg-gray-900 rounded-2xl p-4">
+                  <div className="bg-slate-900 rounded-2xl p-4 shadow-xl">
                     <div className="relative">
                       <video
                         ref={videoRef}
@@ -477,7 +485,7 @@ const PreRegisteredFlow = () => {
                         )}
                         
                         {/* Camera status */}
-                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2">
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2">
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                           <span>Camera Active</span>
                         </div>
@@ -487,25 +495,25 @@ const PreRegisteredFlow = () => {
                   
                   <div className="flex justify-center space-x-4">
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={takePhoto}
-                      className="btn-primary flex items-center space-x-2 text-lg px-8 py-4"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10 flex items-center space-x-2 text-lg"
                       disabled={countdown > 0}
                     >
                       <Camera className="h-6 w-6" />
-                      <span>📸 Take Photo</span>
+                      <span>Take Photo</span>
                     </motion.button>
                     
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={startCountdown}
-                      className="btn-secondary flex items-center space-x-2 text-lg px-8 py-4"
+                      className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-8 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 text-lg"
                       disabled={countdown > 0}
                     >
                       <Clock className="h-6 w-6" />
-                      <span>⏱️ 3s Timer</span>
+                      <span>3s Timer</span>
                     </motion.button>
                   </div>
                   
@@ -520,22 +528,22 @@ const PreRegisteredFlow = () => {
                   <img
                     src={formData.photo}
                     alt="Visitor photo"
-                    className="w-full max-w-lg mx-auto rounded-xl border-2 border-white/30"
+                    className="w-full max-w-lg mx-auto rounded-xl border-4 border-blue-500 shadow-lg"
                   />
                   <div className="flex justify-center space-x-4">
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={retakePhoto}
-                      className="btn-secondary"
+                      className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200"
                     >
                       Retake
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setCurrentStep(4)}
-                      className="btn-primary"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10"
                     >
                       Continue
                     </motion.button>
@@ -558,19 +566,19 @@ const PreRegisteredFlow = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Digital Signature
             </h2>
             
             <div className="space-y-4">
-              <div className="bg-white rounded-xl p-4">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
                 <SignatureCanvas
                   ref={signatureRef}
                   penColor="black"
                   canvasProps={{
                     width: 500,
                     height: 200,
-                    className: 'signature-canvas w-full'
+                    className: 'signature-canvas w-full bg-gray-50 rounded-lg border border-gray-100'
                   }}
                   onEnd={saveSignature}
                 />
@@ -578,19 +586,19 @@ const PreRegisteredFlow = () => {
               
               <div className="flex justify-center space-x-4">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={clearSignature}
-                  className="btn-secondary"
+                  className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200"
                 >
                   Clear
                 </motion.button>
                 {formData.signature && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setCurrentStep(5)}
-                    className="btn-primary"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10"
                   >
                     Continue
                   </motion.button>
@@ -610,12 +618,12 @@ const PreRegisteredFlow = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Final Confirmation
             </h2>
             
             <div className="space-y-6">
-              <div className="glass rounded-xl p-6 max-h-60 overflow-y-auto">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 max-h-60 overflow-y-auto shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-4">Data Privacy Consent</h3>
                 <div className="text-gray-700 text-sm space-y-2">
                   <p>By proceeding, you confirm consent for data collection and processing as outlined in our privacy policy.</p>
@@ -636,10 +644,10 @@ const PreRegisteredFlow = () => {
               </div>
               
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleCheckIn}
-                className={`w-full btn-primary ${!formData.consentGiven || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10 ${!formData.consentGiven || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={!formData.consentGiven || loading}
               >
                 {loading ? (
@@ -674,7 +682,8 @@ const PreRegisteredFlow = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Sidebar */}
-      <div className="w-1/2 relative overflow-hidden">
+      <div className="w-1/2 relative overflow-hidden hidden lg:block">
+        <div className="absolute inset-0 bg-slate-900/90 z-10"></div>
         <img 
           src="/images/gvasblack.jpg" 
           alt="GVAS Logo" 
@@ -683,13 +692,13 @@ const PreRegisteredFlow = () => {
         
         {/* Powered by Hovidastechnologies - Below Logo */}
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center z-20">
-          <div className="text-white text-sm drop-shadow-lg">
+          <div className="text-white/60 text-sm">
             Powered by{' '}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
-              className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+              className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
             >
               Hovidastechnologies
             </motion.button>
@@ -698,7 +707,7 @@ const PreRegisteredFlow = () => {
       </div>
 
       {/* Right Content Area */}
-      <div className="w-1/2 bg-gray-50 flex flex-col">
+      <div className="w-full lg:w-1/2 bg-gray-50 flex flex-col">
         {/* Progress Bar at Top */}
         {currentStep > 1 && (
           <ProgressBar 
@@ -710,32 +719,37 @@ const PreRegisteredFlow = () => {
         )}
         
         {/* Header */}
-        <div className="bg-white shadow-sm">
+        <div className="bg-white shadow-sm border-b border-gray-100">
           <div className="p-6 flex items-center justify-between">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/desk')}
-              className="flex items-center space-x-2 text-gray-500 hover:text-green-600 transition-colors"
+              className="flex items-center space-x-2 text-gray-500 hover:text-blue-900 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Back to Desk</span>
             </motion.button>
             
-            <h2 className="text-xl font-semibold text-gray-800">Pre-Registered Check-In</h2>
+            <div className="flex items-center space-x-3">
+              <div className="lg:hidden">
+                <span className="text-blue-900 font-bold text-xl">GVAS</span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 hidden sm:block">Pre-Registered Check-In</h2>
+            </div>
             
-            <div className="text-gray-500">
+            <div className="text-gray-500 text-sm font-medium">
               {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
           <div className="w-full max-w-2xl">
             <motion.div
               key={currentStep}
-              className="bg-white rounded-xl shadow-lg p-8"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}

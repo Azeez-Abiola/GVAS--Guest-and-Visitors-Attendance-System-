@@ -1,13 +1,23 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const sqlite3 = require('sqlite3').verbose();
-const { v4: uuidv4 } = require('uuid');
+const { createClient } = require('@supabase/supabase-js');
 const QRCode = require('qrcode');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env file');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
 app.use(helmet({
@@ -18,256 +28,869 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Database setup
-const dbPath = path.join(__dirname, 'guests.db');
-const db = new sqlite3.Database(dbPath);
-
-// Initialize database tables
-db.serialize(() => {
-  // Visitors table
-  db.run(`CREATE TABLE IF NOT EXISTS visitors (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT,
-    phone TEXT,
-    company TEXT,
-    host TEXT NOT NULL,
-    purpose TEXT,
-    photo TEXT,
-    signature TEXT,
-    consent_given INTEGER DEFAULT 0,
-    consent_timestamp TEXT,
-    qr_code TEXT,
-    status TEXT DEFAULT 'pending',
-    check_in_time TEXT,
-    check_out_time TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`);
-
-  // Hosts/Tenants table
-  db.run(`CREATE TABLE IF NOT EXISTS hosts (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT,
-    company TEXT,
-    office_number TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`);
-
-  // Insert sample hosts
-  const sampleHosts = [
-    { id: uuidv4(), name: 'John Smith', email: 'john@techcorp.com', company: 'TechCorp Ltd', office_number: '15A' },
-    { id: uuidv4(), name: 'Sarah Johnson', email: 'sarah@designstudio.com', company: 'Design Studio Inc', office_number: '22B' },
-    { id: uuidv4(), name: 'Mike Wilson', email: 'mike@consulting.com', company: 'Wilson Consulting', office_number: '8C' }
-  ];
-
-  sampleHosts.forEach(host => {
-    db.run(`INSERT OR IGNORE INTO hosts (id, name, email, company, office_number) VALUES (?, ?, ?, ?, ?)`,
-      [host.id, host.name, host.email, host.company, host.office_number]);
-  });
-});
+console.log('✅ Supabase client initialized');
+console.log('📊 Database: Supabase PostgreSQL');
 
 // Routes
 
 // Get all hosts
-app.get('/api/hosts', (req, res) => {
-  db.all('SELECT * FROM hosts ORDER BY name', (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
+app.get('/api/hosts', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('hosts')
+      .select('*')
+      .order('name');
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching hosts:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Pre-register visitor
 app.post('/api/pre-register', async (req, res) => {
   try {
-    const { name, email, phone, company, host, purpose } = req.body;
-    const id = uuidv4();
-    const qrData = JSON.stringify({ id, type: 'pre-registered' });
+    const { name, email, phone, company, host, purpose, visitor_id } = req.body;
+    
+    // Generate QR code
+    const visitorId = visitor_id || await generateVisitorId();
+    const guestCode = await generateGuestCode();
+    const qrData = JSON.stringify({ id: visitorId, type: 'pre-registered', guestCode });
     const qrCode = await QRCode.toDataURL(qrData);
 
-    db.run(`INSERT INTO visitors (id, name, email, phone, company, host, purpose, qr_code, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pre-registered')`,
-      [id, name, email, phone, company, host, purpose, qrCode], function(err) {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        res.json({ 
-          id, 
-          qrCode,
-          message: 'Visitor pre-registered successfully',
-          guestCode: id.substring(0, 8).toUpperCase()
-        });
-      });
+    // Get host details
+    const { data: hostData, error: hostError } = await supabase
+      .from('hosts')
+      .select('id, name, tenant_id, floor_number')
+      .eq('name', host)
+      .single();
+
+    if (hostError) {
+      console.error('Host lookup error:', hostError);
+    }
+
+    // Insert visitor
+    const { data, error } = await supabase
+      .from('visitors')
+      .insert([{
+        visitor_id: visitorId,
+        name,
+        email,
+        phone,
+        company,
+        host_id: hostData?.id,
+        host_name: host,
+        tenant_id: hostData?.tenant_id,
+        floor_number: hostData?.floor_number,
+        purpose,
+        qr_code: qrCode,
+        guest_code: guestCode,
+        status: 'pre-registered',
+        approval_status: 'pending'
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ 
+      id: data.id,
+      visitor_id: visitorId,
+      qrCode,
+      message: 'Visitor pre-registered successfully',
+      guestCode
+    });
   } catch (error) {
+    console.error('Pre-registration error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Get visitor by ID (for QR scan or code lookup)
-app.get('/api/visitor/:id', (req, res) => {
-  const { id } = req.params;
-  
-  db.get('SELECT * FROM visitors WHERE id = ? OR id LIKE ?', [id, `${id}%`], (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
+app.get('/api/visitor/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Try to find by visitor_id or guest_code
+    const { data, error } = await supabase
+      .from('visitors')
+      .select('*')
+      .or(`visitor_id.eq.${id},guest_code.ilike.${id}%,id.eq.${id}`)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Visitor not found' });
+      }
+      throw error;
     }
-    if (!row) {
-      return res.status(404).json({ error: 'Visitor not found' });
-    }
-    res.json(row);
-  });
+
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching visitor:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Check-in visitor (walk-in or pre-registered)
-app.post('/api/checkin', (req, res) => {
-  const { 
-    id, 
-    name, 
-    email, 
-    phone, 
-    company, 
-    host, 
-    purpose, 
-    photo, 
-    signature, 
-    consentGiven,
-    isPreRegistered = false 
-  } = req.body;
+app.post('/api/checkin', async (req, res) => {
+  try {
+    const { 
+      id, 
+      name, 
+      email, 
+      phone, 
+      company, 
+      host, 
+      purpose, 
+      photo, 
+      signature, 
+      consentGiven,
+      isPreRegistered = false 
+    } = req.body;
 
-  const visitorId = id || uuidv4();
-  const checkInTime = new Date().toISOString();
-  const consentTimestamp = consentGiven ? checkInTime : null;
+    const checkInTime = new Date().toISOString();
+    const consentTimestamp = consentGiven ? checkInTime : null;
 
-  if (isPreRegistered) {
-    // Update existing pre-registered visitor
-    db.run(`UPDATE visitors SET 
-            photo = ?, 
-            signature = ?, 
-            consent_given = ?, 
-            consent_timestamp = ?,
-            status = 'checked-in',
-            check_in_time = ?,
-            updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?`,
-      [photo, signature, consentGiven ? 1 : 0, consentTimestamp, checkInTime, visitorId], 
-      function(err) {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        if (this.changes === 0) {
+    if (isPreRegistered) {
+      // Update existing pre-registered visitor
+      const { data, error } = await supabase
+        .from('visitors')
+        .update({
+          photo,
+          signature,
+          consent_given: consentGiven,
+          consent_timestamp: consentTimestamp,
+          status: 'checked-in',
+          check_in_time: checkInTime
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
           return res.status(404).json({ error: 'Pre-registered visitor not found' });
         }
-        res.json({ 
-          id: visitorId, 
-          status: 'checked-in',
-          checkInTime,
-          message: 'Pre-registered visitor checked in successfully' 
-        });
+        throw error;
+      }
+
+      res.json({ 
+        id: data.id,
+        visitor_id: data.visitor_id,
+        status: 'checked-in',
+        checkInTime,
+        message: 'Pre-registered visitor checked in successfully' 
       });
-  } else {
-    // Create new walk-in visitor
-    db.run(`INSERT INTO visitors (
-            id, name, email, phone, company, host, purpose, photo, signature, 
-            consent_given, consent_timestamp, status, check_in_time
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'checked-in', ?)`,
-      [visitorId, name, email, phone, company, host, purpose, photo, signature, 
-       consentGiven ? 1 : 0, consentTimestamp, checkInTime], 
-      function(err) {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        res.json({ 
-          id: visitorId, 
+    } else {
+      // Create new walk-in visitor
+      const visitorId = await generateVisitorId();
+      
+      // Get host details
+      const { data: hostData } = await supabase
+        .from('hosts')
+        .select('id, name, tenant_id, floor_number')
+        .eq('name', host)
+        .single();
+
+      const { data, error } = await supabase
+        .from('visitors')
+        .insert([{
+          visitor_id: visitorId,
+          name,
+          email,
+          phone,
+          company,
+          host_id: hostData?.id,
+          host_name: host,
+          tenant_id: hostData?.tenant_id,
+          floor_number: hostData?.floor_number,
+          purpose,
+          photo,
+          signature,
+          consent_given: consentGiven,
+          consent_timestamp: consentTimestamp,
           status: 'checked-in',
-          checkInTime,
-          message: 'Walk-in visitor checked in successfully' 
-        });
+          check_in_time: checkInTime
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.json({ 
+        id: data.id,
+        visitor_id: visitorId,
+        status: 'checked-in',
+        checkInTime,
+        message: 'Walk-in visitor checked in successfully' 
       });
+    }
+  } catch (error) {
+    console.error('Check-in error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Get all visitors with filters
-app.get('/api/visitors', (req, res) => {
-  const { status, date, limit = 100 } = req.query;
-  
-  let query = 'SELECT * FROM visitors WHERE 1=1';
-  const params = [];
+app.get('/api/visitors', async (req, res) => {
+  try {
+    const { status, date, limit = 100 } = req.query;
+    
+    let query = supabase
+      .from('visitors')
+      .select('*');
 
-  if (status && status !== 'all') {
-    query += ' AND status = ?';
-    params.push(status);
-  }
-
-  if (date) {
-    query += ' AND DATE(created_at) = ?';
-    params.push(date);
-  } else {
-    // Default to today
-    query += ' AND DATE(created_at) = DATE("now")';
-  }
-
-  query += ' ORDER BY created_at DESC LIMIT ?';
-  params.push(parseInt(limit));
-
-  db.all(query, params, (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
+    // Apply status filter
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
     }
-    res.json(rows);
-  });
+
+    // Apply date filter
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      query = query
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString());
+    } else {
+      // Default to today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      query = query.gte('created_at', today.toISOString());
+    }
+
+    // Apply limit and order
+    query = query
+      .order('created_at', { ascending: false })
+      .limit(parseInt(limit));
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching visitors:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Notify host
-app.post('/api/notify-host', (req, res) => {
-  const { visitorId, message } = req.body;
-  
-  // In a real app, this would send email/SMS
-  // For demo, we'll just log and return success
-  console.log(`Host notification for visitor ${visitorId}: ${message}`);
-  
-  res.json({ 
-    success: true, 
-    message: 'Host notified successfully (demo mode)' 
-  });
+app.post('/api/notify-host', async (req, res) => {
+  try {
+    const { visitorId, message } = req.body;
+    
+    // Create notification record
+    const { data: visitor } = await supabase
+      .from('visitors')
+      .select('*, hosts(*)')
+      .eq('id', visitorId)
+      .single();
+
+    if (visitor && visitor.hosts) {
+      await supabase
+        .from('notifications')
+        .insert([{
+          visitor_id: visitorId,
+          host_id: visitor.host_id,
+          type: 'email',
+          template: 'visitor_arrival',
+          recipient_email: visitor.hosts.email,
+          subject: `Guest Arrival: ${visitor.name}`,
+          message: message || `${visitor.name} has arrived and is waiting at reception.`,
+          status: 'pending'
+        }]);
+    }
+    
+    // For now, just log (real implementation would send actual email/SMS)
+    console.log(`Host notification for visitor ${visitorId}: ${message}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Host notification queued successfully' 
+    });
+  } catch (error) {
+    console.error('Notification error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Check-out visitor
-app.post('/api/checkout/:id', (req, res) => {
-  const { id } = req.params;
-  const checkOutTime = new Date().toISOString();
+app.post('/api/checkout/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const checkOutTime = new Date().toISOString();
 
-  db.run(`UPDATE visitors SET 
-          status = 'checked-out',
-          check_out_time = ?,
-          updated_at = CURRENT_TIMESTAMP
-          WHERE id = ?`,
-    [checkOutTime, id], function(err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      if (this.changes === 0) {
+    const { data, error } = await supabase
+      .from('visitors')
+      .update({
+        status: 'checked-out',
+        check_out_time: checkOutTime
+      })
+      .eq('visitor_id', id)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
         return res.status(404).json({ error: 'Visitor not found' });
       }
-      res.json({ 
-        id, 
-        status: 'checked-out',
-        checkOutTime,
-        message: 'Visitor checked out successfully' 
-      });
+      throw error;
+    }
+
+    res.json({ 
+      id: data.id,
+      visitor_id: data.visitor_id,
+      status: 'checked-out',
+      checkOutTime,
+      message: 'Visitor checked out successfully' 
     });
+  } catch (error) {
+    console.error('Checkout error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
-    timestamp: new Date().toISOString(),
-    database: 'connected'
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('count')
+      .limit(1);
+
+    if (error) throw error;
+
+    res.json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      database: 'connected',
+      type: 'Supabase PostgreSQL'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'unhealthy', 
+      timestamp: new Date().toISOString(),
+      database: 'disconnected',
+      error: error.message
+    });
+  }
 });
+
+// Badge Management APIs
+
+// Get all badges with optional status filter
+app.get('/api/badges', async (req, res) => {
+  try {
+    const { status } = req.query;
+    
+    let query = supabase
+      .from('badges')
+      .select(`
+        *,
+        current_visitor:visitors(id, name, visitor_id)
+      `)
+      .order('badge_number');
+    
+    if (status) {
+      query = query.eq('status', status);
+    }
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching badges:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update badge status
+app.patch('/api/badges/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const { data, error } = await supabase
+      .from('badges')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating badge status:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Return badge (make available again)
+app.post('/api/badges/:id/return', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // First, get the badge to find the visitor
+    const { data: badge, error: badgeError } = await supabase
+      .from('badges')
+      .select('current_visitor_id')
+      .eq('id', id)
+      .single();
+    
+    if (badgeError) throw badgeError;
+    
+    // Update badge to available
+    const { data: updatedBadge, error: updateError } = await supabase
+      .from('badges')
+      .update({
+        status: 'available',
+        current_visitor_id: null,
+        assigned_at: null,
+        notes: null
+      })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (updateError) throw updateError;
+    
+    // Update visitor's badge_id to null
+    if (badge.current_visitor_id) {
+      await supabase
+        .from('visitors')
+        .update({ badge_id: null })
+        .eq('id', badge.current_visitor_id);
+    }
+    
+    res.json(updatedBadge);
+  } catch (error) {
+    console.error('Error returning badge:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all tenants
+app.get('/api/tenants', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('*')
+      .order('floor_number');
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching tenants:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== AUDIT LOGS API ====================
+
+// Get audit logs with filtering
+app.get('/api/audit-logs', async (req, res) => {
+  try {
+    const { action, resource_type, user_id, limit = 100, offset = 0 } = req.query;
+    
+    let query = supabase
+      .from('audit_logs')
+      .select(`
+        *,
+        users:user_id(email, full_name)
+      `)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    if (action) query = query.eq('action', action);
+    if (resource_type) query = query.eq('resource_type', resource_type);
+    if (user_id) query = query.eq('user_id', user_id);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching audit logs:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create audit log entry
+app.post('/api/audit-logs', async (req, res) => {
+  try {
+    const { action, resource_type, resource_id, old_values, new_values, details } = req.body;
+    
+    const { data, error } = await supabase.rpc('create_audit_log', {
+      p_action: action,
+      p_resource_type: resource_type,
+      p_resource_id: resource_id,
+      p_old_values: old_values,
+      p_new_values: new_values,
+      p_details: details
+    });
+    
+    if (error) throw error;
+    res.json({ id: data, success: true });
+  } catch (error) {
+    console.error('Error creating audit log:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== INCIDENTS API ====================
+
+// Get all incidents
+app.get('/api/incidents', async (req, res) => {
+  try {
+    const { status, severity, type, assigned_to } = req.query;
+    
+    let query = supabase
+      .from('incidents')
+      .select(`
+        *,
+        reporter:reported_by(email, full_name),
+        assignee:assigned_to(email, full_name),
+        visitor:visitor_id(visitor_id, name, company),
+        badge:badge_id(badge_number, type)
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (status) query = query.eq('status', status);
+    if (severity) query = query.eq('severity', severity);
+    if (type) query = query.eq('incident_type', type);
+    if (assigned_to) query = query.eq('assigned_to', assigned_to);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching incidents:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new incident
+app.post('/api/incidents', async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      incident_type,
+      severity = 'medium',
+      location,
+      visitor_id,
+      badge_id,
+      occurred_at,
+      evidence_photos = []
+    } = req.body;
+    
+    const { data, error } = await supabase
+      .from('incidents')
+      .insert([{
+        title,
+        description,
+        incident_type,
+        severity,
+        location,
+        visitor_id,
+        badge_id,
+        occurred_at,
+        evidence_photos
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error creating incident:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update incident
+app.put('/api/incidents/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const { data, error } = await supabase
+      .from('incidents')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating incident:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== SYSTEM SETTINGS API ====================
+
+// Get system settings
+app.get('/api/settings', async (req, res) => {
+  try {
+    const { category } = req.query;
+    
+    let query = supabase
+      .from('system_settings')
+      .select('*')
+      .order('category', { ascending: true })
+      .order('setting_key', { ascending: true });
+    
+    if (category) query = query.eq('category', category);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update system setting
+app.put('/api/settings/:category/:key', async (req, res) => {
+  try {
+    const { category, key } = req.params;
+    const { value } = req.body;
+    
+    const { data, error } = await supabase.rpc('update_setting', {
+      p_category: category,
+      p_key: key,
+      p_value: value
+    });
+    
+    if (error) throw error;
+    res.json({ success: data });
+  } catch (error) {
+    console.error('Error updating setting:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== DOCUMENTS API ====================
+
+// Get documents for visitor
+app.get('/api/documents', async (req, res) => {
+  try {
+    const { visitor_id, status } = req.query;
+    
+    let query = supabase
+      .from('documents')
+      .select(`
+        *,
+        verifier:verified_by(email, full_name),
+        uploader:uploaded_by(email, full_name)
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (visitor_id) query = query.eq('visitor_id', visitor_id);
+    if (status) query = query.eq('verification_status', status);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Verify document
+app.post('/api/documents/:id/verify', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+    
+    const { data, error } = await supabase.rpc('verify_document', {
+      p_document_id: id,
+      p_status: status,
+      p_notes: notes
+    });
+    
+    if (error) throw error;
+    res.json({ success: data });
+  } catch (error) {
+    console.error('Error verifying document:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== ANALYTICS & REPORTS API ====================
+
+// Get analytics data
+app.get('/api/analytics/:metric', async (req, res) => {
+  try {
+    const { metric } = req.params;
+    const { period = 'today', from_date, to_date } = req.query;
+    
+    const cacheKey = `analytics_${metric}_${period}_${from_date}_${to_date}`;
+    
+    // Try to get cached data first
+    const { data: cachedData } = await supabase.rpc('get_analytics_cache', {
+      p_cache_key: cacheKey,
+      p_ttl_minutes: 30
+    });
+    
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+    
+    // Generate fresh analytics based on metric type
+    let analyticsData = {};
+    
+    switch (metric) {
+      case 'visitor_summary':
+        // Get visitor statistics
+        const today = new Date().toISOString().split('T')[0];
+        
+        const { data: visitors } = await supabase
+          .from('visitors')
+          .select('*')
+          .gte('created_at', today);
+        
+        const { data: checkedIn } = await supabase
+          .from('visitors')
+          .select('*')
+          .not('check_in_time', 'is', null)
+          .is('check_out_time', null);
+        
+        analyticsData = {
+          total_today: visitors?.length || 0,
+          checked_in: checkedIn?.length || 0,
+          checked_out: (visitors?.length || 0) - (checkedIn?.length || 0),
+          badge_usage: checkedIn?.filter(v => v.badge_number).length || 0
+        };
+        break;
+        
+      case 'floor_distribution':
+        const { data: floorData } = await supabase
+          .from('visitors')
+          .select(`
+            *,
+            hosts:host_id(tenant_id),
+            tenants:hosts.tenant_id(floor_number)
+          `)
+          .not('check_in_time', 'is', null)
+          .is('check_out_time', null);
+        
+        analyticsData = floorData?.reduce((acc, visitor) => {
+          const floor = visitor.hosts?.tenants?.floor_number || 'Unknown';
+          acc[floor] = (acc[floor] || 0) + 1;
+          return acc;
+        }, {}) || {};
+        break;
+        
+      default:
+        analyticsData = { message: 'Metric not implemented yet' };
+    }
+    
+    // Cache the result
+    await supabase.rpc('set_analytics_cache', {
+      p_cache_key: cacheKey,
+      p_data: analyticsData,
+      p_ttl_minutes: 30
+    });
+    
+    res.json(analyticsData);
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get report templates
+app.get('/api/reports/templates', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('report_templates')
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching report templates:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Generate report
+app.post('/api/reports/generate', async (req, res) => {
+  try {
+    const { template_id, parameters, date_range_start, date_range_end } = req.body;
+    
+    // For now, return mock data - implement actual report generation later
+    const reportData = {
+      summary: { total: 100, change: '+5%' },
+      data: [
+        { date: '2025-12-01', visitors: 45 },
+        { date: '2025-12-02', visitors: 52 },
+        { date: '2025-12-03', visitors: 38 }
+      ]
+    };
+    
+    const { data, error } = await supabase
+      .from('generated_reports')
+      .insert([{
+        template_id,
+        name: `Report ${new Date().toISOString().split('T')[0]}`,
+        data: reportData,
+        parameters,
+        date_range_start,
+        date_range_end,
+        status: 'completed'
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error generating report:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Helper functions
+async function generateVisitorId() {
+  const { data, error } = await supabase.rpc('generate_visitor_id');
+  if (error) {
+    // Fallback if function doesn't exist
+    return 'V' + Math.floor(1000 + Math.random() * 9000);
+  }
+  return data;
+}
+
+async function generateGuestCode() {
+  const { data, error } = await supabase.rpc('generate_guest_code');
+  if (error) {
+    // Fallback if function doesn't exist
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+  return data;
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -278,8 +901,9 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Guest Experience API running on port ${PORT}`);
-  console.log(`📊 Database: ${dbPath}`);
+  console.log(`📊 Database: Supabase PostgreSQL`);
   console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`✅ Supabase URL: ${supabaseUrl}`);
 });
 
 module.exports = app;

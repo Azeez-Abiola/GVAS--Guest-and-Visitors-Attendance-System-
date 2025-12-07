@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 40px 30px;
+      border-radius: 12px 12px 0 0;
+      text-align: center;
+    }
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .content {
+      background: #ffffff;
+      padding: 40px 30px;
+      border: 1px solid #e5e7eb;
+      border-top: none;
+    }
+    .welcome-box {
+      background: #f8fafc;
+      border-left: 4px solid #0f172a;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .credentials {
+      background: #fff;
+      border: 2px solid #0f172a;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+    .credential-item {
+      margin: 12px 0;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 4px;
+    }
+    .credential-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .credential-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      font-family: 'Courier New', monospace;
+    }
+    .button {
+      display: inline-block;
+      background: #0f172a;
+      color: white !important;
+      padding: 14px 32px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .button:hover {
+      background: #1e293b;
+    }
+    .info-section {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .info-section h3 {
+      margin-top: 0;
+      color: #1e40af;
+      font-size: 16px;
+    }
+    .footer {
+      background: #f8fafc;
+      padding: 30px;
+      border-radius: 0 0 12px 12px;
+      border: 1px solid #e5e7eb;
+      border-top: none;
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .role-badge {
+      display: inline-block;
+      background: #3b82f6;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    li {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🏢 GVAS</div>
+    <div class="subtitle">Guest & Visitor Attendance System</div>
+  </div>
+
+  <div class="content">
+    <h1 style="color: #0f172a; margin-top: 0;">Welcome to GVAS! 👋</h1>
+    
+    <div class="welcome-box">
+      <p style="margin: 0;">
+        <strong>Hello {{ .FullName }},</strong><br><br>
+        You've been successfully added to the Guest & Visitor Attendance System (GVAS) for UAC House. 
+        Your account has been created with the role: <span class="role-badge">{{ .Role }}</span>
+      </p>
+    </div>
+
+    <h2 style="color: #0f172a;">🔐 Your Login Credentials</h2>
+    <p>Please use the following credentials to access the system:</p>
+    
+    <div class="credentials">
+      <div class="credential-item">
+        <div class="credential-label">Email Address</div>
+        <div class="credential-value">{{ .Email }}</div>
+      </div>
+      <div class="credential-item">
+        <div class="credential-label">Temporary Password</div>
+        <div class="credential-value">{{ .Password }}</div>
+      </div>
+      <div class="credential-item">
+        <div class="credential-label">System URL</div>
+        <div class="credential-value">{{ .SiteURL }}</div>
+      </div>
+    </div>
+
+    <div style="text-align: center;">
+      <a href="{{ .SiteURL }}/login" class="button">
+        🚀 Access GVAS System
+      </a>
+    </div>
+
+    <div class="info-section">
+      <h3>⚠️ Important Security Note</h3>
+      <ul style="margin: 10px 0;">
+        <li><strong>Change your password immediately</strong> after your first login</li>
+        <li>Never share your credentials with anyone</li>
+        <li>Keep this email in a secure location</li>
+        <li>If you didn't request this account, please contact the administrator</li>
+      </ul>
+    </div>
+
+    <h2 style="color: #0f172a;">📋 What You Can Do</h2>
+    <p>Based on your role ({{ .Role }}), you have access to:</p>
+    
+    <ul>
+      <li><strong>Admin:</strong> Full system access - manage users, visitors, badges, and view all reports</li>
+      <li><strong>Reception:</strong> Check-in/out visitors, manage badges, handle walk-ins</li>
+      <li><strong>Security:</strong> Monitor visitor flow, manage evacuations, access blacklist</li>
+      <li><strong>Host:</strong> Approve visitor requests, manage your expected visitors</li>
+    </ul>
+
+    <div class="info-section" style="background: #fef3c7; border-color: #fcd34d;">
+      <h3 style="color: #92400e;">💡 Getting Started</h3>
+      <ol style="margin: 10px 0;">
+        <li>Click the "Access GVAS System" button above</li>
+        <li>Log in using your email and temporary password</li>
+        <li>Change your password in the profile settings</li>
+        <li>Explore your dashboard and familiarize yourself with the features</li>
+      </ol>
+    </div>
+
+    <p style="margin-top: 30px;">
+      If you have any questions or need assistance, please contact your system administrator.
+    </p>
+
+    <p style="margin-top: 20px; color: #64748b; font-size: 14px;">
+      Best regards,<br>
+      <strong>GVAS Administration Team</strong><br>
+      UAC House Management
+    </p>
+  </div>
+
+  <div class="footer">
+    <p style="margin: 10px 0;">
+      <strong>GVAS - Guest & Visitor Attendance System</strong><br>
+      UAC House Multi-Tenant Building
+    </p>
+    <p style="margin: 10px 0; font-size: 12px;">
+      This is an automated email. Please do not reply to this message.<br>
+      © {{ .Year }} GVAS. All rights reserved.
+    </p>
+  </div>
+</body>
+</html>

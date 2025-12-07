@@ -26,7 +26,8 @@ const CheckInSuccess = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Sidebar */}
-      <div className="w-1/2 relative overflow-hidden">
+      <div className="w-1/2 relative overflow-hidden hidden lg:block">
+        <div className="absolute inset-0 bg-[#052e16]/90 z-10"></div>
         <img 
           src="/images/gvasblack.jpg" 
           alt="GVAS Logo" 
@@ -34,20 +35,28 @@ const CheckInSuccess = () => {
         />
         
         {/* Success indicator at bottom */}
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-center z-20">
-          <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
-          <div className="text-gray-800 font-semibold">Check-in Complete</div>
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-center z-20 w-full px-8">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+            className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-900/20"
+          >
+            <CheckCircle className="h-10 w-10 text-white" />
+          </motion.div>
+          <h2 className="text-3xl font-bold text-white mb-2">Check-in Complete</h2>
+          <p className="text-emerald-100 text-lg">Thank you for visiting</p>
         </div>
         
         {/* Powered by Hovidastechnologies - Below Logo */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center z-20">
-          <div className="text-white text-sm drop-shadow-lg">
+          <div className="text-white/60 text-sm">
             Powered by{' '}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
-              className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+              className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
             >
               Hovidastechnologies
             </motion.button>
@@ -56,52 +65,49 @@ const CheckInSuccess = () => {
       </div>
 
       {/* Right Content Area */}
-      <div className="w-1/2 bg-gray-50 flex flex-col">
+      <div className="w-full lg:w-1/2 bg-gray-50 flex flex-col h-screen overflow-y-auto">
         {/* Header */}
-        <div className="bg-white shadow-sm">
+        <div className="bg-white shadow-sm sticky top-0 z-30">
           <div className="p-6 flex items-center justify-between">
-            <div></div>
+            <div className="lg:hidden">
+              <span className="text-[#052e16] font-bold text-xl">GVAS</span>
+            </div>
             
-            <h2 className="text-xl font-semibold text-gray-800">Check-In Successful!</h2>
+            <div className="hidden lg:block"></div>
             
-            <div className="text-gray-500">
+            <div className="text-gray-500 font-medium bg-gray-100 px-4 py-2 rounded-full text-sm">
               {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="w-full max-w-2xl">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+          <div className="w-full max-w-xl">
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="bg-white rounded-xl shadow-lg p-8 text-center space-y-8"
+              transition={{ duration: 0.5 }}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 text-center space-y-8"
             >
-              {/* Success Icon */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.5, type: "spring", stiffness: 200 }}
-                className="flex justify-center"
-              >
-                <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-16 w-16 text-green-500" />
+              {/* Mobile Success Icon */}
+              <div className="lg:hidden flex justify-center">
+                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-10 w-10 text-emerald-600" />
                 </div>
-              </motion.div>
+              </div>
 
               {/* Success Message */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-                className="space-y-4"
+                transition={{ delay: 0.3 }}
+                className="space-y-2"
               >
-                <h1 className="text-4xl font-bold text-green-600">
+                <h1 className="text-3xl font-bold text-[#052e16]">
                   {message || 'Check-In Successful!'}
                 </h1>
-                <p className="text-gray-600 text-lg">
+                <p className="text-gray-600">
                   Welcome! Your visit has been registered successfully.
                 </p>
               </motion.div>
@@ -110,26 +116,32 @@ const CheckInSuccess = () => {
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white"
+                transition={{ delay: 0.4 }}
+                className="bg-[#052e16] rounded-2xl p-6 text-white shadow-lg shadow-emerald-900/10 relative overflow-hidden group"
               >
-                <div className="text-center space-y-3">
-                  <div className="flex items-center justify-center space-x-2">
-                    <Hash className="h-6 w-6" />
-                    <span className="text-xl font-semibold">Your Visitor ID</span>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -ml-16 -mb-16"></div>
+                
+                <div className="relative z-10 text-center space-y-4">
+                  <div className="flex items-center justify-center space-x-2 text-emerald-200">
+                    <Hash className="h-5 w-5" />
+                    <span className="font-medium uppercase tracking-wider text-sm">Your Visitor ID</span>
                   </div>
-                  <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                    <div className="text-3xl font-bold tracking-wider">{visitorId}</div>
+                  
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                    <div className="text-4xl font-bold tracking-widest font-mono">{visitorId}</div>
                   </div>
+                  
                   <button
                     onClick={copyVisitorId}
-                    className="inline-flex items-center space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all duration-200"
+                    className="inline-flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium"
                   >
                     <Copy className="h-4 w-4" />
-                    <span className="text-sm">{copiedId ? 'Copied!' : 'Copy ID'}</span>
+                    <span>{copiedId ? 'Copied to clipboard' : 'Copy ID'}</span>
                   </button>
-                  <p className="text-blue-100 text-sm">
-                    Keep this ID safe - you'll need it for checkout
+                  
+                  <p className="text-emerald-200/80 text-xs">
+                    Please keep this ID safe for checkout
                   </p>
                 </div>
               </motion.div>
@@ -139,57 +151,35 @@ const CheckInSuccess = () => {
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                  className="bg-gray-50 rounded-xl p-6 space-y-4"
+                  transition={{ delay: 0.5 }}
+                  className="bg-gray-50 rounded-2xl p-6 border border-gray-100"
                 >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Visit Summary</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <User className="h-5 w-5 mr-2 text-emerald-600" />
+                    Visit Summary
+                  </h2>
                   
-                  <div className="grid grid-cols-2 gap-4 text-left">
-                    <div className="flex items-center space-x-3">
-                      <User className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <p className="text-gray-600 text-sm">Visitor</p>
-                        <p className="text-gray-900 font-medium">{visitorData.name}</p>
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                    <div className="bg-white p-3 rounded-xl border border-gray-100">
+                      <p className="text-gray-500 text-xs mb-1">Visitor Name</p>
+                      <p className="text-gray-900 font-medium">{visitorData.name}</p>
                     </div>
                     
-                    <div className="flex items-center space-x-3">
-                      <Building className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <p className="text-gray-600 text-sm">Host</p>
-                        <p className="text-gray-900 font-medium">{visitorData.host}</p>
-                      </div>
+                    <div className="bg-white p-3 rounded-xl border border-gray-100">
+                      <p className="text-gray-500 text-xs mb-1">Host</p>
+                      <p className="text-gray-900 font-medium">{visitorData.host}</p>
                     </div>
                     
-                    <div className="flex items-center space-x-3">
-                      <Clock className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <p className="text-gray-600 text-sm">Check-in Time</p>
-                        <p className="text-gray-900 font-medium">{getCurrentTime()}</p>
-                      </div>
+                    <div className="bg-white p-3 rounded-xl border border-gray-100">
+                      <p className="text-gray-500 text-xs mb-1">Check-in Time</p>
+                      <p className="text-gray-900 font-medium">{getCurrentTime()}</p>
                     </div>
                     
-                    <div className="flex items-center space-x-3">
-                      <div className="w-5 h-5 bg-yellow-400 rounded-full" />
-                      <div>
-                        <p className="text-gray-600 text-sm">Purpose</p>
-                        <p className="text-gray-900 font-medium">{visitorData.purpose}</p>
-                      </div>
+                    <div className="bg-white p-3 rounded-xl border border-gray-100">
+                      <p className="text-gray-500 text-xs mb-1">Purpose</p>
+                      <p className="text-gray-900 font-medium">{visitorData.purpose}</p>
                     </div>
                   </div>
-
-                  {/* Visitor Photo */}
-                  {visitorData.photo && (
-                    <div className="flex justify-center mt-6">
-                      <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-gray-300 shadow-md">
-                        <img 
-                          src={visitorData.photo} 
-                          alt="Visitor" 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                  )}
                 </motion.div>
               )}
 
@@ -197,45 +187,44 @@ const CheckInSuccess = () => {
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.9, duration: 0.5 }}
-                className="space-y-4"
+                transition={{ delay: 0.6 }}
+                className="bg-emerald-50/50 rounded-2xl p-6 text-left border border-emerald-100"
               >
-                <div className="bg-blue-50 rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">Important Information</h3>
-                  <div className="text-gray-700 text-sm space-y-2 text-left">
-                    <p>• Your host has been notified of your arrival</p>
-                    <p>• Please wait in the reception area until escorted</p>
-                    <p>• <strong>Save your Visitor ID ({visitorId})</strong> - you'll need it for checkout</p>
-                    <p>• When leaving, use the "Guest Checkout" option at any desk</p>
-                    <p>• Keep your visitor information accessible for security</p>
-                  </div>
-                </div>
+                <h3 className="font-semibold text-[#052e16] mb-3 flex items-center">
+                  <CheckCircle className="h-5 w-5 mr-2 text-emerald-600" />
+                  Next Steps
+                </h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-start">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                    Your host has been notified of your arrival
+                  </li>
+                  <li className="flex items-start">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                    Please wait in the reception area until escorted
+                  </li>
+                  <li className="flex items-start">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                    Use your Visitor ID <strong>{visitorId}</strong> for checkout
+                  </li>
+                </ul>
               </motion.div>
 
               {/* Actions */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 1.1, duration: 0.5 }}
-                className="space-y-4"
+                transition={{ delay: 0.7 }}
+                className="space-y-3 pt-2"
               >
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => navigate('/desk')}
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 w-full"
+                  className="w-full bg-[#052e16] text-white px-6 py-4 rounded-xl font-semibold hover:bg-[#0a4f26] transition-all shadow-lg shadow-emerald-900/10 flex items-center justify-center space-x-2"
                 >
                   <Home className="h-5 w-5" />
                   <span>Return to Desk</span>
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/admin')}
-                  className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors w-full"
-                >
-                  View Admin Dashboard
                 </motion.button>
               </motion.div>
             </motion.div>

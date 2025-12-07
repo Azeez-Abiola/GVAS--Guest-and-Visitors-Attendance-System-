@@ -1,895 +1,441 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  ArrowRight, 
-  Shield, 
-  Zap, 
-  Users, 
-  Building2, 
-  CheckCircle, 
-  Phone,
-  Mail,
-  MapPin,
+import {
+  ArrowRight,
+  Shield,
+  Zap,
+  Users,
+  Building2,
+  CheckCircle,
   Monitor,
-  Smartphone,
   Camera,
-  Clock,
-  QrCode,
-  UserCheck,
   Bell,
   BarChart3,
   Lock,
-  Eye,
   ChevronRight,
-  ChevronDown,
-  PlayCircle,
-  FileText,
-  Wifi,
-  Database,
-  Globe,
   Menu,
-  X
+  X,
+  PlayCircle,
+  Star,
+  Quote
 } from 'lucide-react'
 import GvasLogo from '../components/GvasLogo'
 
-// FAQ Component with animations
-const FAQSection = () => {
-  const [openIndex, setOpenIndex] = useState(null)
-
-  const faqData = [
-    {
-      question: "What is GVAS and how does it work?",
-      answer: "GVAS (Global Visitor Access System) is a comprehensive visitor management platform that streamlines the check-in process for guests. It provides digital registration, photo capture, host notifications, and real-time tracking to enhance security and improve visitor experience."
-    },
-    {
-      question: "Can visitors pre-register before their visit?",
-      answer: "Yes! GVAS supports pre-registration where visitors can submit their information in advance. This creates a faster check-in experience and allows hosts to prepare for their arrival."
-    },
-    {
-      question: "What security features does GVAS provide?",
-      answer: "GVAS includes photo capture, digital signatures, real-time host notifications, visitor tracking, comprehensive audit trails, and integration with existing security systems to ensure maximum safety."
-    },
-    {
-      question: "Is GVAS suitable for different types of buildings?",
-      answer: "Absolutely! GVAS is designed to work in corporate offices, residential complexes, government buildings, educational institutions, and any facility that needs professional visitor management."
-    },
-    {
-      question: "How does the mobile interface work?",
-      answer: "GVAS features a responsive mobile-first design that works seamlessly on tablets and smartphones. The desk interface is optimized for touch interactions and provides an intuitive user experience."
-    },
-    {
-      question: "Can GVAS integrate with our existing systems?",
-      answer: "Yes, GVAS is built with integration in mind. It can connect with existing security systems, access control, and notification platforms through our comprehensive API."
-    }
-  ]
-
-  const toggleFAQ = (index) => {
-    setOpenIndex(openIndex === index ? null : index)
-  }
-
-  return (
-    <div className="space-y-4">
-      {faqData.map((faq, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1, duration: 0.5 }}
-          className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
-        >
-          <button
-            onClick={() => toggleFAQ(index)}
-            className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-          >
-            <span className="font-semibold text-gray-900 text-sm sm:text-base">{faq.question}</span>
-            <motion.div
-              animate={{ rotate: openIndex === index ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
-              className="flex-shrink-0 ml-4"
-            >
-              <ChevronDown className="h-5 w-5 text-gray-500" />
-            </motion.div>
-          </button>
-          <AnimatePresence>
-            {openIndex === index && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-6 pb-4">
-                  <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      ))}
-    </div>
-  )
-}
-
 const LandingPage = () => {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const stakeholders = [
-    {
-      title: "Facility Managers",
-      icon: <Building2 className="h-6 w-6" />,
-      benefit: "Centralized control & compliance",
-      description: "Complete oversight of all visitor activities across multiple buildings with real-time analytics and compliance reporting."
-    },
-    {
-      title: "Tenants",
-      icon: <Users className="h-6 w-6" />,
-      benefit: "Seamless hosting experience",
-      description: "Effortless guest pre-registration and automatic notifications when visitors arrive, enhancing professional hosting."
-    },
-    {
-      title: "Security Teams",
-      icon: <Shield className="h-6 w-6" />,
-      benefit: "Instant visitor traceability",
-      description: "Real-time visitor tracking with photo verification and immediate alerts for enhanced building security."
-    },
-    {
-      title: "Guests",
-      icon: <UserCheck className="h-6 w-6" />,
-      benefit: "Smooth, fast, and paperless entry",
-      description: "Quick check-in process with digital forms and QR codes, eliminating long waits and paperwork."
-    }
-  ]
+  // Animation variants
+  const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6 }
+  }
 
   const features = [
     {
-      icon: <FileText className="h-8 w-8" />,
-      title: "Digital Guest Forms",
-      description: "Replace manual logbooks with secure digital registration"
+      icon: <CheckCircle className="h-6 w-6 text-[#070f2b]" />,
+      title: "Digital Entry",
+      description: "Seamless guest registration without paper logbooks"
     },
     {
-      icon: <Camera className="h-8 w-8" />,
-      title: "Face & ID Capture",
-      description: "Improve security with image validation and verification"
+      icon: <Shield className="h-6 w-6 text-[#070f2b]" />,
+      title: "Security Verification",
+      description: "Instant background checks and ID verification"
     },
     {
-      icon: <Bell className="h-8 w-8" />,
-      title: "Host Notifications",
-      description: "Real-time arrival alerts via SMS, email, or app"
+      icon: <Bell className="h-6 w-6 text-[#070f2b]" />,
+      title: "Instant Alerts",
+      description: "Real-time host notifications upon arrival"
     },
     {
-      icon: <BarChart3 className="h-8 w-8" />,
-      title: "Analytics Dashboard",
-      description: "Visualize visitor trends and compliance reporting"
-    },
-    {
-      icon: <Wifi className="h-8 w-8" />,
-      title: "Access Control Integration",
-      description: "Connect doors, elevators, and camera systems"
-    },
-    {
-      icon: <Lock className="h-8 w-8" />,
-      title: "GDPR & NDPA Compliant",
-      description: "Data privacy guaranteed with enterprise security"
+      icon: <BarChart3 className="h-6 w-6 text-[#070f2b]" />,
+      title: "Analytics",
+      description: "Detailed insights into visitor traffic and trends"
     }
   ]
-
-  const processSteps = [
-    {
-      number: "01",
-      title: "Pre-register guests",
-      description: "Hosts create guest invitations with visit details",
-      icon: <Users className="h-6 w-6" />
-    },
-    {
-      number: "02",
-      title: "Send automated QR code",
-      description: "Guests receive secure QR codes via email/SMS",
-      icon: <QrCode className="h-6 w-6" />
-    },
-    {
-      number: "03",
-      title: "Scan at reception desk",
-      description: "Quick check-in with photo capture and signature",
-      icon: <Monitor className="h-6 w-6" />
-    },
-    {
-      number: "04",
-      title: "Access granted & logged",
-      description: "Secure entry with complete audit trail",
-      icon: <CheckCircle className="h-6 w-6" />
-    }
-  ]
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTab((prev) => (prev + 1) % stakeholders.length)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="fixed w-full z-50 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 backdrop-blur-xl border-b border-blue-500/30 shadow-lg">
-        <div className="absolute inset-0 bg-white/5"></div>
-        <div className="container mx-auto px-4 sm:px-6 py-6 relative">
-          <div className="flex items-center justify-between">
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: 1 }}
-              transition={{ duration: 0.3, type: "spring" }}
-              className="flex items-center space-x-3"
-            >
-              <GvasLogo variant="white" />
-              <div className="hidden sm:block">
-                <h1 className="text-white font-bold text-xl tracking-wide">GVAS</h1>
-                <p className="text-blue-200 text-xs">Visitor Management</p>
-              </div>
-            </motion.div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
-              <a href="#features" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
-                Features
-                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
-              </a>
-              <a href="#how-it-works" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
-                How It Works
-                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
-              </a>
-              <a href="#security" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
-                Security
-                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
-              </a>
-              <a href="#contact" className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 font-medium relative group">
-                Contact
-                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-3/4 transition-all duration-300"></span>
-              </a>
-              <div className="ml-4 pl-4 border-l border-white/20">
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/desk')}
-                  className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-md hover:shadow-lg"
-                >
-                  <Monitor className="h-4 w-4" />
-                  <span>Visit Desk</span>
-                  <ChevronRight className="h-4 w-4 opacity-60" />
-                </motion.button>
-              </div>
-            </div>
+    <div className="min-h-screen bg-white text-[#070f2b] font-sans selection:bg-[#070f2b] selection:text-white overflow-x-hidden">
 
-            {/* Mobile Menu Button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-300 text-white border border-white/20 backdrop-blur-sm"
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </motion.button>
+      {/* Floating Navbar */}
+      <div className="fixed top-6 w-full z-50 flex justify-center px-4">
+        <nav className="bg-white/80 backdrop-blur-md border border-[#070f2b]/10 rounded-full px-6 py-3 shadow-sm max-w-5xl w-full flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
+            <GvasLogo className="h-8 w-8 text-[#070f2b]" />
+            <span className="text-xl font-bold tracking-tight text-[#070f2b]">GVAS</span>
           </div>
 
-          {/* Mobile Menu */}
-          <AnimatePresence>
-            {isMobileMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="lg:hidden mt-6 pb-6 border-t border-white/20 bg-white/5 rounded-b-2xl backdrop-blur-sm"
+          {/* Desktop Links */}
+          <div className="hidden lg:flex items-center space-x-8">
+            {['Features', 'Solutions', 'Enterprise', 'Resources'].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-sm font-medium text-[#070f2b]/70 hover:text-[#070f2b] transition-colors"
               >
-                <div className="flex flex-col space-y-2 pt-6">
-                  <a 
-                    href="#features" 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
-                  >
-                    Features
-                  </a>
-                  <a 
-                    href="#how-it-works" 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
-                  >
-                    How It Works
-                  </a>
-                  <a 
-                    href="#security" 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
-                  >
-                    Security
-                  </a>
-                  <a 
-                    href="#contact" 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all duration-300 font-medium py-3 px-4 rounded-lg"
-                  >
-                    Contact
-                  </a>
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      navigate('/desk')
-                      setIsMobileMenuOpen(false)
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-lg mx-4"
-                  >
-                    <Monitor className="h-4 w-4" />
-                    <span>Visit Desk</span>
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </nav>
+                {item}
+              </a>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="hidden lg:flex items-center space-x-3">
+            <button
+              onClick={() => navigate('/login')}
+              className="px-5 py-2 rounded-full text-[#070f2b] font-medium text-sm hover:bg-[#070f2b]/5 transition-colors"
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => navigate('/guest-register')}
+              className="px-5 py-2 rounded-full bg-[#070f2b] text-white font-semibold text-sm hover:bg-[#070f2b]/90 transition-all shadow-md"
+            >
+              Get Started
+            </button>
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="lg:hidden p-2 text-[#070f2b]"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X /> : <Menu />}
+          </button>
+        </nav>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-x-4 top-24 z-40 bg-white rounded-2xl shadow-xl border border-[#070f2b]/10 p-6 lg:hidden"
+          >
+            <div className="flex flex-col space-y-4">
+              {['Features', 'Solutions', 'Enterprise', 'Resources'].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="text-lg font-medium text-[#070f2b]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item}
+                </a>
+              ))}
+              <div className="pt-4 flex flex-col space-y-3 border-t border-[#070f2b]/10">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="w-full px-5 py-3 rounded-xl border border-[#070f2b]/20 text-[#070f2b] font-medium"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => navigate('/guest-register')}
+                  className="w-full px-5 py-3 rounded-xl bg-[#070f2b] text-white font-bold"
+                >
+                  Get Started
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 bg-gray-50 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-blue-50/50"></div>
-        <div className="absolute top-20 left-4 sm:left-20 w-48 sm:w-72 h-48 sm:h-72 bg-blue-100/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-4 sm:right-20 w-64 sm:w-96 h-64 sm:h-96 bg-blue-100/20 rounded-full blur-3xl"></div>
-        
-        <div className="container mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8 }}
-              className="text-center lg:text-left"
-            >
-              <div className="text-blue-600 text-xs sm:text-sm font-bold mb-4 uppercase tracking-wider">
-                Next-Generation Visitor Management
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Reimagine Visitor Management in Your
-                <span className="text-blue-600"> Facility.</span>
-              </h1>
-              <p className="text-lg sm:text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                GVAS simplifies guest registration, enhances building security, and gives managers full control—all from one intelligent dashboard.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <motion.button
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(30, 64, 175, 0.3)" }}
-                  whileTap={{ scale: 0.98 }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-2 shadow-lg transition-all duration-300"
-                >
-                  <span>Request Demo</span>
-                  <ArrowRight className="h-5 w-5" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02, backgroundColor: "rgba(30, 64, 175, 0.1)" }}
-                  whileTap={{ scale: 0.98 }}
-                  className="border-2 border-blue-200 hover:border-blue-400 bg-white/80 backdrop-blur-sm text-blue-700 hover:text-blue-800 px-6 sm:px-8 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-2 transition-all duration-300 shadow-lg"
-                >
-                  <PlayCircle className="h-5 w-5" />
-                  <span>See How It Works</span>
-                </motion.button>
-              </div>
-            </motion.div>
+      <section className="relative pt-48 pb-20 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center">
 
-            <motion.div
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative mt-8 lg:mt-0"
+          {/* Badge */}
+          <motion.div
+            variants={fadeIn}
+            initial="initial"
+            animate="animate"
+            className="inline-flex items-center space-x-2 bg-[#070f2b]/5 rounded-full px-1 py-1 pr-4 mb-8"
+          >
+            <span className="bg-[#070f2b] text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+              New
+            </span>
+            <span className="text-[#070f2b]/80 text-sm font-medium">
+              Enterprise Visitor Management System
+            </span>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="text-5xl md:text-7xl font-bold text-[#070f2b] mb-8 leading-[1.1] tracking-tight max-w-5xl mx-auto"
+          >
+            Streamline Visitor Access with <br />
+            <span className="relative whitespace-nowrap">
+              Intelligent Security
+              <svg className="absolute w-full h-3 -bottom-1 left-0 text-[#070f2b] opacity-20" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.00025 6.99997C25.7262 3.8647 62.1932 2.62886 100 2.5C146.401 2.34182 196.248 4.242 198 6.99997" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg md:text-xl text-[#070f2b]/70 mb-12 max-w-2xl mx-auto leading-relaxed"
+          >
+            Professional visitor management that enhances security, impresses guests, and automates compliance. Trusted by industry leaders.
+          </motion.p>
+
+          {/* Buttons */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-24"
+          >
+            <button
+              onClick={() => navigate('/guest-register')}
+              className="group min-w-[180px] px-8 py-4 rounded-full bg-[#070f2b] text-white font-semibold text-lg hover:bg-[#070f2b]/90 transition-all shadow-xl shadow-[#070f2b]/20"
             >
-              <div className="relative">
-                {/* Floating background elements */}
-                <div className="absolute -top-2 sm:-top-4 -left-2 sm:-left-4 w-full h-full bg-blue-100/20 rounded-2xl sm:rounded-3xl blur-xl"></div>
-                <div className="absolute -bottom-2 sm:-bottom-4 -right-2 sm:-right-4 w-full h-full bg-blue-100/20 rounded-2xl sm:rounded-3xl blur-xl"></div>
-                
-                {/* Dashboard Image */}
-                <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 border border-white/50">
-                  <img 
-                    src="/images/dashboard.jpeg" 
-                    alt="GVAS Dashboard Interface" 
-                    className="w-full h-auto rounded-xl sm:rounded-2xl shadow-lg"
+              <span className="flex items-center justify-center space-x-2">
+                <span>Start Free Trial</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+            <button
+              className="group min-w-[180px] px-8 py-4 rounded-full bg-white border border-[#070f2b]/20 text-[#070f2b] font-semibold text-lg hover:bg-[#070f2b]/5 transition-all"
+            >
+              Book a Demo
+            </button>
+          </motion.div>
+
+          {/* Hero Images Container */}
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="relative mx-auto max-w-7xl px-4"
+          >
+            <div className="relative">
+              {/* Desktop Dashboard Image */}
+              <div className="relative z-10 bg-white rounded-2xl shadow-2xl border border-[#070f2b]/10 overflow-hidden transform md:-translate-x-10">
+                <img
+                  src="/images/dashboard-hero-real.jpg"
+                  alt="GVAS Desktop Dashboard"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+
+              {/* Mobile Dashboard Image - Positioned Absolute */}
+              <div className="hidden md:block absolute -right-4 -bottom-12 z-20 w-[280px] rounded-[2.5rem] bg-[#070f2b] p-2 shadow-2xl transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500 hover:z-30 hover:scale-105 border-[6px] border-[#070f2b]">
+                <div className="rounded-[2rem] overflow-hidden bg-white h-full relative">
+                  {/* Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#070f2b] rounded-b-xl z-10"></div>
+                  <img
+                    src="/images/dashboard-mobile.jpg"
+                    alt="GVAS Mobile App"
+                    className="w-full h-auto"
                   />
-                  <div className="absolute top-4 sm:top-8 right-4 sm:right-8">
-                    <div className="bg-green-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                      <span className="hidden sm:inline">Live Dashboard</span>
-                      <span className="sm:hidden">Live</span>
-                    </div>
-                  </div>
                 </div>
-                
-                {/* Floating stats */}
-                <motion.div
-                  animate={{ y: [-10, 10, -10] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -left-4 sm:-left-8 top-1/4 bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md p-3 sm:p-4 border border-white/50"
-                >
-                  <div className="flex items-center space-x-2 sm:space-x-3">
-                    <div className="bg-blue-500 p-1.5 sm:p-2 rounded-lg">
-                      <Users className="h-4 sm:h-5 w-4 sm:w-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-sm sm:text-lg font-bold text-gray-900">127</div>
-                      <div className="text-xs text-gray-600">Visitors Today</div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  animate={{ y: [10, -10, 10] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-                  className="absolute -right-4 sm:-right-8 bottom-1/4 bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md p-3 sm:p-4 border border-white/50"
-                >
-                  <div className="flex items-center space-x-2 sm:space-x-3">
-                    <div className="bg-green-500 p-1.5 sm:p-2 rounded-lg">
-                      <Shield className="h-4 sm:h-5 w-4 sm:w-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-sm sm:text-lg font-bold text-gray-900">100%</div>
-                      <div className="text-xs text-gray-600">Secure</div>
-                    </div>
-                  </div>
-                </motion.div>
               </div>
-            </motion.div>
+            </div>
+
+            {/* Background Decorations */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#070f2b]/5 blur-[100px] -z-10 rounded-full"></div>
+          </motion.div>
+
+        </div>
+      </section>
+
+      {/* Trusted By Section */}
+      <section className="py-12 border-y border-[#070f2b]/5 bg-[#070f2b]/[0.02]">
+        <div className="container mx-auto px-6">
+          <p className="text-[#070f2b]/50 text-xs md:text-sm mb-8 text-center font-bold tracking-[0.2em] uppercase">Trusted by forward-thinking companies</p>
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
+            <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b] tracking-tight">Acme Corp</h3>
+            <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] tracking-widest">GLOBAL</h3>
+            <h3 className="text-xl md:text-2xl font-black font-mono text-[#070f2b]">NEXUS</h3>
+            <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] italic">Vertex</h3>
+            <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b]">Stark Industries</h3>
           </div>
         </div>
       </section>
 
-      {/* How GVAS Works */}
-      <section id="how-it-works" className="py-16 sm:py-20 px-4 sm:px-6 bg-blue-50 relative overflow-hidden">
-        {/* Enhanced Background Pattern */}
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-0 left-0 w-full h-full bg-blue-100/50"></div>
-          <div className="absolute top-1/4 left-1/4 w-32 sm:w-48 h-32 sm:h-48 bg-blue-300/30 rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-40 sm:w-56 h-40 sm:h-56 bg-blue-300/30 rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 sm:w-32 h-24 sm:h-32 bg-blue-300/20 rounded-full blur-2xl"></div>
-        </div>
-        
-        <div className="container mx-auto relative z-10">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <motion.div 
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="inline-block text-blue-600 text-xs sm:text-sm font-bold mb-4 uppercase tracking-wider bg-white/80 px-4 py-2 rounded-full shadow-lg"
-            >
-              ✨ Simple & Effective
-            </motion.div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">How GVAS Works</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4 leading-relaxed">
-              Streamlined visitor management in four simple steps
-            </p>
-          </motion.div>
-
-          {/* Mobile-first responsive grid */}
-          <div className="space-y-8 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 lg:gap-8">
-            {processSteps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                className="text-center relative group"
-              >
-                {/* Connection line for desktop */}
-                {index < 3 && (
-                  <div className="hidden lg:block absolute top-14 left-full w-full h-0.5 bg-blue-400 transform -translate-y-1/2 rounded-full opacity-60"></div>
-                )}
-                
-                {/* Step number circle */}
-                <motion.div 
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 text-lg sm:text-xl lg:text-2xl font-bold shadow-md group-hover:shadow-lg transition-all duration-300 relative"
-                >
-                  <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  {step.number}
-                </motion.div>
-                
-                {/* Content card */}
-                <motion.div 
-                  whileHover={{ y: -5 }}
-                  className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-sm border border-white/50 group-hover:shadow-md group-hover:border-blue-200/50 transition-all duration-300 mx-2 sm:mx-0"
-                >
-                  <div className="text-blue-600 mb-3 flex justify-center group-hover:text-blue-700 transition-colors duration-300 transform group-hover:scale-110">
-                    {step.icon}
-                  </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors">{step.title}</h3>
-                  <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{step.description}</p>
-                </motion.div>
-                
-                {/* Mobile connection arrow */}
-                {index < 3 && (
-                  <div className="sm:hidden flex justify-center mt-6 mb-2">
-                    <ChevronDown className="h-6 w-6 text-blue-400 animate-bounce" />
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Key Features */}
-      <section id="features" className="py-20 px-4 sm:px-6 bg-white relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-blue-50 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-48 sm:w-80 h-48 sm:h-80 bg-blue-50 rounded-full blur-3xl"></div>
-        
-        <div className="container mx-auto relative z-10">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <div className="text-blue-600 text-xs sm:text-sm font-bold mb-4 uppercase tracking-wider">
-              Powerful Features
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Key Features</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              Everything you need for modern visitor management
-            </p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                whileHover={{ y: -10, scale: 1.02 }}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 group relative overflow-hidden"
-              >
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                
-                <div className="relative z-10">
-                  <div className="bg-blue-600 p-3 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <div className="text-white">
-                      {feature.icon}
-                    </div>
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors">{feature.title}</h3>
-                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors text-sm sm:text-base">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(30, 64, 175, 0.3)" }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-2xl font-semibold flex items-center space-x-2 mx-auto transition-all duration-300 shadow-lg"
-            >
-              <span>See Full Feature List</span>
-              <ChevronRight className="h-4 w-4" />
-            </motion.button>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits for Stakeholders */}
-      <section className="py-20 px-4 sm:px-6 bg-blue-50 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-blue-100/30"></div>
-        <div className="absolute top-1/3 left-4 sm:left-10 w-32 sm:w-64 h-32 sm:h-64 bg-blue-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 right-4 sm:right-10 w-40 sm:w-72 h-40 sm:h-72 bg-blue-200/30 rounded-full blur-3xl"></div>
-        
-        <div className="container mx-auto relative z-10">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <div className="text-blue-600 text-xs sm:text-sm font-bold mb-4 uppercase tracking-wider">
-              Universal Value
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Benefits for Everyone</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              GVAS delivers value across your entire organization
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-            <div className="space-y-4 order-2 lg:order-1">
-              {stakeholders.map((stakeholder, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ scale: 1.02, x: 10 }}
-                  onClick={() => setActiveTab(index)}
-                  className={`p-4 sm:p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
-                    activeTab === index
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-white/80 backdrop-blur-sm text-gray-900 hover:bg-white shadow-lg border border-white/50'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3 sm:space-x-4">
-                    <div className={`p-2 rounded-lg ${activeTab === index ? 'bg-white/20 text-white' : 'bg-blue-600 text-white'}`}>
-                      {stakeholder.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-base sm:text-lg">{stakeholder.title}</h3>
-                      <p className={`text-sm ${activeTab === index ? 'text-blue-100' : 'text-gray-600'}`}>
-                        {stakeholder.benefit}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg border border-white/50 relative overflow-hidden order-1 lg:order-2"
-            >
-              {/* Background overlay */}
-              <div className="absolute inset-0 bg-blue-50/50 rounded-3xl"></div>
-              
-              <div className="relative z-10">
-                <div className="bg-blue-600 p-3 rounded-xl w-fit mb-4">
-                  <div className="text-white">
-                    {stakeholders[activeTab].icon}
-                  </div>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                  {stakeholders[activeTab].title}
-                </h3>
-                <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
-                  {stakeholders[activeTab].description}
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* System Architecture */}
-      <section className="py-20 px-4 sm:px-6">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">System Architecture</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              Cloud-native, scalable, and secure infrastructure
-            </p>
-          </motion.div>
-
-          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100">
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6 items-center">
-              <div className="text-center">
-                <div className="bg-blue-100 rounded-xl p-4 mb-3 mx-auto w-fit">
-                  <Monitor className="h-6 sm:h-8 w-6 sm:w-8 text-blue-600 mx-auto" />
-                </div>
-                <h4 className="font-semibold text-gray-900 text-sm sm:text-base">Frontend</h4>
-                <p className="text-xs sm:text-sm text-gray-600">Web + Desk</p>
-              </div>
-              <div className="hidden sm:flex justify-center">
-                <ChevronRight className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="text-center">
-                <div className="bg-blue-100 rounded-xl p-4 mb-3 mx-auto w-fit">
-                  <BarChart3 className="h-6 sm:h-8 w-6 sm:w-8 text-blue-600 mx-auto" />
-                </div>
-                <h4 className="font-semibold text-gray-900 text-sm sm:text-base">Dashboard</h4>
-                <p className="text-xs sm:text-sm text-gray-600">Admin Control</p>
-              </div>
-              <div className="hidden sm:flex justify-center">
-                <ChevronRight className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="text-center">
-                <div className="bg-blue-100 rounded-xl p-4 mb-3 mx-auto w-fit">
-                  <Database className="h-6 sm:h-8 w-6 sm:w-8 text-blue-600 mx-auto" />
-                </div>
-                <h4 className="font-semibold text-gray-900 text-sm sm:text-base">API Layer</h4>
-                <p className="text-xs sm:text-sm text-gray-600">Secure Backend</p>
-              </div>
-            </div>
-            <div className="mt-6 sm:mt-8 text-center">
-              <p className="text-gray-600 text-sm sm:text-base">
-                <strong>Multi-building support</strong> • <strong>Cloud-native scaling</strong> • <strong>Enterprise security</strong>
+      {/* Features Grid */}
+      <section id="features" className="py-32 relative bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-bold text-[#070f2b] mb-6 leading-tight">
+                Everything needed to run <br />
+                <span className="text-[#070f2b]/60">modern facilities.</span>
+              </h2>
+              <p className="text-[#070f2b]/70 text-lg max-w-xl leading-relaxed">
+                Replace outdated logbooks with a system that secures your building, delights visitors, and gives you complete visibility.
               </p>
             </div>
+            <div className="flex justify-start lg:justify-end">
+              <button className="text-[#070f2b] border-b-2 border-[#070f2b] pb-1 hover:text-[#070f2b]/70 hover:border-[#070f2b]/70 transition-all flex items-center space-x-2 font-semibold">
+                <span>View all features</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="p-8 rounded-2xl bg-white border border-[#070f2b]/10 shadow-sm hover:shadow-xl hover:border-[#070f2b]/20 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#070f2b]/5 flex items-center justify-center mb-6 text-[#070f2b] group-hover:scale-110 transition-transform">
+                  {feature.icon}
+                </div>
+                <h3 className="text-lg font-bold text-[#070f2b] mb-3">{feature.title}</h3>
+                <p className="text-[#070f2b]/70 text-sm leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Security & Compliance */}
-      <section id="security" className="py-20 px-4 sm:px-6 bg-gray-900 text-white">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <div className="bg-blue-600 w-12 sm:w-16 h-12 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Shield className="h-6 sm:h-8 w-6 sm:w-8 text-white" />
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Security & Compliance</h2>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto px-4">
-              Enterprise-grade security you can trust
-            </p>
-          </motion.div>
+      {/* Testimonials */}
+      <section className="py-24 bg-[#070f2b] text-white overflow-hidden relative">
+        {/* Background decorations */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px]"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-[100px]"></div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Voices of Leadership</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {[
               {
-                icon: <Lock className="h-5 sm:h-6 w-5 sm:w-6" />,
-                title: "End-to-end encryption",
-                description: "AES-256, TLS 1.3"
+                quote: "GVAS transformed how we handle security. The difference was night and day compared to our old paper-based system.",
+                author: "Sarah Jenkins",
+                role: "Head of Operations, TechFlow"
               },
               {
-                icon: <Users className="h-5 sm:h-6 w-5 sm:w-6" />,
-                title: "Role-based access",
-                description: "Granular permissions"
-              },
-              {
-                icon: <FileText className="h-5 sm:h-6 w-5 sm:w-6" />,
-                title: "Immutable audit logs",
-                description: "Complete traceability"
-              },
-              {
-                icon: <Globe className="h-5 sm:h-6 w-5 sm:w-6" />,
-                title: "GDPR & NDPA Compliant",
-                description: "Data privacy guaranteed"
+                quote: "The interface is incredibly intuitive. Our reception staff mastered it in minutes, and our visitors love the quick check-in.",
+                author: "Michael Chang",
+                role: "Facility Director, Skyline Towers"
               }
-            ].map((item, index) => (
+            ].map((t, i) => (
               <motion.div
-                key={index}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                className="text-center"
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.2 }}
+                className="bg-white/10 backdrop-blur-sm border border-white/10 p-10 rounded-3xl relative hover:bg-white/15 transition-colors"
               >
-                <div className="bg-white/10 rounded-xl p-3 sm:p-4 mb-4 w-12 sm:w-16 h-12 sm:h-16 flex items-center justify-center mx-auto">
-                  <div className="text-blue-400">
-                    {item.icon}
-                  </div>
+                <Quote className="absolute top-8 right-8 w-8 h-8 text-white/20" />
+                <div className="flex gap-1 mb-6">
+                  {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 text-white fill-white" />)}
                 </div>
-                <h3 className="font-semibold mb-2 text-sm sm:text-base">{item.title}</h3>
-                <p className="text-gray-300 text-xs sm:text-sm">{item.description}</p>
+                <p className="text-lg text-white/90 mb-8 leading-relaxed">"{t.quote}"</p>
+                <div>
+                  <p className="text-white font-bold">{t.author}</p>
+                  <p className="text-white/60 text-sm">{t.role}</p>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 px-4 sm:px-6 bg-gray-50">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Find answers to common questions about GVAS and how it can transform your visitor management
-            </p>
-          </motion.div>
+      {/* CTA Section */}
+      <section className="py-24 px-6 relative overflow-hidden bg-white">
+        <div className="container mx-auto relative z-10">
+          <div className="bg-[#070f2b] rounded-[3rem] p-12 md:p-24 text-center shadow-2xl max-w-6xl mx-auto relative overflow-hidden">
 
-          <div className="max-w-4xl mx-auto">
-            <FAQSection />
-          </div>
-        </div>
-      </section>
+            {/* Pattern */}
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
 
-      {/* CTA Banner */}
-      <section className="py-20 px-4 sm:px-6 bg-blue-600 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-blue-700/50"></div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-30">
-          <div className="absolute top-4 left-4 w-2 h-2 bg-white/20 rounded-full"></div>
-          <div className="absolute top-12 left-16 w-2 h-2 bg-white/20 rounded-full"></div>
-          <div className="absolute top-20 left-8 w-2 h-2 bg-white/20 rounded-full"></div>
-          <div className="absolute top-8 left-32 w-2 h-2 bg-white/20 rounded-full"></div>
-          <div className="absolute top-24 left-24 w-2 h-2 bg-white/20 rounded-full"></div>
-        </div>
-        <div className="absolute top-10 sm:top-20 right-10 sm:right-20 w-24 sm:w-32 h-24 sm:h-32 bg-white/10 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-10 sm:bottom-20 left-10 sm:left-20 w-32 sm:w-40 h-32 sm:h-40 bg-white/10 rounded-full blur-3xl"></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="text-blue-200 text-xs sm:text-sm font-bold mb-4 uppercase tracking-wider">
-              Ready to Transform?
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight px-4">
-              Upgrade Your Building Security & Experience Today
-            </h2>
-            <p className="text-lg sm:text-xl text-blue-100 mb-8 max-w-2xl mx-auto px-4">
-              Join hundreds of facilities already transforming their visitor management with GVAS
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 20px 50px rgba(255, 255, 255, 0.2)" }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-white text-blue-700 px-8 sm:px-10 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all shadow-lg inline-flex items-center space-x-3"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="relative z-10"
             >
-              <span>Book a Free Demo</span>
-              <ArrowRight className="h-5 w-5" />
-            </motion.button>
-          </motion.div>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+                Ready to secure your facility?
+              </h2>
+              <p className="text-white/80 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
+                Join thousands of companies using GVAS to manage visitors securely and efficiently.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button
+                  onClick={() => navigate('/guest-register')}
+                  className="px-10 py-5 bg-white text-[#070f2b] rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+                >
+                  Get Started Now
+                </button>
+                <button className="px-10 py-5 bg-transparent border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-colors">
+                  Contact Sales
+                </button>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="py-12 px-4 sm:px-6 bg-gray-900 text-white">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            <div className="sm:col-span-2 lg:col-span-1">
-              <GvasLogo variant="white" className="mb-4" />
-              <p className="text-gray-400 text-sm sm:text-base">
-                Transforming visitor management for modern facilities
+      <footer className="bg-white pt-20 pb-10 border-t border-[#070f2b]/5">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1 md:col-span-1">
+              <div className="flex items-center space-x-2 mb-6 cursor-pointer">
+                <GvasLogo className="w-8 h-8 text-[#070f2b]" />
+                <span className="text-xl font-bold text-[#070f2b]">GVAS</span>
+              </div>
+              <p className="text-[#070f2b]/60 text-sm leading-relaxed">
+                The enterprise standard for visitor management and facility security.
               </p>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4 text-sm sm:text-base">Product</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#security" className="hover:text-white transition-colors">Security</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+              <h4 className="text-[#070f2b] font-bold mb-6 text-sm uppercase tracking-wider">Platform</h4>
+              <ul className="space-y-4 text-sm text-[#070f2b]/70">
+                <li><a href="#" className="hover:text-[#070f2b] transition-colors">Features</a></li>
+                <li><a href="#" className="hover:text-[#070f2b] transition-colors">Integrations</a></li>
+                <li><a href="#" className="hover:text-[#070f2b] transition-colors">Security</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4 text-sm sm:text-base">Company</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              <h4 className="text-[#070f2b] font-bold mb-6 text-sm uppercase tracking-wider">Company</h4>
+              <ul className="space-y-4 text-sm text-[#070f2b]/70">
+                <li><a href="#" className="hover:text-[#070f2b] transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-[#070f2b] transition-colors">Customers</a></li>
+                <li><a href="#" className="hover:text-[#070f2b] transition-colors">Careers</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4 text-sm sm:text-base">Contact</h4>
-              <div className="space-y-3 text-gray-400 text-sm">
-                <div className="flex items-center space-x-3">
-                  <Phone className="h-3 sm:h-4 w-3 sm:w-4 flex-shrink-0" />
-                  <span>+234 (0) 123-GVAS</span>
+              <h4 className="text-[#070f2b] font-bold mb-6 text-sm uppercase tracking-wider">Connect</h4>
+              <div className="flex space-x-4">
+                {/* Social placeholders */}
+                <div className="w-10 h-10 rounded-full bg-[#070f2b]/5 flex items-center justify-center hover:bg-[#070f2b] hover:text-white transition-all cursor-pointer text-[#070f2b]">
+                  <span className="sr-only">Twitter</span>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" /></svg>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-3 sm:h-4 w-3 sm:w-4 flex-shrink-0" />
-                  <span>hello@gvas.com</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-3 sm:h-4 w-3 sm:w-4 flex-shrink-0" />
-                  <span>Lagos, Nigeria</span>
+                <div className="w-10 h-10 rounded-full bg-[#070f2b]/5 flex items-center justify-center hover:bg-[#070f2b] hover:text-white transition-all cursor-pointer text-[#070f2b]">
+                  <span className="sr-only">LinkedIn</span>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
                 </div>
               </div>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-gray-400 text-xs sm:text-sm text-center md:text-left">
-              © 2025 GVAS. All rights reserved.
-            </div>
-            <div className="flex space-x-6">
-              <a href="#" className="text-gray-400 hover:text-white text-xs sm:text-sm transition-colors">Privacy Policy</a>
-              <a href="#" className="text-gray-400 hover:text-white text-xs sm:text-sm transition-colors">Terms of Service</a>
-            </div>
+
+          <div className="pt-8 border-t border-[#070f2b]/5 flex flex-col md:flex-row justify-between items-center text-[#070f2b]/60 text-sm">
+            <p>&copy; 2024 Global Visitor Access System. All rights reserved.</p>
           </div>
         </div>
       </footer>

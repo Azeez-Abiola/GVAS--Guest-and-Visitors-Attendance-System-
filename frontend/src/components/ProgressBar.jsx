@@ -3,27 +3,27 @@ import { motion } from 'framer-motion'
 const ProgressBar = ({ currentStep, totalSteps, stepLabels = [], variant = 'top' }) => {
   const progressPercentage = (currentStep / totalSteps) * 100
 
-  // Color progression: red -> yellow -> green -> blue
+  // Color progression: lime -> emerald -> dark green
   const getProgressColor = () => {
-    if (progressPercentage <= 25) return 'from-red-500 to-red-600'
-    if (progressPercentage <= 50) return 'from-yellow-500 to-yellow-600'
-    if (progressPercentage <= 75) return 'from-green-500 to-green-600'
-    return 'from-blue-500 to-blue-600'
+    if (progressPercentage <= 25) return 'from-lime-400 to-lime-600'
+    if (progressPercentage <= 50) return 'from-emerald-400 to-emerald-600'
+    if (progressPercentage <= 75) return 'from-emerald-600 to-[#052e16]'
+    return 'from-[#052e16] to-[#022c22]'
   }
 
   const getStepColor = (stepIndex) => {
     if (stepIndex < currentStep) {
       // Completed steps
-      if (currentStep <= Math.ceil(totalSteps * 0.25)) return 'bg-red-500 border-red-500'
-      if (currentStep <= Math.ceil(totalSteps * 0.5)) return 'bg-yellow-500 border-yellow-500'
-      if (currentStep <= Math.ceil(totalSteps * 0.75)) return 'bg-green-500 border-green-500'
-      return 'bg-blue-500 border-blue-500'
+      if (currentStep <= Math.ceil(totalSteps * 0.25)) return 'bg-lime-500 border-lime-500'
+      if (currentStep <= Math.ceil(totalSteps * 0.5)) return 'bg-emerald-500 border-emerald-500'
+      if (currentStep <= Math.ceil(totalSteps * 0.75)) return 'bg-[#052e16] border-[#052e16]'
+      return 'bg-[#022c22] border-[#022c22]'
     } else if (stepIndex === currentStep - 1) {
       // Current step
-      if (currentStep <= Math.ceil(totalSteps * 0.25)) return 'bg-red-500 border-red-500'
-      if (currentStep <= Math.ceil(totalSteps * 0.5)) return 'bg-yellow-500 border-yellow-500'
-      if (currentStep <= Math.ceil(totalSteps * 0.75)) return 'bg-green-500 border-green-500'
-      return 'bg-blue-500 border-blue-500'
+      if (currentStep <= Math.ceil(totalSteps * 0.25)) return 'bg-lime-500 border-lime-500'
+      if (currentStep <= Math.ceil(totalSteps * 0.5)) return 'bg-emerald-500 border-emerald-500'
+      if (currentStep <= Math.ceil(totalSteps * 0.75)) return 'bg-[#052e16] border-[#052e16]'
+      return 'bg-[#022c22] border-[#022c22]'
     }
     return 'bg-gray-200 border-gray-300'
   }

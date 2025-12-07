@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { Camera, User, Building, Phone, Mail, FileText, ArrowLeft, Check } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import ApiService from '../services/api'
+import showToast from '../utils/toast'
 import ProgressBar from '../components/ProgressBar'
+import HostSelector from '../components/HostSelector'
 
 const WalkInForm = () => {
   const navigate = useNavigate()
@@ -27,6 +29,7 @@ const WalkInForm = () => {
     phone: '',
     company: '',
     host: '',
+    host_id: '',
     purpose: '',
     photo: '',
     signature: '',
@@ -166,6 +169,9 @@ const WalkInForm = () => {
         isPreRegistered: false
       })
       
+      // Show success toast
+      showToast(`${formData.name} checked in successfully!`, 'success');
+      
       // Notify host
       if (formData.host) {
         await ApiService.notifyHost(response.id, `${formData.name} has checked in`)
@@ -211,7 +217,7 @@ const WalkInForm = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Personal Information
             </h2>
             
@@ -222,7 +228,7 @@ const WalkInForm = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="input-field"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="Enter your full name"
                   required
                 />
@@ -234,7 +240,7 @@ const WalkInForm = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="input-field"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="your.email@company.com"
                 />
               </div>
@@ -245,7 +251,7 @@ const WalkInForm = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="input-field"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
@@ -256,7 +262,7 @@ const WalkInForm = () => {
                   type="text"
                   value={formData.company}
                   onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-                  className="input-field"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="Your company name"
                 />
               </div>
@@ -274,34 +280,31 @@ const WalkInForm = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Visit Details
             </h2>
             
             <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-2 font-medium">Who are you visiting? *</label>
-                <select
-                  value={formData.host}
-                  onChange={(e) => setFormData(prev => ({ ...prev, host: e.target.value }))}
-                  className="select-field"
-                  required
-                >
-                  <option value="">Select your host</option>
-                  {hosts.map(host => (
-                    <option key={host.id} value={host.name}>
-                      {host.name} - {host.company} (Office {host.office_number})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <HostSelector
+                hosts={hosts}
+                value={formData.host_id}
+                onChange={(hostId) => {
+                  const selectedHost = hosts.find(h => h.id === hostId)
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    host_id: hostId,
+                    host: selectedHost?.name || ''
+                  }))
+                }}
+                label="Who are you visiting?"
+              />
               
               <div>
                 <label className="block text-gray-700 mb-2 font-medium">Purpose of Visit *</label>
                 <select
                   value={formData.purpose}
                   onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
-                  className="select-field"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
                   required
                 >
                   <option value="">Select purpose</option>
@@ -327,14 +330,14 @@ const WalkInForm = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Photo Capture
             </h2>
             
             <div className="text-center space-y-6">
               {!cameraActive && !photoTaken && (
                 <div className="text-center space-y-4">
-                  <div className="w-32 h-32 mx-auto bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center">
+                  <div className="w-32 h-32 mx-auto bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-center">
                     <Camera className="h-16 w-16 text-gray-400" />
                   </div>
                   
@@ -352,11 +355,11 @@ const WalkInForm = () => {
                   )}
                   
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={startCamera}
                     disabled={cameraLoading}
-                    className={`btn-primary mx-auto flex items-center space-x-2 ${cameraLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full max-w-xs mx-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10 flex items-center justify-center space-x-2 ${cameraLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {cameraLoading ? (
                       <>
@@ -366,7 +369,7 @@ const WalkInForm = () => {
                     ) : (
                       <>
                         <Camera className="h-5 w-5" />
-                        <span>📷 Start Camera & Take Photo</span>
+                        <span>Start Camera & Take Photo</span>
                       </>
                     )}
                   </motion.button>
@@ -399,7 +402,7 @@ const WalkInForm = () => {
                       ref={videoRef}
                       autoPlay
                       playsInline
-                      className="w-full max-w-lg mx-auto rounded-xl border-2 border-blue-300 shadow-lg"
+                      className="w-full max-w-lg mx-auto rounded-xl border-4 border-blue-500 shadow-lg"
                     />
                     {/* Camera overlay with instructions */}
                     <div className="absolute inset-0 pointer-events-none">
@@ -407,7 +410,7 @@ const WalkInForm = () => {
                         📷 Position your face in the center
                       </div>
                       {/* Face detection guide */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-blue-400 rounded-full opacity-50"></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-4 border-blue-400 rounded-full opacity-50"></div>
                       
                       {/* Countdown overlay */}
                       {countdown > 0 && (
@@ -418,27 +421,27 @@ const WalkInForm = () => {
                         </div>
                       )}
                       
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500/80 text-white px-3 py-1 rounded-full text-xs animate-pulse">
+                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-500/80 text-white px-3 py-1 rounded-full text-xs animate-pulse">
                         🟢 Camera Active - Ready to capture
                       </div>
                     </div>
                   </div>
                   <div className="flex justify-center space-x-4">
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={takePhoto}
-                      className="btn-primary flex items-center space-x-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-900/10 flex items-center space-x-2"
                       disabled={countdown > 0}
                     >
                       <Camera className="h-5 w-5" />
-                      <span>📸 Capture Now</span>
+                      <span>Capture Now</span>
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={startCountdown}
-                      className="btn-secondary flex items-center space-x-2"
+                      className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2"
                       disabled={countdown > 0}
                     >
                       <span>⏱️</span>
@@ -457,20 +460,20 @@ const WalkInForm = () => {
                     <img
                       src={formData.photo}
                       alt="Visitor photo"
-                      className="w-full max-w-lg mx-auto rounded-xl border-2 border-green-400 shadow-lg"
+                      className="w-full max-w-lg mx-auto rounded-xl border-4 border-blue-500 shadow-lg"
                     />
-                    <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm flex items-center space-x-1">
+                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center space-x-1">
                       <span>✅</span>
                       <span>Photo Captured</span>
                     </div>
                   </div>
                   <div className="text-center space-y-3">
-                    <p className="text-green-600 font-medium">📸 Photo successfully captured!</p>
+                    <p className="text-blue-600 font-medium">📸 Photo successfully captured!</p>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={retakePhoto}
-                      className="btn-secondary"
+                      className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200"
                     >
                       🔄 Retake Photo
                     </motion.button>
@@ -493,7 +496,7 @@ const WalkInForm = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Digital Signature
             </h2>
             
@@ -502,14 +505,14 @@ const WalkInForm = () => {
                 Please sign below to confirm your information is accurate:
               </p>
               
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
                 <SignatureCanvas
                   ref={signatureRef}
                   penColor="black"
                   canvasProps={{
                     width: 500,
                     height: 200,
-                    className: 'signature-canvas w-full'
+                    className: 'signature-canvas w-full bg-gray-50 rounded-lg border border-gray-100'
                   }}
                   onEnd={saveSignature}
                 />
@@ -517,10 +520,10 @@ const WalkInForm = () => {
               
               <div className="flex justify-center space-x-4">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={clearSignature}
-                  className="btn-secondary"
+                  className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200"
                 >
                   Clear
                 </motion.button>
@@ -539,12 +542,12 @@ const WalkInForm = () => {
             exit="exit"
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
               Privacy & Consent
             </h2>
             
             <div className="space-y-6">
-              <div className="glass rounded-xl p-6 max-h-60 overflow-y-auto">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 max-h-60 overflow-y-auto shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-4">Data Privacy Policy</h3>
                 <div className="text-gray-600 text-sm space-y-2">
                   <p>By checking in, you consent to the collection and processing of your personal data including:</p>
@@ -615,7 +618,8 @@ const WalkInForm = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Sidebar */}
-      <div className="w-1/2 relative overflow-hidden">
+      <div className="w-1/2 relative overflow-hidden hidden lg:block">
+        <div className="absolute inset-0 bg-slate-900/90 z-10"></div>
         <img 
           src="/images/gvasblack.jpg" 
           alt="GVAS Logo" 
@@ -624,13 +628,13 @@ const WalkInForm = () => {
         
         {/* Powered by Hovidastechnologies - Below Logo */}
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center z-20">
-          <div className="text-white text-sm drop-shadow-lg">
+          <div className="text-white/60 text-sm">
             Powered by{' '}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => window.open('https://hovidastechnologies.com', '_blank')}
-              className="text-blue-300 hover:text-blue-200 underline font-semibold transition-colors"
+              className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
             >
               Hovidastechnologies
             </motion.button>
@@ -639,7 +643,7 @@ const WalkInForm = () => {
       </div>
 
       {/* Right Content Area */}
-      <div className="w-1/2 bg-gray-50 flex flex-col">
+      <div className="w-full lg:w-1/2 bg-gray-50 flex flex-col">
         {/* Progress Bar at Top */}
         <ProgressBar 
           currentStep={currentStep} 
@@ -649,32 +653,37 @@ const WalkInForm = () => {
         />
         
         {/* Header */}
-        <div className="bg-white shadow-sm">
+        <div className="bg-white shadow-sm border-b border-gray-100">
           <div className="p-6 flex items-center justify-between">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/desk')}
-              className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors"
+              className="flex items-center space-x-2 text-gray-500 hover:text-blue-900 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Back to Desk</span>
             </motion.button>
             
-            <h2 className="text-xl font-semibold text-gray-800">Walk-In Guest Registration</h2>
+            <div className="flex items-center space-x-3">
+              <div className="lg:hidden">
+                <span className="text-blue-900 font-bold text-xl">GVAS</span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 hidden sm:block">Walk-In Guest Registration</h2>
+            </div>
             
-            <div className="text-gray-500">
+            <div className="text-gray-500 text-sm font-medium">
               {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
           <div className="w-full max-w-2xl">
             <motion.div
               key={currentStep}
-              className="bg-white rounded-xl shadow-lg p-8"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
@@ -685,15 +694,15 @@ const WalkInForm = () => {
         </div>
 
         {/* Navigation */}
-        <div className="bg-white border-t p-6 flex justify-between">
+        <div className="bg-white border-t border-gray-100 p-6 flex justify-between">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={prevStep}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            className={`px-6 py-3 rounded-xl font-medium transition-colors ${
               currentStep === 1 
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
             }`}
             disabled={currentStep === 1}
           >
@@ -702,12 +711,12 @@ const WalkInForm = () => {
           
           {currentStep < 5 ? (
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={nextStep}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              className={`px-6 py-3 rounded-xl font-medium transition-colors shadow-lg shadow-blue-900/10 ${
                 !canProceed() 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' 
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
               disabled={!canProceed()}
@@ -716,13 +725,13 @@ const WalkInForm = () => {
             </motion.button>
           ) : (
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              className={`px-6 py-3 rounded-xl font-medium transition-colors shadow-lg shadow-blue-900/10 ${
                 !canProceed() || loading 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-green-600 text-white hover:bg-green-700'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
               disabled={!canProceed() || loading}
             >
