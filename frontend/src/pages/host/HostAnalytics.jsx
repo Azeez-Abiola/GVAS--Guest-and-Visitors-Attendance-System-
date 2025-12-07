@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Card, Title, Text, Metric, Grid } from '@tremor/react';
+import { Users, Clock, CheckCircle, LogOut, BadgeCheck, Calendar } from 'lucide-react';
 import ApiService from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -44,27 +43,44 @@ const HostAnalytics = () => {
   };
 
   const statCards = [
-    { label: 'Total Visitors', value: stats.totalVisitors },
-    { label: 'Pending Approvals', value: stats.pendingApprovals },
-    { label: 'Checked In', value: stats.checkedIn },
-    { label: 'Checked Out', value: stats.checkedOut },
-    { label: 'Badges Assigned', value: stats.badgesAssigned },
-    { label: 'Upcoming Visits', value: stats.upcomingVisits },
+    { label: 'Total Visitors', value: stats.totalVisitors, icon: Users, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'Pending Approvals', value: stats.pendingApprovals, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { label: 'Checked In', value: stats.checkedIn, icon: CheckCircle, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Checked Out', value: stats.checkedOut, icon: LogOut, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800' },
+    { label: 'Badges Assigned', value: stats.badgesAssigned, icon: BadgeCheck, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+    { label: 'Upcoming Visits', value: stats.upcomingVisits, icon: Calendar, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/20' },
   ];
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Title>Host Analytics</Title>
-        <Text className="mb-4">Overview of your visitor and badge activity</Text>
-        <Grid numItems={3} className="gap-6">
-          {statCards.map((stat) => (
-            <Card key={stat.label} className="p-6 flex flex-col items-center justify-center">
-              <Metric className="text-3xl font-bold mb-2">{loading ? '...' : stat.value}</Metric>
-              <Text className="text-lg text-gray-700">{stat.label}</Text>
-            </Card>
-          ))}
-        </Grid>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Host Analytics</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of your visitor and badge activity</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {statCards.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div key={stat.label} className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex items-start justify-between hover:shadow-md transition-all">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {loading ? (
+                      <span className="w-8 h-8 rounded bg-gray-200 dark:bg-slate-700 animate-pulse inline-block" />
+                    ) : (
+                      stat.value
+                    )}
+                  </p>
+                </div>
+                <div className={`p-3 rounded-lg ${stat.bg}`}>
+                  <Icon size={24} className={stat.color} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </DashboardLayout>
   );

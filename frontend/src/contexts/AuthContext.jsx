@@ -21,15 +21,26 @@ export const AuthProvider = ({ children }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event)
-      
+
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('User signed in:', session.user.email)
-        
-        // Always fetch fresh profile on sign in
-        setUser(session.user)
-        setLoading(true)
-        await fetchUserProfile(session.user.id, session.user)
-        setLoading(false)
+
+        // PREVENT UNNECESSARY REFRESH: Only fetch if user changed or profile is missing
+        setUser(prevUser => {
+          if (prevUser?.id === session.user.id) {
+            console.log('User already loaded, skipping profile fetch for token refresh');
+            return prevUser;
+          }
+
+          // New user or initial load
+          setTimeout(async () => {
+            setLoading(true)
+            await fetchUserProfile(session.user.id, session.user)
+            setLoading(false)
+          }, 0);
+          return session.user;
+        })
+
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out')
         setUser(null)
@@ -45,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Checking for existing session...')
       const { data: { session }, error } = await supabase.auth.getSession()
-      
+
       if (error) {
         console.error('Session check error:', error)
         setUser(null)
@@ -53,7 +64,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false)
         return
       }
-      
+
       if (session?.user) {
         console.log('Session found:', session.user.email)
         setUser(session.user)
@@ -75,10 +86,10 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = async (userId, sessionUser = null) => {
     try {
       console.log('Fetching profile for user:', userId)
-      
+
       // Use session user if provided, otherwise fall back to state user
       const currentUser = sessionUser || user
-      
+
       if (!currentUser?.email) {
         console.log('No current user email, using basic profile')
         const basicProfile = {
@@ -91,110 +102,103 @@ export const AuthProvider = ({ children }) => {
         setProfile(basicProfile)
         return basicProfile
       }
-      
+
       // FETCH THE ACTUAL PROFILE FROM DATABASE
       console.log('🔍 Querying database for user profile...')
       console.log('User ID:', userId)
       console.log('User email:', currentUser.email)
-      
+
       // Query with race condition timeout
-      const timeoutMs = 3000 // 3 seconds
-      
+      const timeoutMs = 10000 // Increased to 10 seconds to prevent premature timeouts
+
       const queryPromise = supabase
         .from('users')
         .select('*')
         .eq('id', userId)
         .single()
-      
-      const timeoutPromise = new Promise((resolve) => 
+
+      const timeoutPromise = new Promise((resolve) =>
         setTimeout(() => resolve({ data: null, error: { message: 'timeout' } }), timeoutMs)
       )
-      
+
       const { data: dbProfile, error: profileError } = await Promise.race([
         queryPromise,
         timeoutPromise
       ])
-      
-      console.log('🔍 Query result:', { 
-        hasData: !!dbProfile, 
+
+      console.log('🔍 Query result:', {
+        hasData: !!dbProfile,
         hasError: !!profileError,
-        errorMessage: profileError?.message,
-        profileData: dbProfile,
-        rawAssignedFloors: dbProfile?.assigned_floors,
-        assignedFloorsType: typeof dbProfile?.assigned_floors,
-        assignedFloorsIsArray: Array.isArray(dbProfile?.assigned_floors),
-        assignedFloorsStringified: JSON.stringify(dbProfile?.assigned_floors)
+        errorMessage: profileError?.message
       })
-      
+
       if (profileError) {
         if (profileError.message === 'timeout') {
           console.error('❌ Query timed out after', timeoutMs, 'ms')
-          console.error('⚠️ RLS POLICY ISSUE DETECTED!')
-          console.error('Please run this SQL in Supabase SQL Editor:')
-          console.error('ALTER TABLE users DISABLE ROW LEVEL SECURITY;')
         } else {
           console.warn('⚠️ Database profile fetch error:', profileError.message)
-          console.warn('Error code:', profileError.code)
         }
       }
-      
+
       if (dbProfile) {
         console.log('✅ Database profile found:', {
           role: dbProfile.role,
-          assigned_floors: dbProfile.assigned_floors,
-          assigned_floors_type: typeof dbProfile.assigned_floors,
           email: dbProfile.email
         })
-        
+
         // Parse assigned_floors if it's a string
         if (dbProfile.assigned_floors && typeof dbProfile.assigned_floors === 'string') {
           try {
             dbProfile.assigned_floors = JSON.parse(dbProfile.assigned_floors)
-            console.log('✅ Parsed assigned_floors from string:', dbProfile.assigned_floors)
           } catch (e) {
             console.error('❌ Failed to parse assigned_floors:', e)
           }
         }
-        
+
         setProfile(dbProfile)
         return dbProfile
       }
-      
+
       console.log('⚠️ No profile in database, creating fallback profile')
-      
-      // Fallback: Determine role from email if not in database
+
+      // Fallback: Determine role from user_metadata FIRST, then email
       let role = 'reception' // default
-      if (currentUser.email.includes('admin')) role = 'admin'
-      else if (currentUser.email.includes('security')) role = 'security'
-      else if (currentUser.email.includes('host')) role = 'host'
-      
-      console.log('Using email-based role detection:', role, 'for', currentUser.email)
-      
+
+      if (currentUser.user_metadata?.role) {
+        role = currentUser.user_metadata.role;
+        console.log('Using role from user_metadata:', role);
+      } else if (currentUser.email.includes('admin')) {
+        role = 'admin';
+      } else if (currentUser.email.includes('security')) {
+        role = 'security';
+      } else if (currentUser.email.includes('host')) {
+        role = 'host';
+      }
+
+      console.log('Using ultimate fallback role:', role, 'for', currentUser.email)
+
       // For testing: Assign default floors to reception users
       let defaultFloors = []
       if (role === 'reception') {
-        // Assign Ground Floor and 1st Floor as default for testing
         defaultFloors = [0, 1]
-        console.log('⚠️ WARNING: Using default floor assignment for fallback profile:', defaultFloors)
       }
-      
+
       const profile = {
         id: userId,
         email: currentUser.email,
-        full_name: currentUser.email.split('@')[0],
+        full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
         role: role,
         created_at: currentUser.created_at || new Date().toISOString(),
         tenant_id: null,
         assigned_floors: defaultFloors
       }
-      
+
       setProfile(profile)
-      console.log('✅ Fallback profile set successfully:', { role, assigned_floors: defaultFloors })
       return profile
-      
+
     } catch (error) {
       console.error('Error in fetchUserProfile:', error.message)
-      
+
       // Fallback profile
       const basicProfile = {
         id: userId,
@@ -212,7 +216,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true)
       console.log('Attempting login for:', email)
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {
@@ -223,8 +227,8 @@ export const AuthProvider = ({ children }) => {
 
       console.log('Login successful')
       setUser(data.user)
-      
-      const profile = await fetchUserProfile(data.user.id)
+
+      const profile = await fetchUserProfile(data.user.id, data.user)
       console.log('Profile loaded:', profile?.role)
 
       setLoading(false)
@@ -273,14 +277,14 @@ export const AuthProvider = ({ children }) => {
       if (user) return true
       return false
     }
-    
+
     const userRole = profile.role.toLowerCase()
     if (userRole === 'admin') return true
-    
+
     if (Array.isArray(requiredRole)) {
       return requiredRole.map(r => r.toLowerCase()).includes(userRole)
     }
-    
+
     return userRole === requiredRole.toLowerCase()
   }
 
@@ -293,7 +297,7 @@ export const AuthProvider = ({ children }) => {
     const permissions = {
       admin: ['reception', 'badges', 'evacuation', 'approvals', 'blacklist', 'settings', 'users'],
       reception: ['reception', 'badges'],
-  host: ['approvals', 'host-analytics', 'host-badges'],
+      host: ['approvals', 'host-analytics', 'host-badges'],
       security: ['evacuation', 'blacklist']
     }
 

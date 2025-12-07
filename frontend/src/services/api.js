@@ -19,6 +19,13 @@ class ApiService {
     return code;
   }
 
+  // Check if a string is a valid UUID
+  isValidUUID(str) {
+    if (!str || typeof str !== 'string') return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  }
+
   async request(endpoint, options = {}) {
     const url = `${API_BASE}${endpoint}`;
     const config = {
@@ -41,43 +48,65 @@ class ApiService {
     }
   }
 
-  // Hosts - Query users table with role='host'
+  // Hosts - Query hosts table directly (better for public guest registration)
   async getHosts() {
     if (this.useDirectSupabase) {
-      // Query users table for host role, then join with hosts table for floor info
-      const { data: hostUsers, error: usersError } = await supabase
-        .from('users')
-        .select('id, email, full_name, phone, is_active')
-        .eq('role', 'host')
-        .eq('is_active', true)
-        .order('full_name');
-      
-      if (usersError) throw usersError;
-      
-      // Get additional host details from hosts table
-      const { data: hostDetails, error: hostsError } = await supabase
-        .from('hosts')
-        .select('email, floor_number, office_number')
-        .eq('active', true);
-      
-      if (hostsError) throw hostsError;
-      
-      // Merge the data
-      const hosts = hostUsers.map(user => {
-        const details = hostDetails?.find(h => h.email === user.email) || {};
-        return {
-          id: user.id,
-          name: user.full_name,
-          email: user.email,
-          phone: user.phone,
-          floor_number: details.floor_number || null,
-          office_number: details.office_number || '',
-          active: user.is_active,
-          tenant: null // Can be populated if needed
-        };
-      });
-      
-      return hosts;
+      try {
+        // Try fetching from 'hosts' table first (likely has public read access)
+        const { data: hostsData, error: hostsError } = await supabase
+          .from('hosts')
+          .select('*')
+          .eq('active', true)
+          .order('name');
+
+        if (!hostsError && hostsData && hostsData.length > 0) {
+          // Return formatted hosts
+          return hostsData.map(h => ({
+            id: h.id,
+            name: h.name, // 'hosts' table usually has a 'name' column
+            email: h.email,
+            phone: h.phone || '',
+            floor_number: h.floor_number,
+            office_number: h.office_number,
+            active: true
+          }));
+        }
+
+        console.log('Falling back to users table for hosts...');
+
+        // Fallback: Query users table (might fail due to RLS if unauthenticated)
+        const { data: hostUsers, error: usersError } = await supabase
+          .from('users')
+          .select('id, email, full_name, phone, is_active')
+          .eq('role', 'host')
+          .eq('is_active', true)
+          .order('full_name');
+
+        if (usersError) throw usersError;
+
+        // Get additional host details
+        const { data: hostDetails } = await supabase
+          .from('hosts')
+          .select('email, floor_number, office_number')
+          .eq('active', true);
+
+        return hostUsers.map(user => {
+          const details = hostDetails?.find(h => h.email === user.email) || {};
+          return {
+            id: user.id,
+            name: user.full_name,
+            email: user.email,
+            phone: user.phone,
+            floor_number: details.floor_number || null,
+            office_number: details.office_number || '',
+            active: user.is_active,
+            tenant: null
+          };
+        });
+      } catch (error) {
+        console.error('Error fetching hosts:', error);
+        return [];
+      }
     }
     return this.request('/hosts');
   }
@@ -88,7 +117,7 @@ class ApiService {
       .from('tenants')
       .select('*')
       .order('floor_number');
-    
+
     if (error) throw error;
     return data;
   }
@@ -99,11 +128,11 @@ class ApiService {
       .from('badges')
       .select('*')
       .order('badge_number');
-    
+
     if (status) {
       query = query.eq('status', status);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return data;
@@ -134,7 +163,7 @@ class ApiService {
       }
       if (filters.date) {
         query = query.gte('created_at', `${filters.date}T00:00:00`)
-                     .lte('created_at', `${filters.date}T23:59:59`);
+          .lte('created_at', `${filters.date}T23:59:59`);
       }
 
       const { data, error } = await query;
@@ -158,7 +187,7 @@ class ApiService {
         `)
         .or(`visitor_id.eq.${id},guest_code.eq.${id}`)
         .maybeSingle(); // Use maybeSingle() instead of single() to handle "not found" gracefully
-      
+
       if (error) throw error;
       return data;
     }
@@ -177,7 +206,7 @@ class ApiService {
         `)
         .eq('id', uuid)
         .maybeSingle();
-      
+
       if (error) throw error;
       return data;
     }
@@ -188,32 +217,40 @@ class ApiService {
     if (this.useDirectSupabase) {
       // Fetch host details to populate required fields
       let visitorData = { ...data };
-      
+
       if (data.host_id) {
         console.log('Looking up host with ID:', data.host_id);
-        
+
         const { data: host, error: hostError } = await supabase
           .from('hosts')
           .select('tenant_id, name')
           .eq('id', data.host_id)
           .single();
-        
+
         console.log('Host lookup result:', { host, hostError });
-        
+
         if (hostError || !host) {
           console.error('Failed to fetch host details:', hostError);
           throw new Error(`Invalid host selected or host not found: ${hostError?.message || 'Host not found'}`);
         }
-        
+
         // Populate all required fields from host
-        visitorData.tenant_id = host.tenant_id;
-        visitorData.host_name = host.name;
-        
+        // Only use host's tenant_id if it's a valid UUID
+        if (host.tenant_id && this.isValidUUID(host.tenant_id)) {
+          visitorData.tenant_id = host.tenant_id;
+        } else if (visitorData.tenant_id && this.isValidUUID(visitorData.tenant_id)) {
+          // Keep existing if valid
+        } else {
+          // Don't include tenant_id if no valid UUID available
+          delete visitorData.tenant_id;
+        }
+        visitorData.host_name = host.name || visitorData.host_name;
+
         console.log('Populated visitor data:', { tenant_id: visitorData.tenant_id, host_name: visitorData.host_name });
       } else {
         throw new Error('host_id is required');
       }
-      
+
       // Generate visitor_id if not provided
       if (!visitorData.visitor_id) {
         visitorData.visitor_id = `VIS-${Date.now()}`;
@@ -228,34 +265,34 @@ class ApiService {
       if (!visitorData.qr_code) {
         visitorData.qr_code = visitorData.guest_code; // QR code contains the guest code
       }
-      
+
       // Set default status if not provided
       if (!visitorData.status) {
         visitorData.status = 'pending'; // Valid values: pending, pre-registered, checked-in, checked-out, cancelled
       }
-      
+
       console.log('Final visitor data before insert:', visitorData);
-      
-      // Ensure all required fields are present
-      const requiredFields = ['name', 'email', 'phone', 'host_id', 'host_name', 'tenant_id', 'visitor_id', 'purpose'];
+
+      // Ensure all required fields are present (tenant_id is now optional)
+      const requiredFields = ['name', 'email', 'phone', 'host_id', 'host_name', 'visitor_id', 'purpose'];
       const missingFields = requiredFields.filter(field => !visitorData[field]);
-      
+
       if (missingFields.length > 0) {
         console.error('Missing fields:', missingFields);
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
-      
+
       const { data: visitor, error } = await supabase
         .from('visitors')
         .insert([visitorData])
         .select()
         .single();
-      
+
       if (error) {
         console.error('Database insert error:', error);
         throw error;
       }
-      
+
       console.log('Visitor created successfully:', visitor);
       return visitor;
     }
@@ -273,7 +310,7 @@ class ApiService {
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     }
@@ -322,14 +359,14 @@ class ApiService {
       // Update visitor status to checked-in
       const { data, error } = await supabase
         .from('visitors')
-        .update({ 
+        .update({
           status: 'checked_in',
           check_in_time: new Date().toISOString()
         })
         .eq('id', visitorId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     }
@@ -350,14 +387,14 @@ class ApiService {
       // Update visitor status to checked-out
       const { data, error } = await supabase
         .from('visitors')
-        .update({ 
+        .update({
           status: 'checked_out',
           check_out_time: new Date().toISOString()
         })
         .eq('id', visitorId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     }
@@ -376,7 +413,7 @@ class ApiService {
       .limit(1);
 
     if (fetchError) throw fetchError;
-    
+
     if (!availableBadges || availableBadges.length === 0) {
       throw new Error(`No available ${badgeType} badges. Please add more badges to inventory.`);
     }
@@ -512,8 +549,8 @@ class ApiService {
   subscribeToVisitors(callback) {
     return supabase
       .channel('visitors-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'visitors' }, 
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'visitors' },
         callback
       )
       .subscribe();
@@ -522,8 +559,8 @@ class ApiService {
   subscribeToBadges(callback) {
     return supabase
       .channel('badges-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'badges' }, 
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'badges' },
         callback
       )
       .subscribe();
@@ -532,8 +569,8 @@ class ApiService {
   subscribeToNotifications(callback) {
     return supabase
       .channel('notifications-changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'notifications' }, 
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications' },
         callback
       )
       .subscribe();
@@ -547,7 +584,7 @@ class ApiService {
       .select('*')
       .eq('status', 'checked_in')
       .order('floor_number', { ascending: true });
-    
+
     if (error) throw error;
     return data;
   }
@@ -559,7 +596,7 @@ class ApiService {
       .select('*')
       .eq('active', true)
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data;
   }
@@ -576,7 +613,7 @@ class ApiService {
       })
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -588,7 +625,7 @@ class ApiService {
       .eq('active', true)
       .or(`email.eq.${email},phone.eq.${phone}`)
       .limit(1);
-    
+
     if (error) throw error;
     return data.length > 0 ? data[0] : null;
   }
@@ -601,7 +638,7 @@ class ApiService {
         p_visitor_id: visitorId,
         p_notes: notes
       });
-    
+
     if (error) throw error;
     return data;
   }
@@ -632,11 +669,11 @@ class ApiService {
       `)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
-    
+
     if (hostId) {
       query = query.eq('host_id', hostId);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return data;
@@ -648,7 +685,7 @@ class ApiService {
         p_approval_id: approvalId,
         p_notes: notes
       });
-    
+
     if (error) throw error;
     return data;
   }
@@ -664,7 +701,7 @@ class ApiService {
       .eq('id', approvalId)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -710,7 +747,7 @@ class ApiService {
     if (this.useDirectSupabase) {
       // Use Edge Function for user creation (bypasses rate limits and uses admin API)
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (!session) {
         throw new Error('You must be logged in to create users')
       }
@@ -760,7 +797,7 @@ class ApiService {
     if (this.useDirectSupabase) {
       // Use edge function to delete user from both auth and database
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       const response = await fetch(`${this.supabaseUrl}/functions/v1/delete-user/${id}`, {
         method: 'POST',
         headers: {
@@ -770,7 +807,7 @@ class ApiService {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to delete user');
       }

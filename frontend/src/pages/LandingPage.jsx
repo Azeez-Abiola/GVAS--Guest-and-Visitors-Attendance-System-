@@ -18,12 +18,16 @@ import {
   X,
   PlayCircle,
   Star,
-  Quote
+  Quote,
+  Sun,
+  Moon
 } from 'lucide-react'
 import GvasLogo from '../components/GvasLogo'
+import { useTheme } from '../contexts/ThemeContext'
 
 const LandingPage = () => {
   const navigate = useNavigate()
+  const { theme, toggleTheme } = useTheme()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Animation variants
@@ -57,15 +61,15 @@ const LandingPage = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-white text-[#070f2b] font-sans selection:bg-[#070f2b] selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-[#070f2b] dark:text-white font-sans selection:bg-[#070f2b] selection:text-white dark:selection:bg-white dark:selection:text-[#070f2b] overflow-x-hidden transition-colors duration-300">
 
       {/* Floating Navbar */}
       <div className="fixed top-6 w-full z-50 flex justify-center px-4">
-        <nav className="bg-white/80 backdrop-blur-md border border-[#070f2b]/10 rounded-full px-6 py-3 shadow-sm max-w-5xl w-full flex items-center justify-between">
+        <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-[#070f2b]/10 dark:border-white/10 rounded-full px-6 py-3 shadow-sm max-w-5xl w-full flex items-center justify-between transition-colors duration-300">
           {/* Logo */}
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
-            <GvasLogo className="h-8 w-8 text-[#070f2b]" />
-            <span className="text-xl font-bold tracking-tight text-[#070f2b]">GVAS</span>
+            <GvasLogo className="h-8 w-8 text-[#070f2b] dark:text-white" />
+            <span className="text-xl font-bold tracking-tight text-[#070f2b] dark:text-white">GVAS</span>
           </div>
 
           {/* Desktop Links */}
@@ -84,14 +88,20 @@ const LandingPage = () => {
           {/* Actions */}
           <div className="hidden lg:flex items-center space-x-3">
             <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full text-[#070f2b] dark:text-white hover:bg-[#070f2b]/5 dark:hover:bg-white/10 transition-colors"
+            >
+              {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
+            </button>
+            <button
               onClick={() => navigate('/login')}
-              className="px-5 py-2 rounded-full text-[#070f2b] font-medium text-sm hover:bg-[#070f2b]/5 transition-colors"
+              className="px-5 py-2 rounded-full text-[#070f2b] dark:text-white font-medium text-sm hover:bg-[#070f2b]/5 dark:hover:bg-white/10 transition-colors"
             >
               Log In
             </button>
             <button
               onClick={() => navigate('/guest-register')}
-              className="px-5 py-2 rounded-full bg-[#070f2b] text-white font-semibold text-sm hover:bg-[#070f2b]/90 transition-all shadow-md"
+              className="px-5 py-2 rounded-full bg-[#070f2b] dark:bg-white text-white dark:text-[#070f2b] font-semibold text-sm hover:bg-[#070f2b]/90 dark:hover:bg-white/90 transition-all shadow-md"
             >
               Get Started
             </button>
@@ -147,7 +157,7 @@ const LandingPage = () => {
       </AnimatePresence>
 
       {/* Hero Section */}
-      <section className="relative pt-48 pb-20 overflow-hidden">
+      <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-16 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center">
 
           {/* Badge */}
@@ -155,7 +165,7 @@ const LandingPage = () => {
             variants={fadeIn}
             initial="initial"
             animate="animate"
-            className="inline-flex items-center space-x-2 bg-[#070f2b]/5 rounded-full px-1 py-1 pr-4 mb-8"
+            className="inline-flex items-center space-x-2 bg-[#070f2b]/5 rounded-full px-1 py-1 pr-4 mb-6"
           >
             <span className="bg-[#070f2b] text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
               New
@@ -170,7 +180,7 @@ const LandingPage = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold text-[#070f2b] mb-8 leading-[1.1] tracking-tight max-w-5xl mx-auto"
+            className="text-4xl md:text-7xl font-bold text-[#070f2b] mb-6 leading-[1.1] tracking-tight max-w-5xl mx-auto"
           >
             Streamline Visitor Access with <br />
             <span className="relative whitespace-nowrap">
@@ -183,7 +193,7 @@ const LandingPage = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-lg md:text-xl text-[#070f2b]/70 mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-[#070f2b]/70 mb-8 max-w-2xl mx-auto leading-relaxed px-4"
           >
             Professional visitor management that enhances security, impresses guests, and automates compliance. Trusted by industry leaders.
           </motion.p>
@@ -193,11 +203,11 @@ const LandingPage = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-24"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 lg:mb-12"
           >
             <button
               onClick={() => navigate('/guest-register')}
-              className="group min-w-[180px] px-8 py-4 rounded-full bg-[#070f2b] text-white font-semibold text-lg hover:bg-[#070f2b]/90 transition-all shadow-xl shadow-[#070f2b]/20"
+              className="group w-full sm:w-auto min-w-[180px] px-8 py-4 rounded-full bg-[#070f2b] text-white font-semibold text-lg hover:bg-[#070f2b]/90 transition-all shadow-xl shadow-[#070f2b]/20"
             >
               <span className="flex items-center justify-center space-x-2">
                 <span>Start Free Trial</span>
@@ -205,7 +215,7 @@ const LandingPage = () => {
               </span>
             </button>
             <button
-              className="group min-w-[180px] px-8 py-4 rounded-full bg-white border border-[#070f2b]/20 text-[#070f2b] font-semibold text-lg hover:bg-[#070f2b]/5 transition-all"
+              className="group w-full sm:w-auto min-w-[180px] px-8 py-4 rounded-full bg-white border border-[#070f2b]/20 text-[#070f2b] font-semibold text-lg hover:bg-[#070f2b]/5 transition-all"
             >
               Book a Demo
             </button>
@@ -216,23 +226,23 @@ const LandingPage = () => {
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative mx-auto max-w-7xl px-4"
+            className="relative mx-auto max-w-7xl px-0 sm:px-4"
           >
             <div className="relative">
               {/* Desktop Dashboard Image */}
-              <div className="relative z-10 bg-white rounded-2xl shadow-2xl border border-[#070f2b]/10 overflow-hidden transform md:-translate-x-10">
+              <div className="relative z-10 bg-white rounded-none sm:rounded-xl md:rounded-2xl shadow-2xl border border-[#070f2b]/10 overflow-hidden transform md:-translate-x-4">
                 <img
                   src="/images/dashboard-hero-real.jpg"
                   alt="GVAS Desktop Dashboard"
-                  className="w-full h-auto object-cover"
+                  className="w-full h-auto object-cover scale-100 md:scale-100"
                 />
               </div>
 
               {/* Mobile Dashboard Image - Positioned Absolute */}
-              <div className="hidden md:block absolute -right-4 -bottom-12 z-20 w-[280px] rounded-[2.5rem] bg-[#070f2b] p-2 shadow-2xl transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500 hover:z-30 hover:scale-105 border-[6px] border-[#070f2b]">
+              <div className="hidden md:block absolute -right-8 -bottom-8 z-20 w-[240px] lg:w-[280px] rounded-[2.5rem] bg-[#070f2b] p-2 shadow-2xl transform rotate-[-3deg] hover:rotate-0 transition-transform duration-500 hover:z-30 hover:scale-105 border-[6px] border-[#070f2b]">
                 <div className="rounded-[2rem] overflow-hidden bg-white h-full relative">
                   {/* Notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#070f2b] rounded-b-xl z-10"></div>
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#070f2b] rounded-b-lg z-10"></div>
                   <img
                     src="/images/dashboard-mobile.jpg"
                     alt="GVAS Mobile App"
@@ -243,7 +253,7 @@ const LandingPage = () => {
             </div>
 
             {/* Background Decorations */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#070f2b]/5 blur-[100px] -z-10 rounded-full"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#070f2b]/5 blur-[80px] -z-10 rounded-full"></div>
           </motion.div>
 
         </div>

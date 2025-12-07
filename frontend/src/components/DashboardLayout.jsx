@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
+import ApiService from '../services/api'
 import {
   LayoutDashboard,
   UserCheck,
@@ -19,7 +21,9 @@ import {
   ShieldAlert,
   Bell,
   User,
-  TrendingUp
+  TrendingUp,
+  Sun,
+  Moon
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GvasLogo from './GvasLogo'
@@ -30,36 +34,115 @@ const DashboardLayout = ({ children }) => {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const { profile, signOut, canAccess } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Sample notifications (this would come from API in real implementation)
-  const notifications = [
-    {
-      id: 1,
-      type: 'visitor',
-      title: 'New Visitor Check-In',
-      message: 'John Doe has checked in to visit Engineering floor',
-      time: '2 minutes ago',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'badge',
-      title: 'Badge Not Returned',
-      message: 'Badge #VB-1234 not returned by Sarah Wilson',
-      time: '15 minutes ago',
-      read: false
-    },
-    {
-      id: 3,
-      type: 'approval',
-      title: 'Visitor Pre-Registration',
-      message: 'New visitor registration awaiting approval',
-      time: '1 hour ago',
-      read: true
+  // State for notifications
+  const [notifications, setNotifications] = useState([])
+
+  useEffect(() => {
+    if (!profile) return
+
+    console.log('🔌 Subscribing to real-time visitor updates for:', profile.email)
+
+    // Subscribe to real-time visitor updates
+    const subscription = ApiService.subscribeToVisitors((payload) => {
+      console.log('🔔 Real-time event received:', payload)
+
+      const newVisitor = payload.new
+      if (!newVisitor) return
+
+      let shouldNotify = false
+      let message = ''
+      let title = ''
+      let type = 'visitor'
+
+      // 1. Host Notification
+      if (profile.role === 'host' && newVisitor.host_id === profile.id) {
+        if (payload.eventType === 'INSERT') {
+          // Distinguish walk-in vs pre-registration
+          const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
+          shouldNotify = true
+
+          if (isWalkIn) {
+            type = 'walk_in'
+            title = '🚶 Walk-in Visitor Arrived'
+            message = `${newVisitor.name} (walk-in) has checked in to see you.`
+          } else {
+            type = 'pre_registered'
+            title = '📅 New Guest Pre-registered'
+            message = `${newVisitor.name} is scheduled to visit. Guest Code: ${newVisitor.guest_code || 'N/A'}`
+          }
+        } else if (payload.eventType === 'UPDATE' && newVisitor.status === 'checked_in') {
+          // Pre-registered guest has now arrived
+          shouldNotify = true
+          type = 'arrival'
+          title = '✅ Guest Arrived'
+          message = `${newVisitor.name} (pre-registered) has arrived and checked in.`
+        }
+      }
+
+      // 2. Reception Notification
+      if (profile.role === 'reception') {
+        // Check if relevant floor (if assigned_floors exists)
+        if (payload.eventType === 'INSERT') {
+          const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
+          shouldNotify = true
+
+          if (isWalkIn) {
+            type = 'walk_in'
+            title = '🚶 Walk-in Check-in'
+            message = `${newVisitor.name} (${newVisitor.company || 'Guest'}) - Walk-in for ${newVisitor.host_name || 'Host'} on Floor ${newVisitor.floor_number || 'N/A'}`
+          } else {
+            type = 'pre_registered'
+            title = '📅 New Pre-registration'
+            message = `${newVisitor.name} (${newVisitor.company || 'Guest'}) scheduled for ${newVisitor.host_name || 'Host'} on Floor ${newVisitor.floor_number || 'N/A'}`
+          }
+        } else if (payload.eventType === 'UPDATE' && newVisitor.status === 'checked_in') {
+          // This is a pre-registered guest checking in
+          if (newVisitor.guest_code) {
+            shouldNotify = true
+            type = 'arrival'
+            title = '✅ Pre-registered Guest Checked In'
+            message = `${newVisitor.name} (Code: ${newVisitor.guest_code}) has completed check-in.`
+          }
+        }
+      }
+
+      // 3. Security/Admin Notification (Mock for now)
+      if ((profile.role === 'security' || profile.role === 'admin') && newVisitor.is_blacklisted) {
+        shouldNotify = true
+        type = 'security'
+        title = 'Security Alert'
+        message = `Blacklisted individual attempting access: ${newVisitor.name}`
+      }
+
+      if (shouldNotify && title) {
+        const newNotif = {
+          id: Date.now(),
+          type,
+          title,
+          message,
+          time: 'Just now',
+          read: false,
+          guestCode: newVisitor.guest_code
+        }
+
+        setNotifications(prev => [newNotif, ...prev])
+
+        // Play a subtle notification sound if possible
+        try {
+          const audio = new Audio('/notification.mp3') // Placeholder, won't play if missing but safe
+          audio.play().catch(e => console.log('Audio play failed', e))
+        } catch (e) { }
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
     }
-  ]
+  }, [profile])
 
   const unreadCount = notifications.filter(n => !n.read).length
 
@@ -84,9 +167,9 @@ const DashboardLayout = ({ children }) => {
     } else if (profile?.role === 'reception') {
       items.push({ name: 'Reception', path: '/reception', icon: UserCheck, feature: 'reception' })
     } else if (profile?.role === 'host') {
-  items.push({ name: 'Approvals', path: '/approvals', icon: Users, feature: 'approvals' })
-  items.push({ name: 'Host Analytics', path: '/host/host-analytics', icon: TrendingUp, feature: 'host-analytics' })
-  items.push({ name: 'Badge Management', path: '/host/badge-management', icon: Badge, feature: 'host-badges' })
+      items.push({ name: 'Approvals', path: '/approvals', icon: Users, feature: 'approvals' })
+      items.push({ name: 'Host Analytics', path: '/host/host-analytics', icon: TrendingUp, feature: 'host-analytics' })
+      items.push({ name: 'Badge Management', path: '/host/badge-management', icon: Badge, feature: 'host-badges' })
     } else if (profile?.role === 'security') {
       items.push({ name: 'Security', path: '/security', icon: Shield, feature: 'security' })
     }
@@ -130,7 +213,7 @@ const DashboardLayout = ({ children }) => {
     }
 
     // Remove duplicates based on path
-    return items.filter((item, index, self) => 
+    return items.filter((item, index, self) =>
       index === self.findIndex((t) => t.path === item.path)
     )
   }
@@ -140,18 +223,26 @@ const DashboardLayout = ({ children }) => {
   const isActive = (path) => location.pathname === path
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <GvasLogo className="h-8" />
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+        <GvasLogo className="h-8 dark:text-white" />
         <div className="flex items-center gap-2">
+          {/* Theme Toggle - Mobile */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-slate-600" />}
+          </button>
+
           {/* Notification Icon - Mobile */}
           <div className="relative">
             <button
               onClick={() => setNotificationOpen(!notificationOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 relative"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 relative"
             >
-              <Bell size={20} className="text-gray-700" />
+              <Bell size={20} className="text-gray-700 dark:text-gray-300" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
                   {unreadCount}
@@ -161,7 +252,7 @@ const DashboardLayout = ({ children }) => {
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 dark:text-gray-300"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -230,15 +321,15 @@ const DashboardLayout = ({ children }) => {
             {navigationItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.path)
-              
+
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`
                     flex items-center gap-3 px-3 py-3 rounded-xl transition-all relative group
-                    ${active 
-                      ? 'text-white font-medium' 
+                    ${active
+                      ? 'text-white font-medium'
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }
                   `}
@@ -307,7 +398,7 @@ const DashboardLayout = ({ children }) => {
               onClick={() => setMobileMenuOpen(false)}
               className="lg:hidden fixed inset-0 bg-black/50 z-40"
             />
-            
+
             {/* Mobile Sidebar */}
             <motion.aside
               initial={{ x: -280 }}
@@ -342,7 +433,7 @@ const DashboardLayout = ({ children }) => {
                   {navigationItems.map((item) => {
                     const Icon = item.icon
                     const active = isActive(item.path)
-                    
+
                     return (
                       <Link
                         key={item.path}
@@ -350,8 +441,8 @@ const DashboardLayout = ({ children }) => {
                         onClick={() => setMobileMenuOpen(false)}
                         className={`
                           flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
-                          ${active 
-                            ? 'bg-blue-50 text-blue-700 font-medium' 
+                          ${active
+                            ? 'bg-blue-50 text-blue-700 font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
                           }
                         `}
@@ -391,7 +482,7 @@ const DashboardLayout = ({ children }) => {
               className="fixed inset-0 bg-black/20 z-40"
               onClick={() => setNotificationOpen(false)}
             />
-            
+
             {/* Notification Panel */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -427,40 +518,55 @@ const DashboardLayout = ({ children }) => {
                     <p className="text-sm">You're all caught up!</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                          !notification.read ? 'bg-blue-50/50' : ''
-                        }`}
-                      >
-                        <div className="flex gap-3">
-                          <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
-                            !notification.read ? 'bg-blue-500' : 'bg-gray-300'
-                          }`} />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-sm mb-1">
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-gray-600 mb-2">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              {notification.time}
-                            </p>
+                  <div className="divide-y divide-gray-100 dark:divide-slate-700">
+                    {notifications.map((notification) => {
+                      // Determine dot color based on notification type
+                      const getDotColor = () => {
+                        switch (notification.type) {
+                          case 'walk_in': return 'bg-orange-500'
+                          case 'pre_registered': return 'bg-blue-500'
+                          case 'arrival': return 'bg-green-500'
+                          case 'security': return 'bg-red-500'
+                          default: return !notification.read ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                        }
+                      }
+
+                      return (
+                        <div
+                          key={notification.id}
+                          className={`p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                            }`}
+                        >
+                          <div className="flex gap-3">
+                            <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${getDotColor()}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 dark:text-white text-sm mb-1">
+                                {notification.title}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                {notification.message}
+                              </p>
+                              {notification.guestCode && (
+                                <p className="text-xs font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded inline-block mb-2">
+                                  Code: {notification.guestCode}
+                                </p>
+                              )}
+                              <p className="text-xs text-gray-400 dark:text-gray-500">
+                                {notification.time}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>
 
               {/* Footer */}
               {notifications.length > 0 && (
-                <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-                  <button className="text-sm text-slate-900 hover:underline font-medium w-full text-center">
+                <div className="p-3 border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 rounded-b-xl">
+                  <button className="text-sm text-slate-900 dark:text-white hover:underline font-medium w-full text-center">
                     Mark all as read
                   </button>
                 </div>
@@ -471,12 +577,49 @@ const DashboardLayout = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main 
+      <main
         className={`
           transition-all duration-300 pt-16 lg:pt-0
           ${sidebarOpen ? 'lg:ml-[280px]' : 'lg:ml-[80px]'}
         `}
       >
+        {/* Desktop Header */}
+        <header className="hidden lg:flex items-center justify-between px-8 py-5 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-30">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back, {profile?.full_name || 'User'}</p>
+          </div>
+          <div className="flex items-center gap-4">
+
+            {/* Theme Toggle - Desktop */}
+            <button
+              onClick={toggleTheme}
+              className="w-12 h-12 rounded-full border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center justify-center transition-all group"
+            >
+              {theme === 'dark' ? (
+                <Sun size={22} className="text-yellow-400" />
+              ) : (
+                <Moon size={22} className="text-slate-600 group-hover:text-slate-900 dark:text-slate-400 dark:group-hover:text-white" />
+              )}
+            </button>
+
+            {/* Styled Notification Icon */}
+            <div className="relative">
+              <button
+                onClick={() => setNotificationOpen(!notificationOpen)}
+                className="w-12 h-12 rounded-full border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center justify-center transition-all group"
+              >
+                <Bell size={22} className="text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 ring-2 ring-white dark:ring-slate-900 text-[10px] font-bold text-white shadow-sm">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        </header>
+
         <div className="p-6">
           {children}
         </div>
@@ -500,25 +643,25 @@ const DashboardLayout = ({ children }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+                  className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
                 >
                   <div className="flex items-center justify-center mb-4">
-                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                      <LogOut size={24} className="text-red-600" />
+                    <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                      <LogOut size={24} className="text-red-600 dark:text-red-400" />
                     </div>
                   </div>
 
-                  <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-2">
                     Confirm Logout
                   </h3>
-                  <p className="text-gray-600 text-center mb-6">
+                  <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
                     Are you sure you want to log out? You will need to sign in again to access your dashboard.
                   </p>
 
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowLogoutModal(false)}
-                      className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                      className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors font-medium"
                     >
                       Cancel
                     </button>

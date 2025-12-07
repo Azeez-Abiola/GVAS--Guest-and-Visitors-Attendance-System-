@@ -57,12 +57,12 @@ const AdminDashboard = () => {
     try {
       const visitorsData = await ApiService.getVisitors({ status: 'all' })
       setVisitors(visitorsData || [])
-      
+
       const today = new Date().toISOString().split('T')[0]
       const todayVisitors = visitorsData.filter(v => v.check_in_time?.startsWith(today))
       const active = visitorsData.filter(v => v.status === 'checked_in')
       const pending = visitorsData.filter(v => v.status === 'pre_registered' || v.status === 'pending_approval')
-      
+
       setStats({
         totalVisitors: visitorsData.length,
         activeVisitors: active.length,
@@ -93,10 +93,10 @@ const AdminDashboard = () => {
   const handleAddVisitor = async () => {
     try {
       await ApiService.createVisitor(newVisitor)
-      
+
       // Show success toast
       showToast(`Visitor ${newVisitor.name} added successfully!`, 'success');
-      
+
       setIsAddVisitorOpen(false)
       setNewVisitor({
         name: '',
@@ -148,9 +148,9 @@ const AdminDashboard = () => {
         host_id: newVisitor.host_id,
         floor_number: floorNumber
       })
-      
+
       showToast(`Visitor ${newVisitor.name} updated successfully!`, 'success');
-      
+
       setIsEditVisitorOpen(false)
       setSelectedVisitor(null)
       setNewVisitor({
@@ -172,8 +172,8 @@ const AdminDashboard = () => {
 
   const handleViewVisitor = (activity) => {
     // Find the full visitor object
-    const visitor = visitors.find(v => 
-      v.full_name === activity.name || 
+    const visitor = visitors.find(v =>
+      v.full_name === activity.name ||
       v.name === activity.name ||
       v.id === activity.id
     )
@@ -206,22 +206,8 @@ const AdminDashboard = () => {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <div className="bg-white px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 shadow-sm">
+              <div className="bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-600 dark:text-gray-300 shadow-sm transition-colors">
                 {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </div>
-              {/* Notification Icon - Header */}
-              <div className="relative">
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('dashboard-notification-toggle'))}
-                  className="p-2 rounded-lg hover:bg-gray-100 relative"
-                  title="Notifications"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gvas-deepBlue-700">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a2.001 2.001 0 01-3.714 0M21 19.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 19.5c0-.414.336-.75.75-.75h16.5c.414 0 .75.336.75.75zM18.364 15.364A9 9 0 006 15.364M12 3v1.5m0 0a7.5 7.5 0 017.5 7.5v2.25c0 .414.336.75.75.75h-16.5a.75.75 0 01-.75-.75V12a7.5 7.5 0 017.5-7.5z" />
-                  </svg>
-                  {/* Optionally add a red dot for unread notifications */}
-                  {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">1</span> */}
-                </button>
               </div>
             </div>
           </div>
@@ -230,7 +216,7 @@ const AdminDashboard = () => {
         {/* Top Row: Welcome Card & Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Welcome/Update Card - Dark Blue */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-slate-900 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg"
@@ -245,7 +231,7 @@ const AdminDashboard = () => {
                 Visitor traffic has increased by <span className="text-blue-400 font-bold">+{stats.weeklyGrowth}%</span> this week.
                 Keep up the great work managing the flow!
               </p>
-              <button 
+              <button
                 onClick={() => navigate('/reports-analytics')}
                 className="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1"
               >
@@ -275,11 +261,11 @@ const AdminDashboard = () => {
               </Flex>
             </Card>
 
-            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
               <Flex alignItems="start" justifyContent="between">
                 <div>
-                  <Text className="text-gray-500 font-medium">Active Now</Text>
-                  <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.activeVisitors}</Metric>
+                  <Text className="text-gray-500 dark:text-gray-400 font-medium">Active Now</Text>
+                  <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.activeVisitors}</Metric>
                   <Text className="mt-2 text-blue-600 text-sm font-medium">Currently on site</Text>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-xl">
@@ -318,8 +304,8 @@ const AdminDashboard = () => {
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
-            <Title className="text-gray-900 font-bold">Visitor Traffic</Title>
+          <Card className="lg:col-span-2 rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
+            <Title className="text-gray-900 dark:text-white font-bold">Visitor Traffic</Title>
             <AreaChart
               className="mt-4 h-72"
               data={chartData}
@@ -335,7 +321,7 @@ const AdminDashboard = () => {
 
           <div className="space-y-6">
             {/* Add Visitor Button */}
-            <button 
+            <button
               onClick={() => setIsAddVisitorOpen(true)}
               className="w-full bg-slate-900 text-white px-6 py-3 rounded-lg text-base font-medium hover:bg-slate-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
@@ -344,8 +330,8 @@ const AdminDashboard = () => {
             </button>
 
             {/* Floor Distribution Card */}
-            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
-              <Title className="text-gray-900 font-bold">Floor Distribution</Title>
+            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
+              <Title className="text-gray-900 dark:text-white font-bold">Floor Distribution</Title>
               <DonutChart
                 className="mt-8 h-60"
                 data={floorDistribution}
@@ -375,10 +361,10 @@ const AdminDashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+        <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between mb-4">
-            <Title className="text-gray-900 font-bold">Recent Activity</Title>
-            <button 
+            <Title className="text-gray-900 dark:text-white font-bold">Recent Activity</Title>
+            <button
               onClick={() => navigate('/reception')}
               className="text-sm text-blue-600 font-medium hover:text-blue-700"
             >
@@ -399,8 +385,8 @@ const AdminDashboard = () => {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {recentActivity.length > 0 ? recentActivity.map((activity, i) => (
-                  <tr 
-                    key={i} 
+                  <tr
+                    key={i}
                     onClick={() => handleViewVisitor(activity)}
                     className="group hover:bg-slate-50 transition-colors cursor-pointer"
                   >
@@ -422,13 +408,12 @@ const AdminDashboard = () => {
                       )}
                     </td>
                     <td className="py-3">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        activity.status === 'checked_in' 
-                          ? 'bg-green-100 text-green-800' 
-                          : activity.status === 'pending'
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activity.status === 'checked_in'
+                        ? 'bg-green-100 text-green-800'
+                        : activity.status === 'pending'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-gray-100 text-gray-800'
-                      }`}>
+                        }`}>
                         {activity.status === 'checked_in' ? 'Checked In' : activity.status === 'pending' ? 'Pending' : 'Checked Out'}
                       </span>
                     </td>
@@ -461,7 +446,7 @@ const AdminDashboard = () => {
               onClick={() => setIsAddVisitorOpen(false)}
               className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
             />
-            
+
             {/* Modal */}
             <div className="fixed inset-0 z-50 overflow-y-auto">
               <div className="flex min-h-full items-center justify-center p-4">
@@ -548,7 +533,7 @@ const AdminDashboard = () => {
                       onChange={(hostId) => {
                         // Auto-fill floor based on selected host
                         const selectedHost = hosts.find(h => h.id === hostId);
-                        const hostFloor = selectedHost?.floor_number 
+                        const hostFloor = selectedHost?.floor_number
                           ? `${selectedHost.floor_number === 1 ? 'Ground Floor' : selectedHost.floor_number === 2 ? '1st Floor' : selectedHost.floor_number === 3 ? '2nd Floor' : selectedHost.floor_number === 4 ? '3rd Floor' : selectedHost.floor_number === 5 ? '4th Floor' : selectedHost.floor_number === 6 ? '5th Floor' : selectedHost.floor_number === 7 ? '6th Floor' : selectedHost.floor_number === 8 ? '7th Floor' : selectedHost.floor_number === 9 ? '8th Floor' : selectedHost.floor_number === 10 ? '9th Floor' : `${selectedHost.floor_number}th Floor`}`
                           : '';
                         setNewVisitor({ ...newVisitor, host_id: hostId, floor: hostFloor });
@@ -628,7 +613,7 @@ const AdminDashboard = () => {
               onClick={() => setIsEditVisitorOpen(false)}
               className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
             />
-            
+
             {/* Modal */}
             <div className="fixed inset-0 z-50 overflow-y-auto">
               <div className="flex min-h-full items-center justify-center p-4">
@@ -714,7 +699,7 @@ const AdminDashboard = () => {
                       value={newVisitor.host_id}
                       onChange={(hostId) => {
                         const selectedHost = hosts.find(h => h.id === hostId);
-                        const hostFloor = selectedHost?.floor_number 
+                        const hostFloor = selectedHost?.floor_number
                           ? `${selectedHost.floor_number === 1 ? 'Ground Floor' : selectedHost.floor_number === 2 ? '1st Floor' : selectedHost.floor_number === 3 ? '2nd Floor' : selectedHost.floor_number === 4 ? '3rd Floor' : selectedHost.floor_number === 5 ? '4th Floor' : selectedHost.floor_number === 6 ? '5th Floor' : selectedHost.floor_number === 7 ? '6th Floor' : selectedHost.floor_number === 8 ? '7th Floor' : selectedHost.floor_number === 9 ? '8th Floor' : selectedHost.floor_number === 10 ? '9th Floor' : `${selectedHost.floor_number}th Floor`}`
                           : '';
                         setNewVisitor({ ...newVisitor, host_id: hostId, floor: hostFloor });
@@ -779,7 +764,7 @@ const AdminDashboard = () => {
               onClick={() => setIsViewVisitorOpen(false)}
               className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
             />
-            
+
             {/* Modal */}
             <div className="fixed inset-0 z-50 overflow-y-auto">
               <div className="flex min-h-full items-center justify-center p-4">
@@ -831,16 +816,15 @@ const AdminDashboard = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          selectedVisitor.status === 'checked_in' 
-                            ? 'bg-green-100 text-green-800' 
-                            : selectedVisitor.status === 'checked_out'
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${selectedVisitor.status === 'checked_in'
+                          ? 'bg-green-100 text-green-800'
+                          : selectedVisitor.status === 'checked_out'
                             ? 'bg-gray-100 text-gray-800'
                             : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {selectedVisitor.status === 'checked_in' ? 'Checked In' : 
-                           selectedVisitor.status === 'checked_out' ? 'Checked Out' : 
-                           'Pending'}
+                          }`}>
+                          {selectedVisitor.status === 'checked_in' ? 'Checked In' :
+                            selectedVisitor.status === 'checked_out' ? 'Checked Out' :
+                              'Pending'}
                         </span>
                       </div>
                     </div>
