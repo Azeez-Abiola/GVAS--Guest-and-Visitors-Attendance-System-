@@ -409,12 +409,18 @@ const AdminDashboard = () => {
                     </td>
                     <td className="py-3">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activity.status === 'checked_in'
-                        ? 'bg-green-100 text-green-800'
-                        : activity.status === 'pending'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                          : activity.status === 'pre_registered'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                            : activity.status === 'pending' || activity.status === 'pending_approval'
+                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                         }`}>
-                        {activity.status === 'checked_in' ? 'Checked In' : activity.status === 'pending' ? 'Pending' : 'Checked Out'}
+                        {activity.status === 'checked_in' ? 'Checked In'
+                          : activity.status === 'pre_registered' ? 'Pre-registered'
+                            : activity.status === 'pending' ? 'Pending'
+                              : activity.status === 'pending_approval' ? 'Awaiting Approval'
+                                : 'Checked Out'}
                       </span>
                     </td>
                     <td className="py-3 text-sm text-gray-500">{activity.time}</td>

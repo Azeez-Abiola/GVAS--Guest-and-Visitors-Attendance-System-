@@ -67,54 +67,76 @@ const DashboardLayout = ({ children }) => {
 
           if (isWalkIn) {
             type = 'walk_in'
-            title = '🚶 Walk-in Visitor Arrived'
-            message = `${newVisitor.name} (walk-in) has checked in to see you.`
+            title = '🚶 Walk-in Visitor'
+            message = `${newVisitor.name} has walked in and checked in to see you.`
           } else {
             type = 'pre_registered'
-            title = '📅 New Guest Pre-registered'
-            message = `${newVisitor.name} is scheduled to visit. Guest Code: ${newVisitor.guest_code || 'N/A'}`
+            title = '📅 New Appointment Booked'
+            message = `A guest (${newVisitor.name}) has booked an appointment with you for ${newVisitor.visit_date || 'soon'}. Guest Code: ${newVisitor.guest_code || 'N/A'}`
           }
         } else if (payload.eventType === 'UPDATE' && newVisitor.status === 'checked_in') {
           // Pre-registered guest has now arrived
           shouldNotify = true
           type = 'arrival'
-          title = '✅ Guest Arrived'
-          message = `${newVisitor.name} (pre-registered) has arrived and checked in.`
+          title = '✅ Your Guest Has Arrived'
+          message = `${newVisitor.name} has arrived and is waiting for you at reception.`
         }
       }
 
-      // 2. Reception Notification
+      // 2. Reception Notification (floor-specific)
       if (profile.role === 'reception') {
-        // Check if relevant floor (if assigned_floors exists)
+        // Check if this visitor is on receptionist's assigned floor
+        const visitorFloor = newVisitor.floor_number
+        const isMyFloor = !profile.assigned_floors || profile.assigned_floors.length === 0 ||
+          profile.assigned_floors.some(f => {
+            const floorNum = typeof f === 'number' ? f : parseInt(f)
+            return floorNum === visitorFloor
+          })
+
+        if (isMyFloor && payload.eventType === 'INSERT') {
+          const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
+          shouldNotify = true
+
+          if (isWalkIn) {
+            type = 'walk_in'
+            title = '🚶 Walk-in Visitor'
+            message = `${newVisitor.name} (${newVisitor.company || 'Guest'}) has walked in for ${newVisitor.host_name || 'a host'}.`
+          } else {
+            type = 'pre_registered'
+            title = '📅 New Pre-registration'
+            message = `A guest (${newVisitor.name}) has pre-registered for an appointment with ${newVisitor.host_name || 'a host'} on your floor.`
+          }
+        } else if (isMyFloor && payload.eventType === 'UPDATE' && newVisitor.status === 'checked_in' && newVisitor.guest_code) {
+          shouldNotify = true
+          type = 'arrival'
+          title = '✅ Guest Checked In'
+          message = `${newVisitor.name} (Code: ${newVisitor.guest_code}) has checked in.`
+        }
+      }
+
+      // 3. Admin Notification (all visitors)
+      if (profile.role === 'admin') {
         if (payload.eventType === 'INSERT') {
           const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
           shouldNotify = true
 
           if (isWalkIn) {
             type = 'walk_in'
-            title = '🚶 Walk-in Check-in'
-            message = `${newVisitor.name} (${newVisitor.company || 'Guest'}) - Walk-in for ${newVisitor.host_name || 'Host'} on Floor ${newVisitor.floor_number || 'N/A'}`
+            title = '🚶 Walk-in Visitor'
+            message = `${newVisitor.name} walked in on Floor ${newVisitor.floor_number || 'N/A'} for ${newVisitor.host_name || 'a host'}.`
           } else {
             type = 'pre_registered'
             title = '📅 New Pre-registration'
-            message = `${newVisitor.name} (${newVisitor.company || 'Guest'}) scheduled for ${newVisitor.host_name || 'Host'} on Floor ${newVisitor.floor_number || 'N/A'}`
-          }
-        } else if (payload.eventType === 'UPDATE' && newVisitor.status === 'checked_in') {
-          // This is a pre-registered guest checking in
-          if (newVisitor.guest_code) {
-            shouldNotify = true
-            type = 'arrival'
-            title = '✅ Pre-registered Guest Checked In'
-            message = `${newVisitor.name} (Code: ${newVisitor.guest_code}) has completed check-in.`
+            message = `A guest (${newVisitor.name}) has pre-registered for Floor ${newVisitor.floor_number || 'N/A'} to visit ${newVisitor.host_name || 'a host'}.`
           }
         }
       }
 
-      // 3. Security/Admin Notification (Mock for now)
+      // 4. Security Alert (blacklisted)
       if ((profile.role === 'security' || profile.role === 'admin') && newVisitor.is_blacklisted) {
         shouldNotify = true
         type = 'security'
-        title = 'Security Alert'
+        title = '🚨 Security Alert'
         message = `Blacklisted individual attempting access: ${newVisitor.name}`
       }
 
@@ -145,6 +167,18 @@ const DashboardLayout = ({ children }) => {
   }, [profile])
 
   const unreadCount = notifications.filter(n => !n.read).length
+
+  // Mark single notification as read
+  const markAsRead = (notificationId) => {
+    setNotifications(prev =>
+      prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+    )
+  }
+
+  // Mark all notifications as read
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }
 
   const handleLogout = async () => {
     await signOut()
@@ -534,16 +568,22 @@ const DashboardLayout = ({ children }) => {
                       return (
                         <div
                           key={notification.id}
+                          onClick={() => markAsRead(notification.id)}
                           className={`p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                             }`}
                         >
                           <div className="flex gap-3">
                             <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${getDotColor()}`} />
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 dark:text-white text-sm mb-1">
-                                {notification.title}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                              <div className="flex items-start justify-between">
+                                <p className={`font-medium text-sm mb-1 ${!notification.read ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                                  {notification.title}
+                                </p>
+                                {!notification.read && (
+                                  <span className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500 ml-2 mt-1.5" />
+                                )}
+                              </div>
+                              <p className={`text-sm mb-2 ${!notification.read ? 'text-gray-600 dark:text-gray-400' : 'text-gray-500 dark:text-gray-500'}`}>
                                 {notification.message}
                               </p>
                               {notification.guestCode && (
@@ -565,10 +605,19 @@ const DashboardLayout = ({ children }) => {
 
               {/* Footer */}
               {notifications.length > 0 && (
-                <div className="p-3 border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 rounded-b-xl">
-                  <button className="text-sm text-slate-900 dark:text-white hover:underline font-medium w-full text-center">
-                    Mark all as read
-                  </button>
+                <div className="p-3 border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 rounded-b-xl flex justify-between gap-2">
+                  {unreadCount > 0 ? (
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-sm text-slate-900 dark:text-white hover:underline font-medium flex-1 text-center"
+                    >
+                      Mark all as read
+                    </button>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 text-center">
+                      All caught up!
+                    </p>
+                  )}
                 </div>
               )}
             </motion.div>
