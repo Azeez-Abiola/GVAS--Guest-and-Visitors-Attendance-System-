@@ -293,6 +293,17 @@ const GuestRegister = () => {
     const newWindow = window.open('', '_blank')
     newWindow.document.write(printContent)
     newWindow.document.close()
+
+    // Also trigger automatic download as HTML file
+    const blob = new Blob([printContent], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `visitor-pass-${guestCode}.html`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   if (success) {
@@ -326,8 +337,8 @@ const GuestRegister = () => {
               <button
                 onClick={handleCopyCode}
                 className={`p-2 rounded-lg transition-all ${copied
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
                   }`}
                 title={copied ? 'Copied!' : 'Copy code'}
               >

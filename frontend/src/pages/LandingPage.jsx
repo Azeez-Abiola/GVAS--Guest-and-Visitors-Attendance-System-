@@ -78,7 +78,7 @@ const LandingPage = () => {
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
-                className="text-sm font-medium text-[#070f2b]/70 hover:text-[#070f2b] transition-colors"
+                className="text-sm font-medium text-[#070f2b]/70 dark:text-white/70 hover:text-[#070f2b] dark:hover:text-white transition-colors"
               >
                 {item}
               </a>
