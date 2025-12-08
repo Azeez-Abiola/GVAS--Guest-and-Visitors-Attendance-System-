@@ -1,7 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import ApiService from '../services/api'
 
 const FloorSelector = ({ value, onChange, label = "Floor Assignment", required = false }) => {
-  const availableFloors = [
+  const [floors, setFloors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fallback list
+  const fallbackFloors = [
     { id: 'Ground Floor', name: 'Ground Floor', number: 0 },
     { id: '1st Floor', name: '1st Floor', number: 1 },
     { id: '2nd Floor', name: '2nd Floor', number: 2 },
@@ -12,7 +17,45 @@ const FloorSelector = ({ value, onChange, label = "Floor Assignment", required =
     { id: '7th Floor', name: '7th Floor', number: 7 },
     { id: '8th Floor', name: '8th Floor', number: 8 },
     { id: '9th Floor', name: '9th Floor', number: 9 },
-  ]
+    { id: '10th Floor', name: '10th Floor', number: 10 },
+    { id: '11th Floor', name: '11th Floor', number: 11 },
+    { id: '12th Floor', name: '12th Floor', number: 12 },
+    { id: '13th Floor', name: '13th Floor', number: 13 },
+    { id: '14th Floor', name: '14th Floor', number: 14 },
+    { id: '15th Floor', name: '15th Floor', number: 15 },
+    { id: '16th Floor', name: '16th Floor', number: 16 },
+    { id: '17th Floor', name: '17th Floor', number: 17 },
+    { id: '18th Floor', name: '18th Floor', number: 18 },
+    { id: '19th Floor', name: '19th Floor', number: 19 },
+    { id: '20th Floor', name: '20th Floor', number: 20 },
+  ];
+
+  useEffect(() => {
+    const loadFloors = async () => {
+      try {
+        const data = await ApiService.getFloors();
+        if (data && data.length > 0) {
+          // Format API data to match component expectation
+          const formatted = data.map(f => ({
+            id: f.name, // Use name as ID to match legacy behavior or unique ID? Legacy used name/string.
+            name: f.name,
+            number: f.number
+          }));
+          setFloors(formatted);
+        } else {
+          setFloors(fallbackFloors);
+        }
+      } catch (error) {
+        console.error('Failed to load floors:', error);
+        setFloors(fallbackFloors);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadFloors();
+  }, []);
+
+  const availableFloors = floors.length > 0 ? floors : fallbackFloors;
 
   const handleFloorClick = (floorId) => {
     onChange(floorId)
@@ -30,8 +73,8 @@ const FloorSelector = ({ value, onChange, label = "Floor Assignment", required =
             type="button"
             onClick={() => handleFloorClick(floor.id)}
             className={`group relative p-4 rounded-lg border-2 transition-all transform hover:scale-105 ${value === floor.id
-                ? 'border-slate-900 dark:border-white bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'
-                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:border-slate-700 dark:hover:border-slate-500 hover:shadow-md'
+              ? 'border-slate-900 dark:border-white bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'
+              : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:border-slate-700 dark:hover:border-slate-500 hover:shadow-md'
               }`}
           >
             <div className="text-center">

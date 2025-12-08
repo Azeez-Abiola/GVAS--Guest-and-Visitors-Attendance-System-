@@ -20,6 +20,7 @@ import DashboardLayout from '../components/DashboardLayout'
 import ApiService from '../services/api'
 import showToast from '../utils/toast'
 import HostSelector from '../components/HostSelector'
+import FloorSelector from '../components/FloorSelector'
 import VisitorDetailModal from '../components/VisitorDetailModal'
 import NotificationListener from '../components/NotificationListener'
 import { useAuth } from '../contexts/AuthContext'
@@ -1244,30 +1245,12 @@ const ReceptionDashboard = () => {
                       label="Host"
                     />
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Floor Assignment *</label>
-                      <select
-                        value={newVisitor.floor}
-                        onChange={(e) => setNewVisitor({ ...newVisitor, floor: e.target.value })}
-                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                        required
-                      >
-                        <option value="">Select Floor</option>
-                        <option value="Ground Floor">Ground Floor</option>
-                        <option value="1st Floor">1st Floor</option>
-                        <option value="2nd Floor">2nd Floor</option>
-                        <option value="3rd Floor">3rd Floor</option>
-                        <option value="4th Floor">4th Floor</option>
-                        <option value="5th Floor">5th Floor</option>
-                        <option value="6th Floor">6th Floor</option>
-                        <option value="7th Floor">7th Floor</option>
-                        <option value="8th Floor">8th Floor</option>
-                        <option value="9th Floor">9th Floor</option>
-                      </select>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        ✓ Auto-filled from host's floor (can be changed)
-                      </p>
-                    </div>
+                    <FloorSelector
+                      value={newVisitor.floor}
+                      onChange={(floor) => setNewVisitor({ ...newVisitor, floor })}
+                      label="Floor Assignment"
+                      required={true}
+                    />
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Purpose of Visit *</label>

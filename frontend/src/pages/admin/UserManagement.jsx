@@ -197,19 +197,52 @@ const UserManagement = () => {
     const [passwordCopied, setPasswordCopied] = useState(false);
     const [userCreated, setUserCreated] = useState(false); // Track if user was just created
 
-    // Available floors (you can fetch this from your system if dynamic)
-    const availableFloors = [
-      { id: '0', name: 'Ground Floor' },
-      { id: '1', name: '1st Floor' },
-      { id: '2', name: '2nd Floor' },
-      { id: '3', name: '3rd Floor' },
-      { id: '4', name: '4th Floor' },
-      { id: '5', name: '5th Floor' },
-      { id: '6', name: '6th Floor' },
-      { id: '7', name: '7th Floor' },
-      { id: '8', name: '8th Floor' },
-      { id: '9', name: '9th Floor' },
-    ];
+    // Dynamic Floors State
+    const [floors, setFloors] = useState([]);
+    const [loadingFloors, setLoadingFloors] = useState(false);
+
+    useEffect(() => {
+      const loadFloors = async () => {
+        try {
+          setLoadingFloors(true);
+          const data = await ApiService.getFloors();
+          if (data && data.length > 0) {
+            // Map API data to component format
+            // API returns: { id, name, number, type }
+            // Component expects: { id, name } where id is floor number (API uses integer, we might need string for value match)
+            const formatted = data.map(f => ({
+              id: f.number, // Use number as ID for user assignment
+              name: f.name,
+              // Add icon logic if needed, or generic
+              icon: '🏢'
+            }));
+            setFloors(formatted);
+          } else {
+            // Fallback
+            setFloors([
+              { id: 0, name: 'Ground Floor', icon: 'G' },
+              { id: 1, name: '1st Floor', icon: '1' },
+              { id: 2, name: '2nd Floor', icon: '2' },
+              { id: 3, name: '3rd Floor', icon: '3' },
+              { id: 4, name: '4th Floor', icon: '4' },
+              { id: 5, name: '5th Floor', icon: '5' },
+              { id: 6, name: '6th Floor', icon: '6' },
+              { id: 7, name: '7th Floor', icon: '7' },
+              { id: 8, name: '8th Floor', icon: '8' },
+              { id: 9, name: '9th Floor', icon: '9' },
+            ]);
+          }
+        } catch (error) {
+          console.error('Failed to load floors:', error);
+        } finally {
+          setLoadingFloors(false);
+        }
+      };
+      loadFloors();
+    }, []);
+
+    // Use dynamic floors or empty array while loading
+    const availableFloors = floors;
 
     const handleFloorToggle = (floorId) => {
       const currentFloors = formData.assigned_floors || [];

@@ -53,7 +53,7 @@ app.get('/api/hosts', async (req, res) => {
 app.post('/api/pre-register', async (req, res) => {
   try {
     const { name, email, phone, company, host, purpose, visitor_id } = req.body;
-    
+
     // Generate QR code
     const visitorId = visitor_id || await generateVisitorId();
     const guestCode = await generateGuestCode();
@@ -95,7 +95,7 @@ app.post('/api/pre-register', async (req, res) => {
 
     if (error) throw error;
 
-    res.json({ 
+    res.json({
       id: data.id,
       visitor_id: visitorId,
       qrCode,
@@ -112,7 +112,7 @@ app.post('/api/pre-register', async (req, res) => {
 app.get('/api/visitor/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Try to find by visitor_id or guest_code
     const { data, error } = await supabase
       .from('visitors')
@@ -137,18 +137,18 @@ app.get('/api/visitor/:id', async (req, res) => {
 // Check-in visitor (walk-in or pre-registered)
 app.post('/api/checkin', async (req, res) => {
   try {
-    const { 
-      id, 
-      name, 
-      email, 
-      phone, 
-      company, 
-      host, 
-      purpose, 
-      photo, 
-      signature, 
+    const {
+      id,
+      name,
+      email,
+      phone,
+      company,
+      host,
+      purpose,
+      photo,
+      signature,
       consentGiven,
-      isPreRegistered = false 
+      isPreRegistered = false
     } = req.body;
 
     const checkInTime = new Date().toISOString();
@@ -177,17 +177,17 @@ app.post('/api/checkin', async (req, res) => {
         throw error;
       }
 
-      res.json({ 
+      res.json({
         id: data.id,
         visitor_id: data.visitor_id,
         status: 'checked-in',
         checkInTime,
-        message: 'Pre-registered visitor checked in successfully' 
+        message: 'Pre-registered visitor checked in successfully'
       });
     } else {
       // Create new walk-in visitor
       const visitorId = await generateVisitorId();
-      
+
       // Get host details
       const { data: hostData } = await supabase
         .from('hosts')
@@ -220,12 +220,12 @@ app.post('/api/checkin', async (req, res) => {
 
       if (error) throw error;
 
-      res.json({ 
+      res.json({
         id: data.id,
         visitor_id: visitorId,
         status: 'checked-in',
         checkInTime,
-        message: 'Walk-in visitor checked in successfully' 
+        message: 'Walk-in visitor checked in successfully'
       });
     }
   } catch (error) {
@@ -238,7 +238,7 @@ app.post('/api/checkin', async (req, res) => {
 app.get('/api/visitors', async (req, res) => {
   try {
     const { status, date, limit = 100 } = req.query;
-    
+
     let query = supabase
       .from('visitors')
       .select('*');
@@ -254,7 +254,7 @@ app.get('/api/visitors', async (req, res) => {
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
-      
+
       query = query
         .gte('created_at', startOfDay.toISOString())
         .lte('created_at', endOfDay.toISOString());
@@ -284,7 +284,7 @@ app.get('/api/visitors', async (req, res) => {
 app.post('/api/notify-host', async (req, res) => {
   try {
     const { visitorId, message } = req.body;
-    
+
     // Create notification record
     const { data: visitor } = await supabase
       .from('visitors')
@@ -306,13 +306,13 @@ app.post('/api/notify-host', async (req, res) => {
           status: 'pending'
         }]);
     }
-    
+
     // For now, just log (real implementation would send actual email/SMS)
     console.log(`Host notification for visitor ${visitorId}: ${message}`);
-    
-    res.json({ 
-      success: true, 
-      message: 'Host notification queued successfully' 
+
+    res.json({
+      success: true,
+      message: 'Host notification queued successfully'
     });
   } catch (error) {
     console.error('Notification error:', error);
@@ -343,12 +343,12 @@ app.post('/api/checkout/:id', async (req, res) => {
       throw error;
     }
 
-    res.json({ 
+    res.json({
       id: data.id,
       visitor_id: data.visitor_id,
       status: 'checked-out',
       checkOutTime,
-      message: 'Visitor checked out successfully' 
+      message: 'Visitor checked out successfully'
     });
   } catch (error) {
     console.error('Checkout error:', error);
@@ -367,15 +367,15 @@ app.get('/api/health', async (req, res) => {
 
     if (error) throw error;
 
-    res.json({ 
-      status: 'healthy', 
+    res.json({
+      status: 'healthy',
       timestamp: new Date().toISOString(),
       database: 'connected',
       type: 'Supabase PostgreSQL'
     });
   } catch (error) {
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       timestamp: new Date().toISOString(),
       database: 'disconnected',
       error: error.message
@@ -389,7 +389,7 @@ app.get('/api/health', async (req, res) => {
 app.get('/api/badges', async (req, res) => {
   try {
     const { status } = req.query;
-    
+
     let query = supabase
       .from('badges')
       .select(`
@@ -397,17 +397,52 @@ app.get('/api/badges', async (req, res) => {
         current_visitor:visitors(id, name, visitor_id)
       `)
       .order('badge_number');
-    
+
     if (status) {
       query = query.eq('status', status);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
-    
+
     res.json(data);
   } catch (error) {
     console.error('Error fetching badges:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new badge
+// Create new badge
+app.post('/api/badges', async (req, res) => {
+  try {
+    const { badge_number, type, status = 'available' } = req.body;
+
+    // Check if badge number already exists
+    const { data: existing } = await supabase
+      .from('badges')
+      .select('id')
+      .eq('badge_number', badge_number)
+      .single();
+
+    if (existing) {
+      return res.status(400).json({ error: 'Badge number already exists' });
+    }
+
+    const { data, error } = await supabase
+      .from('badges')
+      .insert([{
+        badge_number,
+        badge_type: type,
+        status
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error creating badge:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -417,14 +452,14 @@ app.patch('/api/badges/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     const { data, error } = await supabase
       .from('badges')
       .update({ status })
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     res.json(data);
   } catch (error) {
@@ -433,20 +468,85 @@ app.patch('/api/badges/:id/status', async (req, res) => {
   }
 });
 
+// --- Floors API ---
+
+// Get all floors
+app.get('/api/floors', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('floors')
+      .select('*')
+      .order('number');
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching floors:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create floor
+app.post('/api/floors', async (req, res) => {
+  try {
+    const { name, number, type } = req.body;
+
+    // Check if floor number already exists
+    const { data: existing } = await supabase
+      .from('floors')
+      .select('id')
+      .eq('number', number)
+      .single();
+
+    if (existing) {
+      return res.status(400).json({ error: 'Floor number already exists' });
+    }
+
+    const { data, error } = await supabase
+      .from('floors')
+      .insert([{ name, number, type }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error creating floor:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete floor
+app.delete('/api/floors/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabase
+      .from('floors')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    res.json({ message: 'Floor deleted' });
+  } catch (error) {
+    console.error('Error deleting floor:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Return badge (make available again)
 app.post('/api/badges/:id/return', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // First, get the badge to find the visitor
     const { data: badge, error: badgeError } = await supabase
       .from('badges')
       .select('current_visitor_id')
       .eq('id', id)
       .single();
-    
+
     if (badgeError) throw badgeError;
-    
+
     // Update badge to available
     const { data: updatedBadge, error: updateError } = await supabase
       .from('badges')
@@ -459,9 +559,9 @@ app.post('/api/badges/:id/return', async (req, res) => {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (updateError) throw updateError;
-    
+
     // Update visitor's badge_id to null
     if (badge.current_visitor_id) {
       await supabase
@@ -469,7 +569,7 @@ app.post('/api/badges/:id/return', async (req, res) => {
         .update({ badge_id: null })
         .eq('id', badge.current_visitor_id);
     }
-    
+
     res.json(updatedBadge);
   } catch (error) {
     console.error('Error returning badge:', error);
@@ -484,7 +584,7 @@ app.get('/api/tenants', async (req, res) => {
       .from('tenants')
       .select('*')
       .order('floor_number');
-    
+
     if (error) throw error;
     res.json(data);
   } catch (error) {
@@ -499,7 +599,7 @@ app.get('/api/tenants', async (req, res) => {
 app.get('/api/audit-logs', async (req, res) => {
   try {
     const { action, resource_type, user_id, limit = 100, offset = 0 } = req.query;
-    
+
     let query = supabase
       .from('audit_logs')
       .select(`
@@ -508,14 +608,14 @@ app.get('/api/audit-logs', async (req, res) => {
       `)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
-    
+
     if (action) query = query.eq('action', action);
     if (resource_type) query = query.eq('resource_type', resource_type);
     if (user_id) query = query.eq('user_id', user_id);
-    
+
     const { data, error } = await query;
     if (error) throw error;
-    
+
     res.json(data);
   } catch (error) {
     console.error('Error fetching audit logs:', error);
@@ -527,7 +627,7 @@ app.get('/api/audit-logs', async (req, res) => {
 app.post('/api/audit-logs', async (req, res) => {
   try {
     const { action, resource_type, resource_id, old_values, new_values, details } = req.body;
-    
+
     const { data, error } = await supabase.rpc('create_audit_log', {
       p_action: action,
       p_resource_type: resource_type,
@@ -536,7 +636,7 @@ app.post('/api/audit-logs', async (req, res) => {
       p_new_values: new_values,
       p_details: details
     });
-    
+
     if (error) throw error;
     res.json({ id: data, success: true });
   } catch (error) {
@@ -551,7 +651,7 @@ app.post('/api/audit-logs', async (req, res) => {
 app.get('/api/incidents', async (req, res) => {
   try {
     const { status, severity, type, assigned_to } = req.query;
-    
+
     let query = supabase
       .from('incidents')
       .select(`
@@ -562,15 +662,15 @@ app.get('/api/incidents', async (req, res) => {
         badge:badge_id(badge_number, type)
       `)
       .order('created_at', { ascending: false });
-    
+
     if (status) query = query.eq('status', status);
     if (severity) query = query.eq('severity', severity);
     if (type) query = query.eq('incident_type', type);
     if (assigned_to) query = query.eq('assigned_to', assigned_to);
-    
+
     const { data, error } = await query;
     if (error) throw error;
-    
+
     res.json(data);
   } catch (error) {
     console.error('Error fetching incidents:', error);
@@ -592,7 +692,7 @@ app.post('/api/incidents', async (req, res) => {
       occurred_at,
       evidence_photos = []
     } = req.body;
-    
+
     const { data, error } = await supabase
       .from('incidents')
       .insert([{
@@ -608,7 +708,7 @@ app.post('/api/incidents', async (req, res) => {
       }])
       .select()
       .single();
-    
+
     if (error) throw error;
     res.json(data);
   } catch (error) {
@@ -622,14 +722,14 @@ app.put('/api/incidents/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    
+
     const { data, error } = await supabase
       .from('incidents')
       .update(updateData)
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     res.json(data);
   } catch (error) {
@@ -644,18 +744,18 @@ app.put('/api/incidents/:id', async (req, res) => {
 app.get('/api/settings', async (req, res) => {
   try {
     const { category } = req.query;
-    
+
     let query = supabase
       .from('system_settings')
       .select('*')
       .order('category', { ascending: true })
       .order('setting_key', { ascending: true });
-    
+
     if (category) query = query.eq('category', category);
-    
+
     const { data, error } = await query;
     if (error) throw error;
-    
+
     res.json(data);
   } catch (error) {
     console.error('Error fetching settings:', error);
@@ -668,13 +768,13 @@ app.put('/api/settings/:category/:key', async (req, res) => {
   try {
     const { category, key } = req.params;
     const { value } = req.body;
-    
+
     const { data, error } = await supabase.rpc('update_setting', {
       p_category: category,
       p_key: key,
       p_value: value
     });
-    
+
     if (error) throw error;
     res.json({ success: data });
   } catch (error) {
@@ -689,7 +789,7 @@ app.put('/api/settings/:category/:key', async (req, res) => {
 app.get('/api/documents', async (req, res) => {
   try {
     const { visitor_id, status } = req.query;
-    
+
     let query = supabase
       .from('documents')
       .select(`
@@ -698,13 +798,13 @@ app.get('/api/documents', async (req, res) => {
         uploader:uploaded_by(email, full_name)
       `)
       .order('created_at', { ascending: false });
-    
+
     if (visitor_id) query = query.eq('visitor_id', visitor_id);
     if (status) query = query.eq('verification_status', status);
-    
+
     const { data, error } = await query;
     if (error) throw error;
-    
+
     res.json(data);
   } catch (error) {
     console.error('Error fetching documents:', error);
@@ -717,13 +817,13 @@ app.post('/api/documents/:id/verify', async (req, res) => {
   try {
     const { id } = req.params;
     const { status, notes } = req.body;
-    
+
     const { data, error } = await supabase.rpc('verify_document', {
       p_document_id: id,
       p_status: status,
       p_notes: notes
     });
-    
+
     if (error) throw error;
     res.json({ success: data });
   } catch (error) {
@@ -739,38 +839,38 @@ app.get('/api/analytics/:metric', async (req, res) => {
   try {
     const { metric } = req.params;
     const { period = 'today', from_date, to_date } = req.query;
-    
+
     const cacheKey = `analytics_${metric}_${period}_${from_date}_${to_date}`;
-    
+
     // Try to get cached data first
     const { data: cachedData } = await supabase.rpc('get_analytics_cache', {
       p_cache_key: cacheKey,
       p_ttl_minutes: 30
     });
-    
+
     if (cachedData) {
       return res.json(cachedData);
     }
-    
+
     // Generate fresh analytics based on metric type
     let analyticsData = {};
-    
+
     switch (metric) {
       case 'visitor_summary':
         // Get visitor statistics
         const today = new Date().toISOString().split('T')[0];
-        
+
         const { data: visitors } = await supabase
           .from('visitors')
           .select('*')
           .gte('created_at', today);
-        
+
         const { data: checkedIn } = await supabase
           .from('visitors')
           .select('*')
           .not('check_in_time', 'is', null)
           .is('check_out_time', null);
-        
+
         analyticsData = {
           total_today: visitors?.length || 0,
           checked_in: checkedIn?.length || 0,
@@ -778,7 +878,7 @@ app.get('/api/analytics/:metric', async (req, res) => {
           badge_usage: checkedIn?.filter(v => v.badge_number).length || 0
         };
         break;
-        
+
       case 'floor_distribution':
         const { data: floorData } = await supabase
           .from('visitors')
@@ -789,25 +889,25 @@ app.get('/api/analytics/:metric', async (req, res) => {
           `)
           .not('check_in_time', 'is', null)
           .is('check_out_time', null);
-        
+
         analyticsData = floorData?.reduce((acc, visitor) => {
           const floor = visitor.hosts?.tenants?.floor_number || 'Unknown';
           acc[floor] = (acc[floor] || 0) + 1;
           return acc;
         }, {}) || {};
         break;
-        
+
       default:
         analyticsData = { message: 'Metric not implemented yet' };
     }
-    
+
     // Cache the result
     await supabase.rpc('set_analytics_cache', {
       p_cache_key: cacheKey,
       p_data: analyticsData,
       p_ttl_minutes: 30
     });
-    
+
     res.json(analyticsData);
   } catch (error) {
     console.error('Error fetching analytics:', error);
@@ -822,7 +922,7 @@ app.get('/api/reports/templates', async (req, res) => {
       .from('report_templates')
       .select('*')
       .order('name');
-    
+
     if (error) throw error;
     res.json(data);
   } catch (error) {
@@ -835,7 +935,7 @@ app.get('/api/reports/templates', async (req, res) => {
 app.post('/api/reports/generate', async (req, res) => {
   try {
     const { template_id, parameters, date_range_start, date_range_end } = req.body;
-    
+
     // For now, return mock data - implement actual report generation later
     const reportData = {
       summary: { total: 100, change: '+5%' },
@@ -845,7 +945,7 @@ app.post('/api/reports/generate', async (req, res) => {
         { date: '2025-12-03', visitors: 38 }
       ]
     };
-    
+
     const { data, error } = await supabase
       .from('generated_reports')
       .insert([{
@@ -859,7 +959,7 @@ app.post('/api/reports/generate', async (req, res) => {
       }])
       .select()
       .single();
-    
+
     if (error) throw error;
     res.json(data);
   } catch (error) {

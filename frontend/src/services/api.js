@@ -601,6 +601,49 @@ class ApiService {
     return data;
   }
 
+  // Floor Management APIs
+  async getFloors() {
+    if (this.useDirectSupabase) {
+      const { data, error } = await supabase
+        .from('floors')
+        .select('*')
+        .order('number');
+      if (error) throw error;
+      return data;
+    }
+    return this.request('/floors');
+  }
+
+  async createFloor(floorData) {
+    if (this.useDirectSupabase) {
+      const { data, error } = await supabase
+        .from('floors')
+        .insert([floorData])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    }
+    return this.request('/floors', {
+      method: 'POST',
+      body: JSON.stringify(floorData)
+    });
+  }
+
+  async deleteFloor(floorId) {
+    if (this.useDirectSupabase) {
+      const { error } = await supabase
+        .from('floors')
+        .delete()
+        .eq('id', floorId);
+      if (error) throw error;
+      return true;
+    }
+    return this.request(`/floors/${floorId}`, {
+      method: 'DELETE'
+    });
+  }
+
   async addToBlacklist(visitorData, reason) {
     const { data, error } = await supabase
       .from('blacklist')
@@ -647,6 +690,27 @@ class ApiService {
     // Use backend API for badge return
     return this.request(`/badges/${badgeId}/return`, {
       method: 'POST'
+    });
+  }
+
+  async createBadge(badgeData) {
+    if (this.useDirectSupabase) {
+      const { data, error } = await supabase
+        .from('badges')
+        .insert([{
+          badge_number: badgeData.badge_number,
+          badge_type: badgeData.type || 'visitor',
+          status: badgeData.status || 'available'
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+    return this.request('/badges', {
+      method: 'POST',
+      body: JSON.stringify(badgeData)
     });
   }
 

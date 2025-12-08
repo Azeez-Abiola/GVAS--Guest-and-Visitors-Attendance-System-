@@ -39,6 +39,12 @@ const BadgeManagement = () => {
   const [showMarkLostModal, setShowMarkLostModal] = useState(false)
   const [showMarkDamagedModal, setShowMarkDamagedModal] = useState(false)
   const [showMarkMaintenanceModal, setShowMarkMaintenanceModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newBadgeData, setNewBadgeData] = useState({
+    badge_number: '',
+    type: 'visitor'
+  })
+  const [creatingBadge, setCreatingBadge] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -205,6 +211,29 @@ const BadgeManagement = () => {
     }
   }
 
+  const handleCreateBadge = async (e) => {
+    e.preventDefault()
+    if (!newBadgeData.badge_number) return
+
+    try {
+      setCreatingBadge(true)
+      await ApiService.createBadge({
+        ...newBadgeData,
+        status: 'available'
+      })
+
+      setShowCreateModal(false)
+      setNewBadgeData({ badge_number: '', type: 'visitor' })
+      loadData()
+      alert('Badge created successfully!')
+    } catch (error) {
+      console.error('Failed to create badge:', error)
+      alert(error.message || 'Failed to create badge')
+    } finally {
+      setCreatingBadge(false)
+    }
+  }
+
   const getBadgeTypeColor = (type) => {
     switch (type) {
       case 'visitor':
@@ -301,6 +330,17 @@ const BadgeManagement = () => {
               <RefreshCw className="h-4 w-4" />
               <span>Refresh</span>
             </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowCreateModal(true)}
+              className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-slate-900/20"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create Badge</span>
+            </motion.button>
+
           </div>
         </div>
 
@@ -399,8 +439,8 @@ const BadgeManagement = () => {
               <button
                 onClick={() => setFilter('all')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'all'
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
-                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                   }`}
               >
                 All
@@ -408,8 +448,8 @@ const BadgeManagement = () => {
               <button
                 onClick={() => setFilter('available')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'available'
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
-                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                   }`}
               >
                 Available
@@ -417,8 +457,8 @@ const BadgeManagement = () => {
               <button
                 onClick={() => setFilter('in-use')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'in-use'
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
-                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                   }`}
               >
                 In Use
@@ -426,8 +466,8 @@ const BadgeManagement = () => {
               <button
                 onClick={() => setFilter('maintenance')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'maintenance'
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
-                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                   }`}
               >
                 Maintenance
@@ -839,6 +879,86 @@ const BadgeManagement = () => {
                 Send to Maintenance
               </motion.button>
             </div>
+          </motion.div>
+        </div>
+      )}
+      {/* Create Badge Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+          >
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                <Plus className="h-8 w-8 text-slate-600" />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+              Create New Badge
+            </h2>
+
+            <p className="text-gray-600 text-center mb-6">
+              Add a new physical badge to the system inventory.
+            </p>
+
+            <form onSubmit={handleCreateBadge} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Badge Number/ID <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBadgeData.badge_number}
+                  onChange={(e) => setNewBadgeData({ ...newBadgeData, badge_number: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition-all"
+                  placeholder="e.g. VIS-001"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Badge Type
+                </label>
+                <select
+                  value={newBadgeData.type}
+                  onChange={(e) => setNewBadgeData({ ...newBadgeData, type: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition-all"
+                >
+                  <option value="visitor">Visitor</option>
+                  <option value="contractor">Contractor</option>
+                  <option value="vip">VIP</option>
+                  <option value="delivery">Delivery</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingBadge}
+                  className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-slate-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {creatingBadge ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Creating...</span>
+                    </>
+                  ) : (
+                    <span>Create Badge</span>
+                  )}
+                </button>
+              </div>
+            </form>
           </motion.div>
         </div>
       )}
