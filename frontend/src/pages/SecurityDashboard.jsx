@@ -222,7 +222,7 @@ const SecurityDashboard = () => {
                         <td className="py-3 text-sm text-gray-600 dark:text-gray-300">{visitor.company || '-'}</td>
                         <td className="py-3">
                           <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.host}</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.host?.name || visitor.host || '-'}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Floor {visitor.floor_number || '-'}</p>
                           </div>
                         </td>

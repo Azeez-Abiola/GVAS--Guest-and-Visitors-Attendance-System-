@@ -12,7 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    storage: window.localStorage,
+    storage: window.sessionStorage,
     storageKey: 'gvas-auth-token'
   }
 })
@@ -24,7 +24,7 @@ export const testConnection = async () => {
       .from('tenants')
       .select('count')
       .limit(1)
-    
+
     if (error) throw error
     return { success: true, message: 'Connected to Supabase' }
   } catch (error) {

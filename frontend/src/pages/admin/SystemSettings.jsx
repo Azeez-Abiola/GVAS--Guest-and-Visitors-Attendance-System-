@@ -18,7 +18,8 @@ import {
   Flex,
   Button,
   Dialog,
-  DialogPanel
+  DialogPanel,
+  Callout
 } from '@tremor/react';
 import {
   CogIcon,
@@ -87,6 +88,7 @@ const SystemSettings = () => {
   const [loadingFloors, setLoadingFloors] = useState(false);
   const [newFloor, setNewFloor] = useState({ name: '', number: '', type: 'general' });
   const [addingFloor, setAddingFloor] = useState(false);
+  const [floorErrorMessage, setFloorErrorMessage] = useState('');
 
   // Floor Detail Modal State
   const [isFloorDetailOpen, setIsFloorDetailOpen] = useState(false);
@@ -119,7 +121,14 @@ const SystemSettings = () => {
 
   const handleAddFloor = async (e) => {
     e.preventDefault();
+    setFloorErrorMessage('');
     if (!newFloor.name || newFloor.number === '') return;
+
+    // Client-side duplicate check
+    if (floors.some(f => f.number === parseInt(newFloor.number))) {
+      setFloorErrorMessage(`Floor ${newFloor.number} already exists. Please choose a different number.`);
+      return;
+    }
 
     try {
       setAddingFloor(true);
@@ -134,9 +143,9 @@ const SystemSettings = () => {
     } catch (error) {
       console.error('Failed to add floor:', error);
       if (error.code === '23505' || (error.message && error.message.includes('unique constraint'))) {
-        alert('A floor with this number already exists. Please choose a different number.');
+        setFloorErrorMessage('A floor with this number already exists. Please choose a different number.');
       } else {
-        alert(error.message || 'Failed to add floor');
+        setFloorErrorMessage(error.message || 'Failed to add floor');
       }
     } finally {
       setAddingFloor(false);
@@ -502,6 +511,16 @@ const SystemSettings = () => {
                   {/* Add Floor Form */}
                   <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                     <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Add New Floor</h4>
+                    {floorErrorMessage && (
+                      <Callout
+                        className="mb-4"
+                        title="Error Adding Floor"
+                        color="red"
+                        icon={ExclamationTriangleIcon}
+                      >
+                        {floorErrorMessage}
+                      </Callout>
+                    )}
                     <form onSubmit={handleAddFloor} className="flex gap-4 items-end flex-wrap">
                       <div className="flex-1 min-w-[200px]">
                         <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">
