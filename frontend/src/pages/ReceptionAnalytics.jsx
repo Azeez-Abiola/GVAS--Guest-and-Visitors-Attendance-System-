@@ -25,30 +25,49 @@ const ReceptionAnalytics = () => {
     try {
       setLoading(true)
       const visitors = await ApiService.getVisitors({ status: 'all' })
-      
+
+      // Filter by assigned floors if receptionist
       // Filter by assigned floors if receptionist
       let filteredVisitors = visitors
       if (profile?.role === 'reception' && profile?.assigned_floors?.length > 0) {
+        const floorMap = {
+          'Ground Floor': 0, '1st Floor': 1, '2nd Floor': 2, '3rd Floor': 3,
+          '4th Floor': 4, '5th Floor': 5, '6th Floor': 6, '7th Floor': 7,
+          '8th Floor': 8, '9th Floor': 9, '10th Floor': 10
+        }
+
         filteredVisitors = visitors.filter(v => {
-          const floorNum = v.floor_number ?? v.floor
+          let floorNum = v.floor_number
+          if (floorNum === undefined || floorNum === null) {
+            floorNum = floorMap[v.floor] ?? v.floor
+          }
+
           return profile.assigned_floors.some(af => {
             const assignedFloorNum = typeof af === 'number' ? af : parseInt(af)
-            return floorNum === assignedFloorNum
+            return floorNum == assignedFloorNum // loose equality for string/number match safety
           })
         })
       }
 
-      // Today's visitors
-      const today = new Date().toISOString().split('T')[0]
-      const todayVisitors = filteredVisitors.filter(v => v.check_in_time?.startsWith(today))
+      // Today's visitors (using local time)
+      const todayLocal = new Date().toLocaleDateString('en-CA');
+      const todayVisitors = filteredVisitors.filter(v => {
+        if (!v.check_in_time) return false;
+        return new Date(v.check_in_time).toLocaleDateString('en-CA') === todayLocal;
+      })
 
       // Weekly visitors (last 7 days)
       const weeklyData = []
       for (let i = 6; i >= 0; i--) {
         const date = new Date()
         date.setDate(date.getDate() - i)
-        const dateStr = date.toISOString().split('T')[0]
-        const count = filteredVisitors.filter(v => v.check_in_time?.startsWith(dateStr)).length
+        const dateStr = date.toLocaleDateString('en-CA') // Local YYYY-MM-DD
+
+        const count = filteredVisitors.filter(v => {
+          if (!v.check_in_time) return false;
+          return new Date(v.check_in_time).toLocaleDateString('en-CA') === dateStr;
+        }).length
+
         weeklyData.push({
           date: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
           Visitors: count

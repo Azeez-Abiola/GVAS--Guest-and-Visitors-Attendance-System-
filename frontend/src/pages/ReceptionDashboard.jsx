@@ -845,12 +845,12 @@ const ReceptionDashboard = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Reception Dashboard</h1>
-            <p className="text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Reception Dashboard</h1>
+            <p className="text-gray-500 dark:text-gray-400">
               Manage visitor check-ins and check-outs
               {profile?.assigned_floors && profile.assigned_floors.length > 0 && (
                 <span className="ml-2">
-                  • <span className="font-semibold text-slate-900">Your Floors:</span>{' '}
+                  • <span className="font-semibold text-slate-900 dark:text-white">Your Floors:</span>{' '}
                   {profile.assigned_floors.map((floor, idx) => {
                     const floorName = typeof floor === 'number'
                       ? (floor === 0 ? 'Ground Floor' : `${floor === 1 ? '1st' : floor === 2 ? '2nd' : floor === 3 ? '3rd' : `${floor}th`} Floor`)
@@ -858,7 +858,7 @@ const ReceptionDashboard = () => {
                     return (
                       <span key={idx}>
                         {idx > 0 && ', '}
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-900 text-white">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900">
                           {floorName}
                         </span>
                       </span>
@@ -869,7 +869,7 @@ const ReceptionDashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="bg-white px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-600 dark:text-gray-300 shadow-sm">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </div>
           </div>
@@ -877,128 +877,128 @@ const ReceptionDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
             <Flex alignItems="start" justifyContent="between">
               <div>
-                <Text className="text-gray-500 font-medium">Today's Check-ins</Text>
-                <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.todayCheckIns}</Metric>
+                <Text className="text-gray-500 dark:text-gray-400 font-medium">Today's Check-ins</Text>
+                <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.todayCheckIns}</Metric>
               </div>
-              <div className="bg-blue-50 p-3 rounded-xl">
-                <UserPlus className="text-blue-600" size={24} />
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
+                <UserPlus className="text-blue-600 dark:text-blue-400" size={24} />
               </div>
             </Flex>
           </Card>
 
-          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
             <Flex alignItems="start" justifyContent="between">
               <div>
-                <Text className="text-gray-500 font-medium">Active Visitors</Text>
-                <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.activeVisitors}</Metric>
+                <Text className="text-gray-500 dark:text-gray-400 font-medium">Active Visitors</Text>
+                <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.activeVisitors}</Metric>
               </div>
-              <div className="bg-blue-50 p-3 rounded-xl">
-                <Users className="text-blue-600" size={24} />
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
+                <Users className="text-blue-600 dark:text-blue-400" size={24} />
               </div>
             </Flex>
           </Card>
 
-          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
             <Flex alignItems="start" justifyContent="between">
               <div>
-                <Text className="text-gray-500 font-medium">Pending Check-outs</Text>
-                <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.pendingCheckOuts}</Metric>
+                <Text className="text-gray-500 dark:text-gray-400 font-medium">Pending Check-outs</Text>
+                <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.pendingCheckOuts}</Metric>
               </div>
-              <div className="bg-amber-50 p-3 rounded-xl">
-                <LogOut className="text-amber-600" size={24} />
+              <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-xl">
+                <LogOut className="text-amber-600 dark:text-amber-400" size={24} />
               </div>
             </Flex>
           </Card>
 
-          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+          <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
             <Flex alignItems="start" justifyContent="between">
               <div>
-                <Text className="text-gray-500 font-medium">Available Badges</Text>
-                <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.availableBadges}</Metric>
+                <Text className="text-gray-500 dark:text-gray-400 font-medium">Available Badges</Text>
+                <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.availableBadges}</Metric>
                 {badgeStats && (
-                  <Text className="mt-2 text-sm text-gray-500">
+                  <Text className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                     {badgeStats.byType.visitor?.issued || 0} issued / {badgeStats.byType.visitor?.total || 0} total
                   </Text>
                 )}
               </div>
-              <div className={`p-3 rounded-xl ${stats.availableBadges > 2 ? 'bg-green-50' : stats.availableBadges > 0 ? 'bg-amber-50' : 'bg-red-50'}`}>
-                <Printer className={`${stats.availableBadges > 2 ? 'text-green-600' : stats.availableBadges > 0 ? 'text-amber-600' : 'text-red-600'}`} size={24} />
+              <div className={`p-3 rounded-xl ${stats.availableBadges > 2 ? 'bg-green-50 dark:bg-green-900/30' : stats.availableBadges > 0 ? 'bg-amber-50 dark:bg-amber-900/30' : 'bg-red-50 dark:bg-red-900/30'}`}>
+                <Printer className={`${stats.availableBadges > 2 ? 'text-green-600 dark:text-green-400' : stats.availableBadges > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`} size={24} />
               </div>
             </Flex>
           </Card>
         </div>
 
         {/* Quick Actions */}
-        <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
-          <Title className="text-gray-900 font-bold mb-4">Quick Actions</Title>
+        <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
+          <Title className="text-gray-900 dark:text-white font-bold mb-4">Quick Actions</Title>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               onClick={() => {
                 console.log('🚪 Opening check-in modal, hosts available:', hosts.length)
                 setShowCheckInModal(true)
               }}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-200"
+              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200"
             >
-              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <UserPlus className="text-blue-700" size={24} />
+              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                <UserPlus className="text-blue-700 dark:text-blue-400" size={24} />
               </div>
               <div className="text-left">
-                <p className="font-bold text-gray-900 group-hover:text-blue-900">Walk-in Check-in</p>
-                <p className="text-sm text-gray-500 group-hover:text-blue-700/70">Register new visitor</p>
+                <p className="font-bold text-gray-900 dark:text-white group-hover:text-blue-900 dark:group-hover:text-blue-300">Walk-in Check-in</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-700/70 dark:group-hover:text-blue-400/70">Register new visitor</p>
               </div>
             </button>
 
             <button
               onClick={() => setShowQRModal(true)}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-200"
+              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200"
             >
-              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <QrCode className="text-blue-700" size={24} />
+              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                <QrCode className="text-blue-700 dark:text-blue-400" size={24} />
               </div>
               <div className="text-left">
-                <p className="font-bold text-gray-900 group-hover:text-blue-900">Verify Guest</p>
-                <p className="text-sm text-gray-500 group-hover:text-blue-700/70">Pre-registered visitor</p>
+                <p className="font-bold text-gray-900 dark:text-white group-hover:text-blue-900 dark:group-hover:text-blue-300">Verify Guest</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-700/70 dark:group-hover:text-blue-400/70">Pre-registered visitor</p>
               </div>
             </button>
 
             <button
               onClick={() => setShowPrintModal(true)}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-violet-500 hover:bg-violet-50/50 transition-all duration-200"
+              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-violet-500 dark:hover:border-violet-400 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all duration-200"
             >
-              <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
-                <Printer className="text-violet-700" size={24} />
+              <div className="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors">
+                <Printer className="text-violet-700 dark:text-violet-400" size={24} />
               </div>
               <div className="text-left">
-                <p className="font-bold text-gray-900 group-hover:text-violet-900">Print Badge</p>
-                <p className="text-sm text-gray-500 group-hover:text-violet-700/70">Reprint visitor badge</p>
+                <p className="font-bold text-gray-900 dark:text-white group-hover:text-violet-900 dark:group-hover:text-violet-300">Print Badge</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-violet-700/70 dark:group-hover:text-violet-400/70">Reprint visitor badge</p>
               </div>
             </button>
           </div>
         </Card>
 
         {/* Visitor List */}
-        <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+        <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <Title className="text-gray-900 font-bold">Recent Visitors</Title>
+            <Title className="text-gray-900 dark:text-white font-bold">Recent Visitors</Title>
             <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input
                 type="text"
                 placeholder="Search visitors..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#052e16] focus:border-transparent transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#052e16] dark:focus:ring-blue-400 focus:border-transparent transition-all"
               />
             </div>
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block w-8 h-8 border-4 border-[#052e16] border-t-transparent rounded-full animate-spin"></div>
-              <p className="mt-2 text-gray-600">Loading visitors...</p>
+              <div className="inline-block w-8 h-8 border-4 border-[#052e16] dark:border-white border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">Loading visitors...</p>
             </div>
           ) : recentVisitors.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-900 rounded-xl border border-dashed border-gray-200 dark:border-slate-800">
@@ -1133,8 +1133,8 @@ const ReceptionDashboard = () => {
                               }}
                               title={isTooEarly ? scheduledInfo : 'Check in this visitor'}
                               className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${isTooEarly
-                                  ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
-                                  : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
+                                ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                                : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
                                 }`}
                             >
                               <LogIn size={14} />

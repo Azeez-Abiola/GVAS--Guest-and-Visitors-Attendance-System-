@@ -59,7 +59,8 @@ const DashboardLayout = ({ children }) => {
       let type = 'visitor'
 
       // 1. Host Notification
-      if (profile.role === 'host' && newVisitor.host_id === profile.id) {
+      // Convert IDs to strings for safe comparison (handles mismatched types)
+      if (profile.role === 'host' && String(newVisitor.host_id) === String(profile.id)) {
         if (payload.eventType === 'INSERT') {
           // Distinguish walk-in vs pre-registration
           const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
@@ -86,12 +87,11 @@ const DashboardLayout = ({ children }) => {
       // 2. Reception Notification (floor-specific)
       if (profile.role === 'reception') {
         // Check if this visitor is on receptionist's assigned floor
-        const visitorFloor = newVisitor.floor_number
+        // Use loose equality or parseInt to handle string/number mismatch
+        const visitorFloor = newVisitor.floor_number !== null ? parseInt(newVisitor.floor_number) : null
+
         const isMyFloor = !profile.assigned_floors || profile.assigned_floors.length === 0 ||
-          profile.assigned_floors.some(f => {
-            const floorNum = typeof f === 'number' ? f : parseInt(f)
-            return floorNum === visitorFloor
-          })
+          profile.assigned_floors.some(f => parseInt(f) === visitorFloor)
 
         if (isMyFloor && payload.eventType === 'INSERT') {
           const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code

@@ -201,8 +201,8 @@ const AdminDashboard = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-500">Overview of visitor activity and system status</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p className="text-gray-500 dark:text-gray-400">Overview of visitor activity and system status</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -245,18 +245,18 @@ const AdminDashboard = () => {
 
           {/* Stats Cards */}
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
               <Flex alignItems="start" justifyContent="between">
                 <div>
-                  <Text className="text-gray-500 font-medium">Total Visitors</Text>
-                  <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.totalVisitors}</Metric>
+                  <Text className="text-gray-500 dark:text-gray-400 font-medium">Total Visitors</Text>
+                  <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.totalVisitors}</Metric>
                   <Flex className="mt-2" alignItems="center" justifyContent="start">
-                    <TrendingUp className="text-blue-500" size={16} />
-                    <Text className="text-blue-600 ml-1 font-medium">+{stats.weeklyGrowth}%</Text>
+                    <TrendingUp className="text-blue-500 dark:text-blue-400" size={16} />
+                    <Text className="text-blue-600 dark:text-blue-400 ml-1 font-medium">+{stats.weeklyGrowth}%</Text>
                   </Flex>
                 </div>
-                <div className="bg-blue-50 p-3 rounded-xl">
-                  <Users className="text-blue-600" size={24} />
+                <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
+                  <Users className="text-blue-600 dark:text-blue-400" size={24} />
                 </div>
               </Flex>
             </Card>
@@ -266,36 +266,36 @@ const AdminDashboard = () => {
                 <div>
                   <Text className="text-gray-500 dark:text-gray-400 font-medium">Active Now</Text>
                   <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.activeVisitors}</Metric>
-                  <Text className="mt-2 text-blue-600 text-sm font-medium">Currently on site</Text>
+                  <Text className="mt-2 text-blue-600 dark:text-blue-400 text-sm font-medium">Currently on site</Text>
                 </div>
-                <div className="bg-blue-50 p-3 rounded-xl">
-                  <UserCheck className="text-blue-600" size={24} />
-                </div>
-              </Flex>
-            </Card>
-
-            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
-              <Flex alignItems="start" justifyContent="between">
-                <div>
-                  <Text className="text-gray-500 font-medium">Today's Check-ins</Text>
-                  <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.todayCheckIns}</Metric>
-                  <Text className="mt-2 text-gray-500 text-sm">Since midnight</Text>
-                </div>
-                <div className="bg-violet-50 p-3 rounded-xl">
-                  <Calendar className="text-violet-600" size={24} />
+                <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
+                  <UserCheck className="text-blue-600 dark:text-blue-400" size={24} />
                 </div>
               </Flex>
             </Card>
 
-            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100">
+            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
               <Flex alignItems="start" justifyContent="between">
                 <div>
-                  <Text className="text-gray-500 font-medium">Pending Approvals</Text>
-                  <Metric className="mt-2 text-3xl font-bold text-gray-900">{stats.pendingApprovals}</Metric>
-                  <Text className="mt-2 text-amber-600 text-sm font-medium">Action required</Text>
+                  <Text className="text-gray-500 dark:text-gray-400 font-medium">Today's Check-ins</Text>
+                  <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.todayCheckIns}</Metric>
+                  <Text className="mt-2 text-gray-500 dark:text-gray-400 text-sm">Since midnight</Text>
                 </div>
-                <div className="bg-amber-50 p-3 rounded-xl">
-                  <Clock className="text-amber-600" size={24} />
+                <div className="bg-violet-50 dark:bg-violet-900/30 p-3 rounded-xl">
+                  <Calendar className="text-violet-600 dark:text-violet-400" size={24} />
+                </div>
+              </Flex>
+            </Card>
+
+            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
+              <Flex alignItems="start" justifyContent="between">
+                <div>
+                  <Text className="text-gray-500 dark:text-gray-400 font-medium">Pending Approvals</Text>
+                  <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.pendingApprovals}</Metric>
+                  <Text className="mt-2 text-amber-600 dark:text-amber-400 text-sm font-medium">Action required</Text>
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-xl">
+                  <Clock className="text-amber-600 dark:text-amber-400" size={24} />
                 </div>
               </Flex>
             </Card>
@@ -323,7 +323,7 @@ const AdminDashboard = () => {
             {/* Add Visitor Button */}
             <button
               onClick={() => setIsAddVisitorOpen(true)}
-              className="w-full bg-slate-900 text-white px-6 py-3 rounded-lg text-base font-medium hover:bg-slate-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg text-base font-medium hover:bg-slate-800 dark:hover:bg-gray-100 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               <UserPlus size={20} />
               Add New Visitor
@@ -345,15 +345,15 @@ const AdminDashboard = () => {
               <div className="mt-6 flex justify-center gap-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-blue-500" />
-                  <span className="text-sm text-gray-500">Low</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Low</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-indigo-500" />
-                  <span className="text-sm text-gray-500">Mid</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Mid</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-cyan-500" />
-                  <span className="text-sm text-gray-500">High</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">High</span>
                 </div>
               </div>
             </Card>
@@ -366,7 +366,7 @@ const AdminDashboard = () => {
             <Title className="text-gray-900 dark:text-white font-bold">Recent Activity</Title>
             <button
               onClick={() => navigate('/reception')}
-              className="text-sm text-blue-600 font-medium hover:text-blue-700"
+              className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300"
             >
               View All
             </button>
@@ -374,7 +374,7 @@ const AdminDashboard = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-slate-700">
                   <th className="pb-3 pl-2">Visitor</th>
                   <th className="pb-3">Floor</th>
                   <th className="pb-3">Status</th>
@@ -383,38 +383,38 @@ const AdminDashboard = () => {
                   <th className="pb-3 text-right pr-2">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                 {recentActivity.length > 0 ? recentActivity.map((activity, i) => (
                   <tr
                     key={i}
                     onClick={() => handleViewVisitor(activity)}
-                    className="group hover:bg-slate-50 transition-colors cursor-pointer"
+                    className="group hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     <td className="py-3 pl-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 dark:from-slate-600 dark:to-slate-800 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                           {activity.name?.charAt(0) || 'V'}
                         </div>
-                        <span className="font-medium text-gray-900 group-hover:text-slate-900">{activity.name || 'Unknown'}</span>
+                        <span className="font-medium text-gray-900 dark:text-white group-hover:text-slate-900 dark:group-hover:text-gray-100">{activity.name || 'Unknown'}</span>
                       </div>
                     </td>
                     <td className="py-3">
                       {activity.floor ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                           {activity.floor}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400">-</span>
+                        <span className="text-sm text-gray-400 dark:text-gray-500">-</span>
                       )}
                     </td>
                     <td className="py-3">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activity.status === 'checked_in'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                          : activity.status === 'pre_registered'
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                            : activity.status === 'pending' || activity.status === 'pending_approval'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                        : activity.status === 'pre_registered'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                          : activity.status === 'pending' || activity.status === 'pending_approval'
+                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                         }`}>
                         {activity.status === 'checked_in' ? 'Checked In'
                           : activity.status === 'pre_registered' ? 'Pre-registered'
@@ -423,15 +423,15 @@ const AdminDashboard = () => {
                                 : 'Checked Out'}
                       </span>
                     </td>
-                    <td className="py-3 text-sm text-gray-500">{activity.time}</td>
-                    <td className="py-3 text-sm text-gray-500">#{activity.badge || 'N/A'}</td>
+                    <td className="py-3 text-sm text-gray-500 dark:text-gray-400">{activity.time}</td>
+                    <td className="py-3 text-sm text-gray-500 dark:text-gray-400">#{activity.badge || 'N/A'}</td>
                     <td className="py-3 text-right pr-2">
-                      <Eye size={16} className="text-gray-400 group-hover:text-slate-900 transition-colors inline-block" />
+                      <Eye size={16} className="text-gray-400 dark:text-gray-500 group-hover:text-slate-900 dark:group-hover:text-gray-300 transition-colors inline-block" />
                     </td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="5" className="py-8 text-center text-gray-500">No recent activity</td>
+                    <td colSpan="5" className="py-8 text-center text-gray-500 dark:text-gray-400">No recent activity</td>
                   </tr>
                 )}
               </tbody>
@@ -461,17 +461,17 @@ const AdminDashboard = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                  className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
                 >
-                  <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b border-gray-100">
+                  <div className="sticky top-0 bg-white dark:bg-slate-900 z-10 px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-800">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">Add New Visitor</h3>
-                        <p className="text-sm text-gray-500 mt-1">Pre-register a visitor for check-in</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">Add New Visitor</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Pre-register a visitor for check-in</p>
                       </div>
                       <button
                         onClick={() => setIsAddVisitorOpen(false)}
-                        className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+                        className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
                       >
                         <X size={20} />
                       </button>
@@ -481,53 +481,53 @@ const AdminDashboard = () => {
                   <div className="space-y-4 px-6 py-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Full Name *
                         </label>
                         <input
                           type="text"
                           value={newVisitor.name}
                           onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                           placeholder="Enter visitor's full name"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Email Address *
                         </label>
                         <input
                           type="email"
                           value={newVisitor.email}
                           onChange={(e) => setNewVisitor({ ...newVisitor, email: e.target.value })}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                           placeholder="visitor@example.com"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Phone Number *
                         </label>
                         <input
                           type="tel"
                           value={newVisitor.phone}
                           onChange={(e) => setNewVisitor({ ...newVisitor, phone: e.target.value })}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                           placeholder="+234-XXX-XXX-XXXX"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Company/Organization
                         </label>
                         <input
                           type="text"
                           value={newVisitor.company}
                           onChange={(e) => setNewVisitor({ ...newVisitor, company: e.target.value })}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                           placeholder="Company name"
                         />
                       </div>
@@ -555,45 +555,45 @@ const AdminDashboard = () => {
                     />
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Purpose of Visit *
                       </label>
                       <textarea
                         value={newVisitor.purpose}
                         onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent resize-none"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent resize-none"
                         placeholder="Brief description of visit purpose"
                         rows={3}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Expected Duration (hours)
                       </label>
                       <input
                         type="number"
                         value={newVisitor.expected_duration}
                         onChange={(e) => setNewVisitor({ ...newVisitor, expected_duration: parseInt(e.target.value) || 0 })}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                         min="1"
                         max="24"
                       />
                     </div>
                   </div>
 
-                  <div className="sticky bottom-0 bg-white px-6 py-4 border-t border-gray-200">
+                  <div className="sticky bottom-0 bg-white dark:bg-slate-900 px-6 py-4 border-t border-gray-200 dark:border-slate-800">
                     <div className="flex items-center justify-end gap-3">
                       <button
                         onClick={() => setIsAddVisitorOpen(false)}
-                        className="px-5 py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+                        className="px-5 py-2.5 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleAddVisitor}
                         disabled={!newVisitor.name || !newVisitor.email || !newVisitor.phone || !newVisitor.host_id || !newVisitor.purpose}
-                        className="px-5 py-2.5 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <UserPlus size={18} />
                         Add Visitor

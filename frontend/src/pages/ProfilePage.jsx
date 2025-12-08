@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  User, 
-  Mail, 
-  Shield, 
-  Building2, 
-  Key, 
-  Eye, 
+import {
+  User,
+  Mail,
+  Shield,
+  Building2,
+  Key,
+  Eye,
   EyeOff,
   Save,
   MapPin
@@ -70,7 +70,7 @@ const ProfilePage = () => {
       if (updateError) throw updateError
 
       showToast('Password updated successfully!', 'success')
-      
+
       // Reset form
       setPasswords({
         currentPassword: '',
@@ -116,8 +116,8 @@ const ProfilePage = () => {
       <div className="space-y-6 max-w-full">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-600 mt-1">Manage your account information and settings</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your account information and settings</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
@@ -125,210 +125,209 @@ const ProfilePage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit"
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden h-fit"
           >
-          <div className="bg-gradient-to-r from-slate-900 to-slate-700 px-6 py-8">
-            <div className="flex items-center gap-4">
-              <div className="bg-white rounded-full p-4">
-                <User className="h-12 w-12 text-slate-900" />
-              </div>
-              <div className="text-white">
-                <h2 className="text-2xl font-bold">{profile?.full_name || 'User'}</h2>
-                <p className="text-slate-200 flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  {profile?.email || user?.email}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 space-y-6">
-            {/* Role */}
-            <div className="flex items-start gap-4">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <Shield className="h-5 w-5 text-gray-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-500">Role</p>
-                <div className="mt-1">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getRoleBadgeColor(profile?.role)}`}>
-                    {profile?.role?.charAt(0).toUpperCase() + profile?.role?.slice(1) || 'N/A'}
-                  </span>
+            <div className="bg-gradient-to-r from-slate-900 to-slate-700 px-6 py-8">
+              <div className="flex items-center gap-4">
+                <div className="bg-white rounded-full p-4">
+                  <User className="h-12 w-12 text-slate-900" />
+                </div>
+                <div className="text-white">
+                  <h2 className="text-2xl font-bold">{profile?.full_name || 'User'}</h2>
+                  <p className="text-slate-200 flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    {profile?.email || user?.email}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* User ID */}
-            <div className="flex items-start gap-4">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <Building2 className="h-5 w-5 text-gray-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-500">User ID</p>
-                <p className="mt-1 text-gray-900 font-mono text-sm break-all">{profile?.id || 'N/A'}</p>
-              </div>
-            </div>
-
-            {/* Assigned Floors (for reception role) */}
-            {profile?.role === 'reception' && profile?.assigned_floors && profile.assigned_floors.length > 0 && (
+            <div className="p-6 space-y-6">
+              {/* Role */}
               <div className="flex items-start gap-4">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <MapPin className="h-5 w-5 text-gray-600" />
+                <div className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg">
+                  <Shield className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-500">Assigned Floors</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {profile.assigned_floors.map((floor, idx) => (
-                      <span 
-                        key={idx}
-                        className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-slate-900 text-white"
-                      >
-                        {getFloorName(floor)}
-                      </span>
-                    ))}
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Role</p>
+                  <div className="mt-1">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getRoleBadgeColor(profile?.role)}`}>
+                      {profile?.role?.charAt(0).toUpperCase() + profile?.role?.slice(1) || 'N/A'}
+                    </span>
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Account Created */}
-            <div className="flex items-start gap-4">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <Building2 className="h-5 w-5 text-gray-600" />
+              {/* User ID */}
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg">
+                  <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">User ID</p>
+                  <p className="mt-1 text-gray-900 dark:text-white font-mono text-sm break-all">{profile?.id || 'N/A'}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-500">Member Since</p>
-                <p className="mt-1 text-gray-900">
-                  {profile?.created_at 
-                    ? new Date(profile.created_at).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+
+              {/* Assigned Floors (for reception role) */}
+              {profile?.role === 'reception' && profile?.assigned_floors && profile.assigned_floors.length > 0 && (
+                <div className="flex items-start gap-4">
+                  <div className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg">
+                    <MapPin className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Assigned Floors</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {profile.assigned_floors.map((floor, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                        >
+                          {getFloorName(floor)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Account Created */}
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg">
+                  <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</p>
+                  <p className="mt-1 text-gray-900 dark:text-white">
+                    {profile?.created_at
+                      ? new Date(profile.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                       })
-                    : 'N/A'}
-                </p>
+                      : 'N/A'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Password Change Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-slate-100 p-3 rounded-lg">
-              <Key className="h-5 w-5 text-slate-900" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Change Password</h3>
-              <p className="text-sm text-gray-500">Update your password to keep your account secure</p>
-            </div>
-          </div>
-
-          <form onSubmit={handlePasswordChange} className="space-y-4">
-            {/* Current Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Current Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showCurrentPassword ? 'text' : 'password'}
-                  value={passwords.currentPassword}
-                  onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 pr-10"
-                  placeholder="Enter current password"
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+          {/* Password Change Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6 h-fit"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                <Key className="h-5 w-5 text-slate-900 dark:text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Change Password</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Update your password to keep your account secure</p>
               </div>
             </div>
 
-            {/* New Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showNewPassword ? 'text' : 'password'}
-                  value={passwords.newPassword}
-                  onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 pr-10"
-                  placeholder="Enter new password (min. 8 characters)"
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              {/* Current Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={passwords.currentPassword}
+                    onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-slate-500 dark:focus:ring-blue-400 focus:border-slate-500 pr-10"
+                    placeholder="Enter current password"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Confirm New Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={passwords.confirmPassword}
-                  onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 pr-10"
-                  placeholder="Confirm new password"
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+              {/* New Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={passwords.newPassword}
+                    onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-slate-500 dark:focus:ring-blue-400 focus:border-slate-500 pr-10"
+                    placeholder="Enter new password (min. 8 characters)"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
+                    {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Password Requirements */}
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-slate-900 mb-2">Password Requirements:</p>
-              <ul className="text-sm text-slate-700 space-y-1">
-                <li>• At least 8 characters long</li>
-                <li>• Include uppercase and lowercase letters</li>
-                <li>• Include at least one number</li>
-              </ul>
-            </div>
+              {/* Confirm New Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={passwords.confirmPassword}
+                    onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-slate-500 dark:focus:ring-blue-400 focus:border-slate-500 pr-10"
+                    placeholder="Confirm new password"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
 
-            {/* Submit Button */}
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: loading ? 1 : 1.02 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-              className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                loading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white shadow-lg hover:shadow-xl'
-              }`}
-            >
-              <Save className="h-5 w-5" />
-              {loading ? 'Updating Password...' : 'Update Password'}
-            </motion.button>
-          </form>
-        </motion.div>
+              {/* Password Requirements */}
+              <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+                <p className="text-sm font-medium text-slate-900 dark:text-white mb-2">Password Requirements:</p>
+                <ul className="text-sm text-slate-700 dark:text-gray-400 space-y-1">
+                  <li>• At least 8 characters long</li>
+                  <li>• Include uppercase and lowercase letters</li>
+                  <li>• Include at least one number</li>
+                </ul>
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
+                whileTap={{ scale: loading ? 1 : 0.98 }}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${loading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-gray-100 text-white dark:text-slate-900 shadow-lg hover:shadow-xl'
+                  }`}
+              >
+                <Save className="h-5 w-5" />
+                {loading ? 'Updating Password...' : 'Update Password'}
+              </motion.button>
+            </form>
+          </motion.div>
         </div>
       </div>
     </DashboardLayout>

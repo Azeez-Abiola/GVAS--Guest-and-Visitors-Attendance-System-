@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Shield, 
-  Plus, 
-  Search, 
+import {
+  Shield,
+  Plus,
+  Search,
   Filter,
-  Edit, 
-  Trash2, 
+  Edit,
+  Trash2,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -267,20 +267,20 @@ const BadgeManagement = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Badge Management</h1>
-            <p className="text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Badge Management</h1>
+            <p className="text-gray-500 dark:text-gray-400">
               Track and manage physical badge inventory
               {profile?.assigned_floors && profile.assigned_floors.length > 0 && (
                 <span className="ml-2">
-                  • <span className="font-semibold text-slate-900">Your Floors:</span>{' '}
+                  • <span className="font-semibold text-slate-900 dark:text-white">Your Floors:</span>{' '}
                   {profile.assigned_floors.map((floor, idx) => {
-                    const floorName = typeof floor === 'number' 
+                    const floorName = typeof floor === 'number'
                       ? (floor === 0 ? 'Ground Floor' : `${floor === 1 ? '1st' : floor === 2 ? '2nd' : floor === 3 ? '3rd' : `${floor}th`} Floor`)
                       : floor
                     return (
                       <span key={idx}>
                         {idx > 0 && ', '}
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-900 text-white">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900">
                           {floorName}
                         </span>
                       </span>
@@ -290,7 +290,7 @@ const BadgeManagement = () => {
               )}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -309,15 +309,15 @@ const BadgeManagement = () => {
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">Total Badges</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Badges</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.total}</p>
               </div>
-              <div className="bg-blue-50 p-3 rounded-xl">
-                <Package className="h-6 w-6 text-blue-600" />
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
+                <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </motion.div>
@@ -326,16 +326,16 @@ const BadgeManagement = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">Available</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.available}</p>
-                <p className="text-blue-600 text-xs mt-1 font-medium">Ready to assign</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Available</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.available}</p>
+                <p className="text-blue-600 dark:text-blue-400 text-xs mt-1 font-medium">Ready to assign</p>
               </div>
-              <div className="bg-blue-50 p-3 rounded-xl">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
+                <CheckCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </motion.div>
@@ -344,16 +344,16 @@ const BadgeManagement = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">In Use</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.inUse}</p>
-                <p className="text-indigo-600 text-xs mt-1 font-medium">Currently assigned</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">In Use</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.inUse}</p>
+                <p className="text-indigo-600 dark:text-indigo-400 text-xs mt-1 font-medium">Currently assigned</p>
               </div>
-              <div className="bg-indigo-50 p-3 rounded-xl">
-                <Users className="h-6 w-6 text-indigo-600" />
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 p-3 rounded-xl">
+                <Users className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
             </div>
           </motion.div>
@@ -362,16 +362,16 @@ const BadgeManagement = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">Maintenance</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.maintenance}</p>
-                <p className="text-amber-600 text-xs mt-1 font-medium">Under repair</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Maintenance</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.maintenance}</p>
+                <p className="text-amber-600 dark:text-amber-400 text-xs mt-1 font-medium">Under repair</p>
               </div>
-              <div className="bg-amber-50 p-3 rounded-xl">
-                <AlertCircle className="h-6 w-6 text-amber-600" />
+              <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-xl">
+                <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
               </div>
             </div>
           </motion.div>
@@ -381,58 +381,54 @@ const BadgeManagement = () => {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="bg-white rounded-2xl shadow-sm border-none ring-1 ring-gray-100 p-6"
+          className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 p-6"
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1 relative w-full">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search by badge number or type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all outline-none"
+                className="w-full pl-12 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:border-blue-600 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-400 transition-all outline-none"
               />
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                  filter === 'all'
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'all'
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  }`}
               >
                 All
               </button>
               <button
                 onClick={() => setFilter('available')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                  filter === 'available'
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'available'
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  }`}
               >
                 Available
               </button>
               <button
                 onClick={() => setFilter('in-use')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                  filter === 'in-use'
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'in-use'
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  }`}
               >
                 In Use
               </button>
               <button
                 onClick={() => setFilter('maintenance')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                  filter === 'maintenance'
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === 'maintenance'
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  }`}
               >
                 Maintenance
               </button>
@@ -453,46 +449,46 @@ const BadgeManagement = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-white rounded-2xl shadow-sm border-none ring-1 ring-gray-100 overflow-hidden hover:shadow-md transition-all duration-300"
+                className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 overflow-hidden hover:shadow-md transition-all duration-300"
               >
-                <div className={`p-6 ${getBadgeStatusColor(badge.status)} bg-opacity-10`}>
+                <div className={`p-6 ${getBadgeStatusColor(badge.status)} bg-opacity-10 dark:bg-opacity-20`}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className="bg-white p-2.5 rounded-xl shadow-sm">
-                        <Shield className="h-5 w-5 text-gray-700" />
+                      <div className="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-sm">
+                        <Shield className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">{badge.badge_number}</h3>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{badge.badge_number}</h3>
                         <span className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-medium border ${getBadgeTypeColor(badge.type)} mt-1`}>
                           {badge.type ? badge.type.toUpperCase() : 'STANDARD'}
                         </span>
                       </div>
                     </div>
-                    <span className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium border ${getBadgeStatusColor(badge.status)} bg-white`}>
+                    <span className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium border ${getBadgeStatusColor(badge.status)} bg-white dark:bg-slate-800`}>
                       {getBadgeStatusIcon(badge.status)}
                       <span className="capitalize">{badge.status.replace('-', ' ')}</span>
                     </span>
                   </div>
 
                   {badge.status === 'in-use' && badge.current_visitor && (
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200/50">
-                      <p className="text-xs text-gray-500 mb-1">Assigned to:</p>
-                      <p className="font-semibold text-gray-900 text-sm">{badge.current_visitor.name}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Assigned to:</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{badge.current_visitor.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Since: {new Date(badge.assigned_at).toLocaleString()}
                       </p>
                     </div>
                   )}
 
                   {badge.notes && (
-                    <div className="mt-3 text-sm text-gray-600 bg-white/50 p-2 rounded-lg">
-                      <p className="font-medium text-xs text-gray-500">Notes:</p>
+                    <div className="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-slate-800/50 p-2 rounded-lg">
+                      <p className="font-medium text-xs text-gray-500 dark:text-gray-400">Notes:</p>
                       <p className="mt-1 text-xs">{badge.notes}</p>
                     </div>
                   )}
                 </div>
 
-                <div className="p-4 bg-gray-50/50 border-t border-gray-100">
+                <div className="p-4 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-700">
                   <div className="flex items-center justify-between gap-2">
                     {badge.status === 'issued' && (
                       <motion.button
@@ -578,10 +574,10 @@ const BadgeManagement = () => {
         )}
 
         {filteredBadges.length === 0 && !loading && (
-          <div className="bg-white rounded-2xl shadow-sm border-none ring-1 ring-gray-100 p-12 text-center">
-            <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No badges found</h3>
-            <p className="text-gray-500">Try adjusting your filters or search term</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 p-12 text-center">
+            <Package className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No badges found</h3>
+            <p className="text-gray-500 dark:text-gray-400">Try adjusting your filters or search term</p>
           </div>
         )}
       </div>
@@ -603,7 +599,7 @@ const BadgeManagement = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
               Release Badge {selectedBadge.badge_number}
             </h2>
-            
+
             <p className="text-gray-600 text-center mb-6">
               This will release the badge back to available inventory. The visitor's badge assignment will be cleared.
             </p>
@@ -658,7 +654,7 @@ const BadgeManagement = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
               Mark Badge Available
             </h2>
-            
+
             <p className="text-gray-600 text-center mb-6">
               Are you sure you want to mark badge <strong>{selectedBadge.badge_number}</strong> as available? This will return it to the active inventory.
             </p>
@@ -705,7 +701,7 @@ const BadgeManagement = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
               Mark Badge as Lost
             </h2>
-            
+
             <p className="text-gray-600 text-center mb-6">
               Are you sure you want to mark badge <strong>{selectedBadge.badge_number}</strong> as lost? This will remove it from available inventory.
             </p>
@@ -758,7 +754,7 @@ const BadgeManagement = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
               Mark Badge as Damaged
             </h2>
-            
+
             <p className="text-gray-600 text-center mb-6">
               Are you sure you want to mark badge <strong>{selectedBadge.badge_number}</strong> as damaged? This will remove it from available inventory.
             </p>
@@ -811,7 +807,7 @@ const BadgeManagement = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
               Send Badge to Maintenance
             </h2>
-            
+
             <p className="text-gray-600 text-center mb-6">
               Are you sure you want to send badge <strong>{selectedBadge.badge_number}</strong> to maintenance? This will temporarily remove it from circulation.
             </p>

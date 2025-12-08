@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Users, Clock, CheckCircle, LogOut, BadgeCheck, Calendar } from 'lucide-react';
+import { Users, Clock, CheckCircle, LogOut, BadgeCheck, Calendar, TrendingUp } from 'lucide-react';
 import ApiService from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -28,13 +28,26 @@ const HostAnalytics = () => {
       // Fetch all visitors for this host
       const visitors = await ApiService.getVisitors({ host_id: profile.id });
       const totalVisitors = visitors.length;
-      const pendingApprovals = visitors.filter(v => v.status === 'pending').length;
+      const pendingApprovals = visitors.filter(v => v.status === 'pending' || v.status === 'pending_approval').length;
       const checkedIn = visitors.filter(v => v.status === 'checked_in').length;
       const checkedOut = visitors.filter(v => v.status === 'checked_out').length;
       const upcomingVisits = visitors.filter(v => v.status === 'pre_registered').length;
+
+      // Calculate today's visitors for this host (checked in today)
+      const todayLocal = new Date().toLocaleDateString('en-CA');
+      const todayVisitors = visitors.filter(v => {
+        // Check if they checked in TODAY
+        if (v.status === 'checked_in' || v.status === 'checked_out') {
+          if (v.check_in_time) {
+            return new Date(v.check_in_time).toLocaleDateString('en-CA') === todayLocal;
+          }
+        }
+        return false;
+      }).length;
+
       // Fetch badges assigned to this host's visitors
       const badgesAssigned = visitors.filter(v => v.badge_number).length;
-      setStats({ totalVisitors, pendingApprovals, checkedIn, checkedOut, badgesAssigned, upcomingVisits });
+      setStats({ totalVisitors, pendingApprovals, checkedIn, checkedOut, badgesAssigned, upcomingVisits, todayVisitors });
     } catch (error) {
       console.error('Failed to fetch host analytics:', error);
     } finally {
@@ -43,6 +56,7 @@ const HostAnalytics = () => {
   };
 
   const statCards = [
+    { label: "Today's Visitors", value: stats.todayVisitors || 0, icon: TrendingUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
     { label: 'Total Visitors', value: stats.totalVisitors, icon: Users, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
     { label: 'Pending Approvals', value: stats.pendingApprovals, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
     { label: 'Checked In', value: stats.checkedIn, icon: CheckCircle, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },

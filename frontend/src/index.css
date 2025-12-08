@@ -10,7 +10,116 @@
 
   body {
     @apply bg-gradient-to-br from-gray-50 via-white to-gray-100;
-    @apply min-h-screen text-gray-900;
+    @apply dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950;
+    @apply min-h-screen text-gray-900 dark:text-gray-100;
+    @apply transition-colors duration-300;
+  }
+
+  /* Tremor Chart dark mode overrides */
+  .dark .tremor-Card-root {
+    @apply bg-slate-900 ring-slate-800;
+  }
+
+  .dark .tremor-Title-root {
+    @apply text-white;
+  }
+
+  .dark .tremor-Text-root {
+    @apply text-gray-400;
+  }
+
+  .dark .tremor-Metric-root {
+    @apply text-white;
+  }
+
+  .dark .tremor-TableCell-root {
+    @apply text-gray-300;
+  }
+
+  .dark .tremor-TableHeaderCell-root {
+    @apply text-gray-400;
+  }
+
+  .dark .tremor-TableRow-root {
+    @apply border-slate-700;
+  }
+
+  .dark .tremor-TableBody-root {
+    @apply divide-slate-700;
+  }
+
+  /* Chart axis labels and legends */
+  .dark .recharts-cartesian-axis-tick-value {
+    fill: #9ca3af !important;
+  }
+
+  .dark .recharts-legend-item-text {
+    color: #9ca3af !important;
+  }
+
+  .dark .recharts-default-legend {
+    color: #9ca3af !important;
+  }
+
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+  }
+
+  .dark .recharts-tooltip-label {
+    color: #f1f5f9 !important;
+  }
+
+  .dark .recharts-tooltip-item {
+    color: #e2e8f0 !important;
+  }
+
+  .dark .recharts-pie-label-text {
+    fill: #f1f5f9 !important;
+  }
+
+  /* Tremor Select dark mode */
+  .dark .tremor-SelectTrigger-root {
+    @apply bg-slate-800 border-slate-700 text-white;
+  }
+
+  .dark .tremor-SelectContent-root {
+    @apply bg-slate-800 border-slate-700;
+  }
+
+  .dark .tremor-SelectItem-root {
+    @apply text-gray-300 hover:bg-slate-700;
+  }
+
+  .dark .tremor-SelectItem-root[data-selected="true"] {
+    @apply bg-slate-700 text-white;
+  }
+
+  /* Tremor Tab dark mode */
+  .dark .tremor-Tab-root {
+    @apply text-gray-400;
+  }
+
+  .dark .tremor-Tab-root[data-selected="true"] {
+    @apply text-white border-blue-400;
+  }
+
+  /* Tremor Badge dark mode */
+  .dark .tremor-Badge-root {
+    @apply bg-slate-700 text-gray-200;
+  }
+
+  /* Tremor BarList dark mode */
+  .dark .tremor-BarList-root .tremor-BarList-item {
+    @apply text-gray-300;
+  }
+
+  .dark .tremor-BarList-root .tremor-BarList-label {
+    @apply text-gray-300;
+  }
+
+  .dark .tremor-BarList-root .tremor-BarList-value {
+    @apply text-gray-300;
   }
 }
 

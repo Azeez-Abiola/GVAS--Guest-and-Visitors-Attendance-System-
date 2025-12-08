@@ -62,15 +62,15 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
 
   const getStatusBadge = (status) => {
     const badges = {
-      'pending': { bg: 'bg-amber-100', text: 'text-amber-800', icon: AlertCircle, label: 'Pending Check-in' },
-      'checked-in': { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle, label: 'Checked In' },
-      'checked-out': { bg: 'bg-gray-100', text: 'text-gray-800', icon: XCircle, label: 'Checked Out' },
-      'pre-registered': { bg: 'bg-blue-100', text: 'text-blue-800', icon: Calendar, label: 'Pre-registered' },
-      'cancelled': { bg: 'bg-red-100', text: 'text-red-800', icon: XCircle, label: 'Cancelled' }
+      'pending': { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-800 dark:text-amber-300', icon: AlertCircle, label: 'Pending Check-in' },
+      'checked-in': { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-800 dark:text-green-300', icon: CheckCircle, label: 'Checked In' },
+      'checked-out': { bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-800 dark:text-gray-300', icon: XCircle, label: 'Checked Out' },
+      'pre-registered': { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-800 dark:text-blue-300', icon: Calendar, label: 'Pre-registered' },
+      'cancelled': { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-800 dark:text-red-300', icon: XCircle, label: 'Cancelled' }
     }
     const badge = badges[status] || badges['pending']
     const Icon = badge.icon
-    
+
     return (
       <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${badge.bg} ${badge.text} font-semibold`}>
         <Icon className="w-5 h-5" />
@@ -113,7 +113,7 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 onClick={(e) => e.stopPropagation()}
-                className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden"
+                className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden"
               >
                 {/* Header */}
                 <div className="bg-gradient-to-r from-slate-900 to-slate-700 px-8 py-6">
@@ -152,57 +152,57 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
                     {/* Left Column - Visitor Information */}
                     <div className="space-y-6">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <User className="w-5 h-5 text-slate-900" />
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                          <User className="w-5 h-5 text-slate-900 dark:text-white" />
                           Visitor Information
                         </h3>
-                        
-                        <div className="space-y-4 bg-slate-50 rounded-xl p-6">
+
+                        <div className="space-y-4 bg-slate-50 dark:bg-slate-800 rounded-xl p-6">
                           <div className="flex items-start gap-3">
-                            <Mail className="w-5 h-5 text-slate-600 mt-0.5" />
+                            <Mail className="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5" />
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</p>
-                              <p className="text-gray-900 font-medium">{visitor.email || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Email</p>
+                              <p className="text-gray-900 dark:text-white font-medium">{visitor.email || 'N/A'}</p>
                             </div>
                           </div>
 
                           <div className="flex items-start gap-3">
-                            <Phone className="w-5 h-5 text-slate-600 mt-0.5" />
+                            <Phone className="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5" />
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone</p>
-                              <p className="text-gray-900 font-medium">{visitor.phone || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Phone</p>
+                              <p className="text-gray-900 dark:text-white font-medium">{visitor.phone || 'N/A'}</p>
                             </div>
                           </div>
 
                           <div className="flex items-start gap-3">
-                            <Building2 className="w-5 h-5 text-slate-600 mt-0.5" />
+                            <Building2 className="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5" />
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Company</p>
-                              <p className="text-gray-900 font-medium">{visitor.company || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Company</p>
+                              <p className="text-gray-900 dark:text-white font-medium">{visitor.company || 'N/A'}</p>
                             </div>
                           </div>
 
                           <div className="flex items-start gap-3">
-                            <User className="w-5 h-5 text-slate-600 mt-0.5" />
+                            <User className="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5" />
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Host</p>
-                              <p className="text-gray-900 font-medium">{visitor.host_name || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Host</p>
+                              <p className="text-gray-900 dark:text-white font-medium">{visitor.host_name || 'N/A'}</p>
                             </div>
                           </div>
 
                           <div className="flex items-start gap-3">
-                            <MapPin className="w-5 h-5 text-slate-600 mt-0.5" />
+                            <MapPin className="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5" />
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Floor</p>
-                              <p className="text-gray-900 font-medium">Floor {visitor.floor_number || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Floor</p>
+                              <p className="text-gray-900 dark:text-white font-medium">Floor {visitor.floor_number || 'N/A'}</p>
                             </div>
                           </div>
 
                           <div className="flex items-start gap-3">
-                            <Hash className="w-5 h-5 text-slate-600 mt-0.5" />
+                            <Hash className="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5" />
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Badge Number</p>
-                              <p className="text-gray-900 font-medium">
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Badge Number</p>
+                              <p className="text-gray-900 dark:text-white font-medium">
                                 {visitor.badge_number ? `#${visitor.badge_number}` : 'Not Assigned'}
                               </p>
                             </div>
@@ -212,36 +212,36 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
 
                       {/* Timeline */}
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <Clock className="w-5 h-5 text-slate-900" />
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-slate-900 dark:text-white" />
                           Timeline
                         </h3>
-                        
+
                         <div className="space-y-3">
-                          <div className="flex items-center gap-3 bg-slate-50 rounded-lg p-4">
-                            <Calendar className="w-5 h-5 text-slate-600" />
+                          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
+                            <Calendar className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Created</p>
-                              <p className="text-gray-900 font-medium">{formatDateTime(visitor.created_at)}</p>
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Created</p>
+                              <p className="text-gray-900 dark:text-white font-medium">{formatDateTime(visitor.created_at)}</p>
                             </div>
                           </div>
 
                           {visitor.check_in_time && (
-                            <div className="flex items-center gap-3 bg-green-50 rounded-lg p-4">
-                              <CheckCircle className="w-5 h-5 text-green-600" />
+                            <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                               <div>
-                                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide">Check-in Time</p>
-                                <p className="text-gray-900 font-medium">{formatDateTime(visitor.check_in_time)}</p>
+                                <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide">Check-in Time</p>
+                                <p className="text-gray-900 dark:text-white font-medium">{formatDateTime(visitor.check_in_time)}</p>
                               </div>
                             </div>
                           )}
 
                           {visitor.check_out_time && (
-                            <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4">
-                              <XCircle className="w-5 h-5 text-gray-600" />
+                            <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                              <XCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                               <div>
-                                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Check-out Time</p>
-                                <p className="text-gray-900 font-medium">{formatDateTime(visitor.check_out_time)}</p>
+                                <p className="text-xs font-semibold text-gray-700 dark:text-gray-400 uppercase tracking-wide">Check-out Time</p>
+                                <p className="text-gray-900 dark:text-white font-medium">{formatDateTime(visitor.check_out_time)}</p>
                               </div>
                             </div>
                           )}
@@ -252,39 +252,39 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
                     {/* Right Column - QR Code & Guest Code */}
                     <div className="space-y-6">
                       {/* QR Code */}
-                      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border-2 border-slate-200">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <QrCode className="w-5 h-5 text-slate-900" />
+                      <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-6 border-2 border-slate-200 dark:border-slate-600">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                          <QrCode className="w-5 h-5 text-slate-900 dark:text-white" />
                           QR Code for Check-in
                         </h3>
-                        
+
                         {qrCodeUrl ? (
                           <div className="bg-white rounded-xl p-6 shadow-sm">
                             <img src={qrCodeUrl} alt="QR Code" className="w-full h-auto" />
-                            <p className="text-center text-sm text-gray-500 mt-4">
+                            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
                               Scan this code at reception to check in
                             </p>
                           </div>
                         ) : (
-                          <div className="bg-white rounded-xl p-8 text-center">
-                            <QrCode className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                            <p className="text-gray-500 text-sm">QR code not available</p>
-                            <p className="text-xs text-gray-400 mt-1">This visitor was created before QR codes were implemented</p>
+                          <div className="bg-white dark:bg-slate-800 rounded-xl p-8 text-center">
+                            <QrCode className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                            <p className="text-gray-500 dark:text-gray-400 text-sm">QR code not available</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">This visitor was created before QR codes were implemented</p>
                           </div>
                         )}
                       </div>
 
                       {/* Guest Code */}
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <Hash className="w-5 h-5 text-blue-900" />
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border-2 border-blue-200 dark:border-blue-700">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                          <Hash className="w-5 h-5 text-blue-900 dark:text-blue-400" />
                           Guest Code
                         </h3>
-                        
+
                         {visitor.guest_code ? (
-                          <div className="bg-white rounded-xl p-8 text-center shadow-sm">
+                          <div className="bg-white dark:bg-slate-800 rounded-xl p-8 text-center shadow-sm">
                             <div className="relative inline-block">
-                              <div className="inline-flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-xl font-mono text-3xl font-bold tracking-wider">
+                              <div className="inline-flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-xl font-mono text-3xl font-bold tracking-wider">
                                 {visitor.guest_code}
                               </div>
                               <button
@@ -299,24 +299,24 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
                                 )}
                               </button>
                             </div>
-                            <p className="text-sm text-gray-500 mt-4">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
                               {copied ? 'Code copied to clipboard!' : 'Share this code with reception for manual check-in'}
                             </p>
                           </div>
                         ) : (
-                          <div className="bg-white rounded-xl p-8 text-center">
-                            <Hash className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                            <p className="text-gray-500 text-sm">Guest code not available</p>
-                            <p className="text-xs text-gray-400 mt-1">This visitor was created before guest codes were implemented</p>
+                          <div className="bg-white dark:bg-slate-800 rounded-xl p-8 text-center">
+                            <Hash className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                            <p className="text-gray-500 dark:text-gray-400 text-sm">Guest code not available</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">This visitor was created before guest codes were implemented</p>
                           </div>
                         )}
                       </div>
 
                       {/* Purpose */}
                       {visitor.purpose && (
-                        <div className="bg-slate-50 rounded-xl p-6">
-                          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Purpose of Visit</h3>
-                          <p className="text-gray-900">{visitor.purpose}</p>
+                        <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6">
+                          <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">Purpose of Visit</h3>
+                          <p className="text-gray-900 dark:text-white">{visitor.purpose}</p>
                         </div>
                       )}
                     </div>
@@ -324,9 +324,9 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
                 </div>
 
                 {/* Footer */}
-                <div className="bg-slate-50 px-8 py-4 flex items-center justify-between border-t border-slate-200">
-                  <p className="text-sm text-gray-500">
-                    Visitor ID: <span className="font-mono font-semibold text-gray-900">{visitor.visitor_id || visitor.id}</span>
+                <div className="bg-slate-50 dark:bg-slate-800 px-8 py-4 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Visitor ID: <span className="font-mono font-semibold text-gray-900 dark:text-white">{visitor.visitor_id || visitor.id}</span>
                   </p>
                   <div className="flex items-center gap-3">
                     {onEdit && (
@@ -342,7 +342,7 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
                     )}
                     <button
                       onClick={onClose}
-                      className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors"
+                      className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors"
                     >
                       Close
                     </button>

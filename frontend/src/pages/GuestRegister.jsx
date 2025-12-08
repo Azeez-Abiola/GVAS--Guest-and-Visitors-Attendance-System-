@@ -107,7 +107,7 @@ const GuestRegister = () => {
         visit_time: formData.visit_time || null,
         guest_code: generatedCode,
         visitor_id: crypto.randomUUID ? crypto.randomUUID() : `vis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: 'pre_registered',
+        status: 'pending_approval',
         host_name: selectedHost.name || selectedHost.full_name
         // Note: tenant_id is handled by the API service
       }

@@ -210,7 +210,7 @@ const LandingPage = () => {
               className="group w-full sm:w-auto min-w-[180px] px-8 py-4 rounded-full bg-[#070f2b] dark:bg-white text-white dark:text-[#070f2b] font-semibold text-lg hover:bg-[#070f2b]/90 dark:hover:bg-white/90 transition-all shadow-xl shadow-[#070f2b]/20 dark:shadow-white/10"
             >
               <span className="flex items-center justify-center space-x-2">
-                <span>Start Free Trial</span>
+                <span>Register as Guest</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </span>
             </button>
@@ -260,15 +260,47 @@ const LandingPage = () => {
       </section>
 
       {/* Trusted By Section */}
-      <section className="py-12 border-y border-[#070f2b]/5 dark:border-white/5 bg-[#070f2b]/[0.02] dark:bg-white/[0.02]">
+      <section className="py-12 border-y border-[#070f2b]/5 dark:border-white/5 bg-[#070f2b]/[0.02] dark:bg-white/[0.02] overflow-hidden">
         <div className="container mx-auto px-6">
           <p className="text-[#070f2b]/50 dark:text-white/50 text-xs md:text-sm mb-8 text-center font-bold tracking-[0.2em] uppercase">Trusted by forward-thinking companies</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
-            <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b] dark:text-white tracking-tight">Acme Corp</h3>
-            <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white tracking-widest">GLOBAL</h3>
-            <h3 className="text-xl md:text-2xl font-black font-mono text-[#070f2b] dark:text-white">NEXUS</h3>
-            <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white italic">Vertex</h3>
-            <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b] dark:text-white">Stark Industries</h3>
+
+          {/* Infinite Scrolling Carousel */}
+          <div className="relative">
+            <style dangerouslySetInnerHTML={{
+              __html: `
+              @keyframes scroll {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+              .animate-scroll {
+                animation: scroll 30s linear infinite;
+              }
+              .animate-scroll:hover {
+                animation-play-state: paused;
+              }
+            `}} />
+
+            <div className="flex animate-scroll">
+              {/* First set of companies */}
+              <div className="flex items-center gap-16 md:gap-24 px-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
+                <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b] dark:text-white tracking-tight whitespace-nowrap">Acme Corp</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white tracking-widest whitespace-nowrap">GLOBAL</h3>
+                <h3 className="text-xl md:text-2xl font-black font-mono text-[#070f2b] dark:text-white whitespace-nowrap">NEXUS</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white italic whitespace-nowrap">Vertex</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b] dark:text-white whitespace-nowrap">Stark Industries</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white whitespace-nowrap">TechFlow</h3>
+              </div>
+
+              {/* Duplicate set for seamless loop */}
+              <div className="flex items-center gap-16 md:gap-24 px-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
+                <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b] dark:text-white tracking-tight whitespace-nowrap">Acme Corp</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white tracking-widest whitespace-nowrap">GLOBAL</h3>
+                <h3 className="text-xl md:text-2xl font-black font-mono text-[#070f2b] dark:text-white whitespace-nowrap">NEXUS</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white italic whitespace-nowrap">Vertex</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-serif text-[#070f2b] dark:text-white whitespace-nowrap">Stark Industries</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-sans text-[#070f2b] dark:text-white whitespace-nowrap">TechFlow</h3>
+              </div>
+            </div>
           </div>
         </div>
       </section>
