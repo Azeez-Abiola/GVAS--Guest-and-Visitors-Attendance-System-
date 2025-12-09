@@ -19,8 +19,13 @@ import {
 import ApiService from '../../services/api';
 import { generateAccessCode } from '../../utils/auth';
 import { supabase } from '../../lib/supabase';
+import { useNavigate } from 'react-router-dom';
+import { Mail, MonitorPlay } from 'lucide-react';
+import GuestInviteModal from '../../components/GuestInviteModal';
 
 const ReceptionistDashboard = () => {
+  const navigate = useNavigate();
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [visitors, setVisitors] = useState([]);
   const [todayVisitors, setTodayVisitors] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,7 +44,7 @@ const ReceptionistDashboard = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -110,7 +115,7 @@ const ReceptionistDashboard = () => {
           console.log('New notification:', payload);
           setNotifications(prev => [payload.new, ...prev]);
           setUnreadCount(prev => prev + 1);
-          
+
           // Show browser notification if permitted
           if (Notification.permission === 'granted') {
             new Notification(payload.new.title, {
@@ -309,6 +314,24 @@ const ReceptionistDashboard = () => {
               </p>
             </div>
 
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+              >
+                <Mail size={18} />
+                Invite Guest
+              </button>
+
+              <button
+                onClick={() => navigate('/reception/visitor-kiosk')}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              >
+                <MonitorPlay size={18} />
+                Visitor Kiosk
+              </button>
+            </div>
+
             {/* Notifications */}
             <div className="relative">
               <button
@@ -368,14 +391,12 @@ const ReceptionistDashboard = () => {
                               <div
                                 key={notification.id}
                                 onClick={() => !notification.is_read && markNotificationAsRead(notification.id)}
-                                className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                                  !notification.is_read ? 'bg-blue-50' : ''
-                                }`}
+                                className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.is_read ? 'bg-blue-50' : ''
+                                  }`}
                               >
                                 <div className="flex items-start gap-3">
-                                  <div className={`w-2 h-2 rounded-full mt-2 ${
-                                    !notification.is_read ? 'bg-blue-600' : 'bg-gray-300'
-                                  }`} />
+                                  <div className={`w-2 h-2 rounded-full mt-2 ${!notification.is_read ? 'bg-blue-600' : 'bg-gray-300'
+                                    }`} />
                                   <div className="flex-1">
                                     <Text className="font-semibold text-slate-900 mb-1">
                                       {notification.title}
@@ -542,7 +563,13 @@ const ReceptionistDashboard = () => {
           </Table>
         </Card>
       </div>
-    </div>
+      <GuestInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        hostName={currentUser?.full_name}
+        hostId={currentUser?.id}
+      />
+    </div >
   );
 };
 

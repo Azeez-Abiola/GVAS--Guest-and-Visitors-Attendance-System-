@@ -13,7 +13,8 @@ import {
   XCircle,
   LogOut,
   LogIn,
-  X
+  X,
+  Mail
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
@@ -24,6 +25,7 @@ import FloorSelector from '../components/FloorSelector'
 import VisitorDetailModal from '../components/VisitorDetailModal'
 import NotificationListener from '../components/NotificationListener'
 import { useAuth } from '../contexts/AuthContext'
+import GuestInviteModal from '../components/GuestInviteModal'
 
 const ReceptionDashboard = () => {
   const { profile, user } = useAuth()
@@ -42,6 +44,7 @@ const ReceptionDashboard = () => {
   const [showCheckOutModal, setShowCheckOutModal] = useState(false)
   const [showPrintModal, setShowPrintModal] = useState(false)
   const [showVisitorDetail, setShowVisitorDetail] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState(null)
   const [visitorToCheckOut, setVisitorToCheckOut] = useState(null)
   const [visitorToCheckIn, setVisitorToCheckIn] = useState(null)
@@ -875,9 +878,13 @@ const ReceptionDashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-600 dark:text-gray-300 shadow-sm">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </div>
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+            >
+              <Mail size={18} />
+              Invite Guest
+            </button>
           </div>
         </div>
 
@@ -1613,6 +1620,12 @@ const ReceptionDashboard = () => {
           }
           await loadData()
         }}
+      />
+      <GuestInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        hostName={profile?.full_name}
+        hostId={profile?.id}
       />
     </DashboardLayout >
   )

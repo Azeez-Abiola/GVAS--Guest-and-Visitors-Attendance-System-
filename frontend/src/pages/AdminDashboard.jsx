@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react'
 import { Card, Title, Text, Metric, Flex, Grid, ProgressBar, AreaChart, DonutChart, Badge as TremorBadge } from '@tremor/react'
-import { Users, UserCheck, Clock, TrendingUp, Calendar, Eye, UserPlus, Shield, Building2, X } from 'lucide-react'
+import { Users, UserCheck, Clock, TrendingUp, Calendar, Eye, UserPlus, Shield, Building2, X, MonitorPlay, Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
@@ -10,10 +10,12 @@ import { useAuth } from '../contexts/AuthContext'
 import HostSelector from '../components/HostSelector'
 import FloorSelector from '../components/FloorSelector'
 import VisitorDetailModal from '../components/VisitorDetailModal'
+import GuestInviteModal from '../components/GuestInviteModal'
 
 const AdminDashboard = () => {
   const { profile } = useAuth()
   const navigate = useNavigate()
+  const [showInviteModal, setShowInviteModal] = useState(false)
   const [stats, setStats] = useState({
     totalVisitors: 0,
     activeVisitors: 0,
@@ -205,11 +207,19 @@ const AdminDashboard = () => {
             <p className="text-gray-500 dark:text-gray-400">Overview of visitor activity and system status</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-600 dark:text-gray-300 shadow-sm transition-colors">
-                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </div>
-            </div>
+            <button
+              onClick={() => navigate('/reception/visitor-kiosk')}
+              className="px-4 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 rounded-lg transition-colors shadow-sm"
+            >
+              Visitor Kiosk
+            </button>
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+            >
+              <Mail size={18} />
+              Invite Guest
+            </button>
           </div>
         </div>
 
@@ -920,6 +930,12 @@ const AdminDashboard = () => {
           })
           setIsEditVisitorOpen(true)
         }}
+      />
+      <GuestInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        hostName={profile?.full_name}
+        hostId={profile?.id}
       />
     </DashboardLayout>
   )

@@ -4,8 +4,11 @@ import { Users, Clock, CheckCircle, LogOut, BadgeCheck, Calendar, TrendingUp } f
 import ApiService from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
+import GuestInviteModal from '../../components/GuestInviteModal';
+
 const HostAnalytics = () => {
   const { profile } = useAuth();
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [stats, setStats] = useState({
     totalVisitors: 0,
     pendingApprovals: 0,
@@ -68,9 +71,11 @@ const HostAnalytics = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Host Analytics</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of your visitor and badge activity</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Host Analytics</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of your visitor and badge activity</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -96,6 +101,13 @@ const HostAnalytics = () => {
           })}
         </div>
       </div>
+
+      <GuestInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        hostName={profile?.full_name}
+        hostId={profile?.id}
+      />
     </DashboardLayout>
   );
 };

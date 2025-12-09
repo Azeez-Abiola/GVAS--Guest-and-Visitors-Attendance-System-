@@ -28,6 +28,8 @@ import ReceptionAnalytics from './pages/ReceptionAnalytics'
 import GuestRegister from './pages/GuestRegister'
 import HostAnalytics from './pages/host/HostAnalytics'
 import BadgeManagementHost from './pages/host/BadgeManagement'
+import VisitorKiosk from './pages/receptionist/VisitorKiosk'
+import AdminVisitorPage from './pages/admin/AdminVisitorPage'
 
 function App() {
   return (
@@ -52,140 +54,156 @@ function App() {
               <Route path="/pre-registration" element={<PreRegistrationPortal />} />
               <Route path="/checkout" element={<CheckoutFlow />} />
               <Route path="/success" element={<CheckInSuccess />} />
-              
+
               {/* Protected Routes - Role-based Dashboards */}
-              <Route 
-                path="/admin" 
+              <Route
+                path="/admin/visitor-registration"
+                element={
+                  <ProtectedRoute>
+                    <AdminVisitorPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/reception" 
+              <Route
+                path="/reception"
                 element={
                   <ProtectedRoute feature="reception">
                     <ReceptionDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/receptionist" 
+              <Route
+                path="/receptionist"
                 element={
                   <ProtectedRoute requiredRole="reception">
                     <ReceptionistDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/approvals" 
+              <Route
+                path="/reception/visitor-kiosk"
+                element={
+                  <ProtectedRoute requiredRole="reception">
+                    <VisitorKiosk />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/approvals"
                 element={
                   <ProtectedRoute feature="approvals">
                     <ApprovalsDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/security" 
+              <Route
+                path="/security"
                 element={
                   <ProtectedRoute requiredRole="security">
                     <SecurityDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              
+
               {/* Feature-specific Routes */}
-              <Route 
-                path="/badges" 
+              <Route
+                path="/badges"
                 element={
                   <ProtectedRoute feature="badges">
                     <BadgeManagement />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/evacuation" 
+              <Route
+                path="/evacuation"
                 element={
                   <ProtectedRoute feature="evacuation">
                     <EvacuationDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/blacklist" 
+              <Route
+                path="/blacklist"
                 element={
                   <ProtectedRoute feature="blacklist">
                     <Blacklist />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/settings" 
+              <Route
+                path="/settings"
                 element={
                   <ProtectedRoute feature="settings">
                     <Settings />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/system-settings" 
+              <Route
+                path="/system-settings"
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <SystemSettings />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/user-management" 
+              <Route
+                path="/user-management"
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <UserManagement />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/audit-logs" 
+              <Route
+                path="/audit-logs"
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AuditLogs />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/reports-analytics" 
+              <Route
+                path="/reports-analytics"
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <ReportsAnalytics />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/profile" 
+              <Route
+                path="/profile"
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/reception-analytics" 
+              <Route
+                path="/reception-analytics"
                 element={
                   <ProtectedRoute requiredRole="reception">
                     <ReceptionAnalytics />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/host/host-analytics" 
+              <Route
+                path="/host/host-analytics"
                 element={
                   <ProtectedRoute feature="host-analytics">
                     <HostAnalytics />
                   </ProtectedRoute>
                 }
               />
-              <Route 
-                path="/host/badge-management" 
+              <Route
+                path="/host/badge-management"
                 element={
                   <ProtectedRoute feature="host-badges">
                     <BadgeManagementHost />

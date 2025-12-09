@@ -615,6 +615,10 @@ const DashboardLayout = ({ children }) => {
             <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back, {profile?.full_name || 'User'}</p>
           </div>
           <div className="flex items-center gap-4">
+            {/* Date Display */}
+            <div className="hidden xl:block bg-gray-50 dark:bg-slate-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-600 dark:text-gray-300 shadow-sm transition-colors">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </div>
 
             {/* Theme Toggle - Desktop */}
             <button

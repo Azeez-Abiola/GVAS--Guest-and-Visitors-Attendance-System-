@@ -543,6 +543,13 @@ class ApiService {
     });
   }
 
+  async inviteGuest(data) {
+    return this.request('/invite-guest', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async checkInVisitor(data) {
     // Use backend API for this to trigger badge assignment and notifications
     return this.request('/checkin', {

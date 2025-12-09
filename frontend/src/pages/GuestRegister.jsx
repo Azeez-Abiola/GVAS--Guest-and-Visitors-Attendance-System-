@@ -32,6 +32,13 @@ const GuestRegister = () => {
 
   useEffect(() => {
     loadHosts()
+
+    // Check for host_id in URL params
+    const params = new URLSearchParams(window.location.search)
+    const hostIdParam = params.get('host_id')
+    if (hostIdParam) {
+      setFormData(prev => ({ ...prev, host_id: hostIdParam }))
+    }
   }, [])
 
   const loadHosts = async () => {

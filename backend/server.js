@@ -4,6 +4,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { createClient } = require('@supabase/supabase-js');
 const QRCode = require('qrcode');
+const nodemailer = require('nodemailer');
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -277,6 +279,73 @@ app.get('/api/visitors', async (req, res) => {
   } catch (error) {
     console.error('Error fetching visitors:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Send guest invitation
+app.post('/api/invite-guest', async (req, res) => {
+  try {
+    const { guestEmail, guestName, hostName, hostId, personalMessage, registrationLink } = req.body;
+
+    if (!guestEmail || !registrationLink) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Configure transporter
+    // Note: In production, use environment variables
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE || 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    // Email content
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@gvas-system.com',
+      to: guestEmail,
+      subject: `Invitation to visit ${hostName || 'us'} at UAC House`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+          <h2 style="color: #0f172a; text-align: center;">You're Invited!</h2>
+          <p>Dear ${guestName || 'Guest'},</p>
+          <p>${hostName ? `<strong>${hostName}</strong>` : 'A host'} has invited you to complete your pre-registration for a visit to UAC House.</p>
+          
+          ${personalMessage ? `<p style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; font-style: italic;">"${personalMessage}"</p>` : ''}
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${registrationLink}" style="background-color: #0f172a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Complete Registration</a>
+          </div>
+          
+          <p style="font-size: 14px; color: #64748b;">
+            Pre-registering will speed up your check-in process upon arrival. You'll receive a QR code pass immediately after registration.
+          </p>
+          <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;">
+          <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+            Guest & Visitors Attendance System (GVAS)
+          </p>
+        </div>
+      `
+    };
+
+    // If credentials are not set, just log it (development mode)
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log('⚠️ EMAIL_USER or EMAIL_PASS not set. Skipping actual email send.');
+      console.log('📧 Mock Email Payload:', JSON.stringify(mailOptions, null, 2));
+      return res.json({
+        success: true,
+        message: 'Invitation logged (Email credentials not configured)',
+        mock: true
+      });
+    }
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ success: true, message: 'Invitation email sent successfully' });
+  } catch (error) {
+    console.error('Email error:', error);
+    res.status(500).json({ error: 'Failed to send invitation email' });
   }
 });
 
