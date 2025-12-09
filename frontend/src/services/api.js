@@ -9,6 +9,24 @@ class ApiService {
     this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL; // Supabase project URL for edge functions
   }
 
+  // Subscribe to real-time visitor updates
+  subscribeToVisitors(callback) {
+    return this.supabase
+      .channel('public:visitors')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'visitors'
+        },
+        (payload) => {
+          callback(payload)
+        }
+      )
+      .subscribe()
+  }
+
   // Generate 8-character alphanumeric guest code
   generateGuestCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -221,17 +239,82 @@ class ApiService {
       if (data.host_id) {
         console.log('Looking up host with ID:', data.host_id);
 
-        const { data: host, error: hostError } = await supabase
+        // Try hosts table first
+        let host = null;
+        let hostError = null;
+
+        const { data: hostsData, error: hostsTableError } = await supabase
           .from('hosts')
-          .select('tenant_id, name')
+          .select('tenant_id, name, email, floor_number')
           .eq('id', data.host_id)
-          .single();
+          .maybeSingle();
 
-        console.log('Host lookup result:', { host, hostError });
+        if (hostsTableError) {
+          console.warn('Error querying hosts table:', hostsTableError);
+        }
 
-        if (hostError || !host) {
+        if (hostsData) {
+          host = hostsData;
+          console.log('Host found in hosts table:', host);
+        } else {
+          // Fallback to users table if not found in hosts table
+          console.log('Host not in hosts table, checking users table...');
+
+          const { data: userData, error: usersTableError } = await supabase
+            .from('users')
+            .select('id, email, full_name, phone, assigned_floors')
+            .eq('id', data.host_id)
+            .eq('role', 'host')
+            .maybeSingle();
+
+          if (usersTableError) {
+            console.error('Error querying users table:', usersTableError);
+            hostError = usersTableError;
+          }
+
+          if (userData) {
+            // Map user data to host format
+            // assigned_floors might be a JSON array or already parsed
+            let floorNum = null;
+            if (userData.assigned_floors) {
+              if (Array.isArray(userData.assigned_floors) && userData.assigned_floors.length > 0) {
+                floorNum = userData.assigned_floors[0];
+              } else if (typeof userData.assigned_floors === 'string') {
+                // Try parsing if it's a string
+                try {
+                  const parsed = JSON.parse(userData.assigned_floors);
+                  if (Array.isArray(parsed) && parsed.length > 0) floorNum = parsed[0];
+                  else if (typeof parsed === 'number' || typeof parsed === 'string') floorNum = parsed;
+                } catch (e) {
+                  // If parsing fails, use the string value itself if it's "simple"
+                  if (userData.assigned_floors.length < 5) floorNum = userData.assigned_floors;
+                  console.log('Using raw assigned_floors string:', userData.assigned_floors);
+                }
+              } else if (typeof userData.assigned_floors === 'number') {
+                floorNum = userData.assigned_floors;
+              }
+            }
+
+            host = {
+              tenant_id: null, // Users don't have tenant_id, will be removed later
+              name: userData.full_name,
+              email: userData.email,
+              floor_number: floorNum
+            };
+            console.log('Host found in users table:', host);
+          }
+        }
+
+        console.log('Final host lookup result:', { host, hostError });
+
+        if (hostError && !host) {
           console.error('Failed to fetch host details:', hostError);
-          throw new Error(`Invalid host selected or host not found: ${hostError?.message || 'Host not found'}`);
+          throw new Error(`Error looking up host: ${hostError.message}`);
+        }
+
+        if (!host) {
+          console.error('Host not found with ID:', data.host_id);
+          throw new Error('The selected host could not be found. Please select a different host or contact support.');
         }
 
         // Populate all required fields from host
@@ -246,7 +329,16 @@ class ApiService {
         }
         visitorData.host_name = host.name || visitorData.host_name;
 
-        console.log('Populated visitor data:', { tenant_id: visitorData.tenant_id, host_name: visitorData.host_name });
+        // Use host's floor number if not provided
+        if (!visitorData.floor_number && host.floor_number) {
+          visitorData.floor_number = host.floor_number;
+        }
+
+        console.log('Populated visitor data:', {
+          tenant_id: visitorData.tenant_id,
+          host_name: visitorData.host_name,
+          floor_number: visitorData.floor_number
+        });
       } else {
         throw new Error('host_id is required');
       }
@@ -294,12 +386,135 @@ class ApiService {
       }
 
       console.log('Visitor created successfully:', visitor);
+
+      // Try to create notifications (but don't fail if it fails)
+      this.createVisitorNotifications(visitor).catch(err => {
+        console.warn('Background notification creation failed:', err);
+      });
+
       return visitor;
     }
     return this.request('/visitors', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  // Helper method for notifications
+  async createVisitorNotifications(visitor) {
+    try {
+      const notifications = [];
+
+      // 1. Notification for the host
+      // Note: visitor.host_id maps to user_id in the notifications table
+      // We store additional metadata in the 'data' JSONB column
+      notifications.push({
+        user_id: visitor.host_id,
+        type: 'visitor_pre_registered',
+        title: 'Guest Pre-registered',
+        message: `New visitor ${visitor.name} from ${visitor.company || 'N/A'} has pre-registered to visit you on ${visitor.visit_date}`,
+        is_read: false,
+        data: {
+          visitor_id: visitor.id,
+          host_id: visitor.host_id,
+          role: 'host'
+        },
+        created_at: new Date().toISOString()
+      });
+
+      // 2. Notification for admin(s)
+      const { data: admins } = await supabase
+        .from('users')
+        .select('id')
+        .eq('role', 'admin')
+        .eq('is_active', true);
+
+      if (admins && admins.length > 0) {
+        admins.forEach(admin => {
+          notifications.push({
+            user_id: admin.id,
+            type: 'visitor_pre_registered',
+            title: 'Guest Pre-registered',
+            message: `New visitor ${visitor.name} has pre-registered to visit ${visitor.host_name} on ${visitor.visit_date}`,
+            is_read: false,
+            data: {
+              visitor_id: visitor.id,
+              host_id: visitor.host_id,
+              role: 'admin'
+            },
+            created_at: new Date().toISOString()
+          });
+        });
+      }
+
+      // 3. Notification for receptionist(s)
+      if (visitor.floor_number !== null && visitor.floor_number !== undefined) {
+        const { data: receptionists } = await supabase
+          .from('users')
+          .select('id, assigned_floors')
+          .eq('role', 'reception')
+          .eq('is_active', true);
+
+        if (receptionists && receptionists.length > 0) {
+          receptionists.forEach(receptionist => {
+            // Check if assigned
+            let isAssigned = false;
+            let floors = [];
+
+            if (receptionist.assigned_floors) {
+              if (Array.isArray(receptionist.assigned_floors)) {
+                floors = receptionist.assigned_floors;
+              } else if (typeof receptionist.assigned_floors === 'string') {
+                // Try to parse if it looks like JSON, otherwise treat as single string
+                try {
+                  const parsed = JSON.parse(receptionist.assigned_floors);
+                  if (Array.isArray(parsed)) floors = parsed;
+                  else floors = [receptionist.assigned_floors];
+                } catch (e) {
+                  floors = [receptionist.assigned_floors];
+                }
+              } else if (typeof receptionist.assigned_floors === 'number') {
+                floors = [receptionist.assigned_floors];
+              }
+            }
+
+            // Loose matching to handle "9" vs 9
+            if (floors.some(f => String(f) === String(visitor.floor_number))) {
+              isAssigned = true;
+            }
+
+            if (isAssigned) {
+              notifications.push({
+                user_id: receptionist.id,
+                type: 'visitor_pre_registered',
+                title: 'Guest Pre-registered',
+                message: `New visitor ${visitor.name} will visit floor ${visitor.floor_number} on ${visitor.visit_date}`,
+                is_read: false,
+                data: {
+                  visitor_id: visitor.id,
+                  host_id: visitor.host_id,
+                  role: 'reception',
+                  floor: visitor.floor_number
+                },
+                created_at: new Date().toISOString()
+              });
+            }
+          });
+        }
+      }
+
+      if (notifications.length > 0) {
+        const { error } = await supabase.from('notifications').insert(notifications);
+
+        if (error) {
+          console.error('Failed to create notifications:', error);
+        } else {
+          console.log(`Created ${notifications.length} notifications`);
+        }
+      }
+    } catch (e) {
+      console.error('Notification logic error:', e);
+    }
   }
 
   async updateVisitor(id, updates) {

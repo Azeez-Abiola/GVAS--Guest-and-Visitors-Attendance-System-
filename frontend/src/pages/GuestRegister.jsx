@@ -91,8 +91,18 @@ const GuestRegister = () => {
       const selectedHost = hosts.find(h => h.id === formData.host_id)
 
       if (!selectedHost) {
-        throw new Error('Selected host not found')
+        console.error('Selected host not found in hosts list', {
+          selectedId: formData.host_id,
+          availableHosts: hosts.map(h => ({ id: h.id, name: h.name || h.full_name }))
+        })
+        throw new Error('The selected host could not be found. Please refresh the page and try again.')
       }
+
+      console.log('Submitting visitor with host:', {
+        hostId: selectedHost.id,
+        hostName: selectedHost.name || selectedHost.full_name,
+        floorNumber: selectedHost.floor_number
+      })
 
       const visitorData = {
         // Fields that exist in the Supabase visitors table
@@ -102,12 +112,12 @@ const GuestRegister = () => {
         company: formData.company || null,
         purpose: formData.purpose,
         host_id: formData.host_id,
-        floor_number: formData.floor_number || null,
+        floor_number: formData.floor_number || selectedHost.floor_number || null,
         visit_date: formData.visit_date.toISOString().split('T')[0],
         visit_time: formData.visit_time || null,
         guest_code: generatedCode,
         visitor_id: crypto.randomUUID ? crypto.randomUUID() : `vis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: 'pending_approval',
+        status: 'pending',
         host_name: selectedHost.name || selectedHost.full_name
         // Note: tenant_id is handled by the API service
       }

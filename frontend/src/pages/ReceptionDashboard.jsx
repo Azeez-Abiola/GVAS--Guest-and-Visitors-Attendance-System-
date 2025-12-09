@@ -136,16 +136,17 @@ const ReceptionDashboard = () => {
         }
 
         visitorsData = visitorsData.filter(visitor => {
-          // Skip visitors without a floor assignment
-          if (!visitor.floor_number && visitor.floor_number !== 0 && !visitor.floor) {
-            console.log('⏭️ Skipping visitor without floor:', visitor.name)
-            return false
-          }
-
           // Get visitor's floor number
-          const visitorFloorNum = visitor.floor_number !== undefined && visitor.floor_number !== null
+          let visitorFloorNum = visitor.floor_number !== undefined && visitor.floor_number !== null
             ? visitor.floor_number
             : floorMap[visitor.floor]
+
+          // If visitor has no floor assigned, show them to all receptionists (fallback)
+          // This ensures pre-registered guests with missing data aren't invisible
+          if (visitorFloorNum === undefined || visitorFloorNum === null) {
+            console.log('⚠️ Visitor has no floor assigned, showing as fallback:', visitor.name)
+            return true
+          }
 
           console.log(`👤 Visitor ${visitor.name} is on floor:`, visitorFloorNum)
 
@@ -166,8 +167,12 @@ const ReceptionDashboard = () => {
               }
             }
 
-            console.log(`  🔍 Checking if floor ${visitorFloorNum} matches assigned floor ${assignedFloorNum}:`, visitorFloorNum === assignedFloorNum)
-            return visitorFloorNum === assignedFloorNum
+            // Loose comparison to handle potential string/number mismatches
+            // e.g. "9" vs 9, or "09" vs 9
+            const match = String(visitorFloorNum) === String(assignedFloorNum);
+
+            console.log(`  🔍 Checking if floor ${visitorFloorNum} matches assigned floor ${assignedFloorNum}:`, match)
+            return match
           })
 
           return matches

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import ApiService from '../services/api'
+import { supabase } from '../lib/supabase'
 import {
   LayoutDashboard,
   UserCheck,
@@ -41,143 +42,118 @@ const DashboardLayout = ({ children }) => {
   // State for notifications
   const [notifications, setNotifications] = useState([])
 
+  // Fetch notifications from database
   useEffect(() => {
     if (!profile) return
 
-    console.log('🔌 Subscribing to real-time visitor updates for:', profile.email)
+    const fetchNotifications = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', profile.id)
+          .order('created_at', { ascending: false })
+          .limit(50)
 
-    // Subscribe to real-time visitor updates
-    const subscription = ApiService.subscribeToVisitors((payload) => {
-      console.log('🔔 Real-time event received:', payload)
+        if (error) throw error
 
-      const newVisitor = payload.new
-      if (!newVisitor) return
+        // Map DB notifications to UI format
+        const formattedNotifications = (data || []).map(n => ({
+          id: n.id,
+          type: n.type === 'visitor_pre_registered' ? 'pre_registered' : 'info', // Map types as needed
+          title: n.title,
+          message: n.message,
+          time: new Date(n.created_at).toLocaleString(), // Simple formatting
+          read: n.is_read,
+          guestCode: n.data?.guest_code || null,
+          data: n.data
+        }))
+        setNotifications(formattedNotifications)
+      } catch (err) {
+        console.error('Error fetching notifications:', err)
+      }
+    }
 
-      let shouldNotify = false
-      let message = ''
-      let title = ''
-      let type = 'visitor'
+    fetchNotifications()
 
-      // 1. Host Notification
-      // Convert IDs to strings for safe comparison (handles mismatched types)
-      if (profile.role === 'host' && String(newVisitor.host_id) === String(profile.id)) {
-        if (payload.eventType === 'INSERT') {
-          // Distinguish walk-in vs pre-registration
-          const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
-          shouldNotify = true
-
-          if (isWalkIn) {
-            type = 'walk_in'
-            title = '🚶 Walk-in Visitor'
-            message = `${newVisitor.name} has walked in and checked in to see you.`
-          } else {
-            type = 'pre_registered'
-            title = '📅 New Appointment Booked'
-            message = `A guest (${newVisitor.name}) has booked an appointment with you for ${newVisitor.visit_date || 'soon'}. Guest Code: ${newVisitor.guest_code || 'N/A'}`
+    // Subscribe to real-time additions to 'notifications' table
+    const channel = supabase
+      .channel('public:notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${profile.id}`
+        },
+        (payload) => {
+          console.log('🔔 New notification received:', payload)
+          const n = payload.new
+          const newNotif = {
+            id: n.id,
+            type: n.type === 'visitor_pre_registered' ? 'pre_registered' : 'info',
+            title: n.title,
+            message: n.message,
+            time: 'Just now',
+            read: n.is_read,
+            guestCode: n.data?.guest_code || null,
+            data: n.data
           }
-        } else if (payload.eventType === 'UPDATE' && newVisitor.status === 'checked_in') {
-          // Pre-registered guest has now arrived
-          shouldNotify = true
-          type = 'arrival'
-          title = '✅ Your Guest Has Arrived'
-          message = `${newVisitor.name} has arrived and is waiting for you at reception.`
+
+          setNotifications(prev => [newNotif, ...prev])
+
+          // Play sound
+          try {
+            const audio = new Audio('/notification.mp3')
+            audio.play().catch(() => { })
+          } catch (e) { }
         }
-      }
-
-      // 2. Reception Notification (floor-specific)
-      if (profile.role === 'reception') {
-        // Check if this visitor is on receptionist's assigned floor
-        // Use loose equality or parseInt to handle string/number mismatch
-        const visitorFloor = newVisitor.floor_number !== null ? parseInt(newVisitor.floor_number) : null
-
-        const isMyFloor = !profile.assigned_floors || profile.assigned_floors.length === 0 ||
-          profile.assigned_floors.some(f => parseInt(f) === visitorFloor)
-
-        if (isMyFloor && payload.eventType === 'INSERT') {
-          const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
-          shouldNotify = true
-
-          if (isWalkIn) {
-            type = 'walk_in'
-            title = '🚶 Walk-in Visitor'
-            message = `${newVisitor.name} (${newVisitor.company || 'Guest'}) has walked in for ${newVisitor.host_name || 'a host'}.`
-          } else {
-            type = 'pre_registered'
-            title = '📅 New Pre-registration'
-            message = `A guest (${newVisitor.name}) has pre-registered for an appointment with ${newVisitor.host_name || 'a host'} on your floor.`
-          }
-        } else if (isMyFloor && payload.eventType === 'UPDATE' && newVisitor.status === 'checked_in' && newVisitor.guest_code) {
-          shouldNotify = true
-          type = 'arrival'
-          title = '✅ Guest Checked In'
-          message = `${newVisitor.name} (Code: ${newVisitor.guest_code}) has checked in.`
-        }
-      }
-
-      // 3. Admin Notification (all visitors)
-      if (profile.role === 'admin') {
-        if (payload.eventType === 'INSERT') {
-          const isWalkIn = newVisitor.status === 'checked_in' && !newVisitor.guest_code
-          shouldNotify = true
-
-          if (isWalkIn) {
-            type = 'walk_in'
-            title = '🚶 Walk-in Visitor'
-            message = `${newVisitor.name} walked in on Floor ${newVisitor.floor_number || 'N/A'} for ${newVisitor.host_name || 'a host'}.`
-          } else {
-            type = 'pre_registered'
-            title = '📅 New Pre-registration'
-            message = `A guest (${newVisitor.name}) has pre-registered for Floor ${newVisitor.floor_number || 'N/A'} to visit ${newVisitor.host_name || 'a host'}.`
-          }
-        }
-      }
-
-      // 4. Security Alert (blacklisted)
-      if ((profile.role === 'security' || profile.role === 'admin') && newVisitor.is_blacklisted) {
-        shouldNotify = true
-        type = 'security'
-        title = '🚨 Security Alert'
-        message = `Blacklisted individual attempting access: ${newVisitor.name}`
-      }
-
-      if (shouldNotify && title) {
-        const newNotif = {
-          id: Date.now(),
-          type,
-          title,
-          message,
-          time: 'Just now',
-          read: false,
-          guestCode: newVisitor.guest_code
-        }
-
-        setNotifications(prev => [newNotif, ...prev])
-
-        // Play a subtle notification sound if possible
-        try {
-          const audio = new Audio('/notification.mp3') // Placeholder, won't play if missing but safe
-          audio.play().catch(e => console.log('Audio play failed', e))
-        } catch (e) { }
-      }
-    })
+      )
+      .subscribe()
 
     return () => {
-      subscription.unsubscribe()
+      supabase.removeChannel(channel)
     }
   }, [profile])
+
 
   const unreadCount = notifications.filter(n => !n.read).length
 
   // Mark single notification as read
-  const markAsRead = (notificationId) => {
+  const markAsRead = async (notificationId) => {
+    // Optimistic update
     setNotifications(prev =>
       prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
     )
+
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+
+      if (error) console.error('Failed to mark as read:', error)
+    } catch (err) {
+      console.error('Error updating notification status:', err)
+    }
   }
 
   // Mark all notifications as read
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
+    // Optimistic update
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', profile?.id)
+
+      if (error) console.error('Failed to mark all as read:', error)
+    } catch (err) {
+      console.error('Error updating all notifications:', err)
+    }
   }
 
   const handleLogout = async () => {
