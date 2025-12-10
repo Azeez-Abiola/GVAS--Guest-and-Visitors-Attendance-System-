@@ -14,12 +14,15 @@ const PORT = process.env.PORT || 3001;
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env file');
-  process.exit(1);
+// Only check for env vars at runtime, not during Vercel build
+let supabase = null;
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey);
+  console.log('✅ Supabase client initialized');
+  console.log('📊 Database: Supabase PostgreSQL');
+} else {
+  console.warn('⚠️ Supabase credentials not found - some features will not work');
 }
-
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
 app.use(helmet({
@@ -29,9 +32,6 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-console.log('✅ Supabase client initialized');
-console.log('📊 Database: Supabase PostgreSQL');
 
 // Routes
 
@@ -1067,12 +1067,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Guest Experience API running on port ${PORT}`);
-  console.log(`📊 Database: Supabase PostgreSQL`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`✅ Supabase URL: ${supabaseUrl}`);
-});
+// Start server only when running directly (not when imported by Vercel)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Guest Experience API running on port ${PORT}`);
+    console.log(`📊 Database: Supabase PostgreSQL`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`✅ Supabase URL: ${supabaseUrl}`);
+  });
+}
 
+// Export for Vercel serverless
 module.exports = app;
