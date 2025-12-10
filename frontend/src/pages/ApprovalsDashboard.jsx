@@ -16,6 +16,7 @@ import { motion } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
 import ApiService from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import GuestInviteModal from '../components/GuestInviteModal'
 
 const ApprovalsDashboard = () => {
   const { profile } = useAuth()
@@ -27,6 +28,7 @@ const ApprovalsDashboard = () => {
   })
   const [visitors, setVisitors] = useState([])
   const [showPreRegisterModal, setShowPreRegisterModal] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('pending') // pending, approved, all
 
@@ -140,13 +142,22 @@ const ApprovalsDashboard = () => {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Visitor Approvals</h1>
             <p className="text-gray-500 dark:text-gray-400">Manage your visitor pre-registrations and approvals</p>
           </div>
-          <button
-            onClick={() => setShowPreRegisterModal(true)}
-            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors shadow-sm flex items-center gap-2"
-          >
-            <UserPlus size={18} />
-            Pre-register Visitor
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+            >
+              <Mail size={18} />
+              Invite Guest
+            </button>
+            <button
+              onClick={() => setShowPreRegisterModal(true)}
+              className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors shadow-sm flex items-center gap-2"
+            >
+              <UserPlus size={18} />
+              Pre-register Visitor
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -470,6 +481,14 @@ const ApprovalsDashboard = () => {
           </motion.div>
         </div>
       )}
+
+      {/* Guest Invite Modal */}
+      <GuestInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        hostName={profile?.full_name}
+        hostId={profile?.id}
+      />
     </DashboardLayout>
   )
 }
