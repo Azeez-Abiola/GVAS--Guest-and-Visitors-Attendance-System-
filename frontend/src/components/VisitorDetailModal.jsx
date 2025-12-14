@@ -129,14 +129,6 @@ const VisitorDetailModal = ({ visitor, isOpen, onClose, onRefresh, onEdit }) => 
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                        className="text-white/60 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg disabled:opacity-50"
-                        title="Refresh visitor data"
-                      >
-                        <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                      </button>
-                      <button
                         onClick={onClose}
                         className="text-white/60 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
                       >

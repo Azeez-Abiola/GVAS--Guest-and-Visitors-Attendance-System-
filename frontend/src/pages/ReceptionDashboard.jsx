@@ -90,9 +90,9 @@ const ReceptionDashboard = () => {
     }
   }
 
-  const loadData = async () => {
+  const loadData = async (silent = false) => {
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
       let visitorsData = await ApiService.getVisitors({ status: 'all' })
 
       console.log('🏢 ALL VISITORS (before filtering):', visitorsData.map(v => ({
@@ -247,7 +247,7 @@ const ReceptionDashboard = () => {
     } catch (error) {
       console.error('Failed to load data:', error)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
@@ -285,7 +285,7 @@ const ReceptionDashboard = () => {
     const subscription = ApiService.subscribeToVisitors((payload) => {
       console.log('🔔 ReceptionDashboard received update:', payload)
       // Refresh data on any visitor change
-      loadData()
+      loadData(true)
       loadBadgeStats()
     })
 
@@ -327,7 +327,7 @@ const ReceptionDashboard = () => {
 
           // 1. Check if visit date is in the future
           if (visitDate > today) {
-            showToast(`⚠️ Cannot check in yet. Visit is scheduled for ${new Date(visitorToCheckIn.visit_date).toLocaleDateString()}.`, 'error')
+            showToast(`Cannot check in yet. Visit is scheduled for ${new Date(visitorToCheckIn.visit_date).toLocaleDateString()}.`, 'error')
             setLoading(false)
             return
           }
@@ -342,7 +342,7 @@ const ReceptionDashboard = () => {
               const allowedTime = new Date(scheduledTime.getTime() - 60 * 60 * 1000) // 60 mins before
 
               if (now < allowedTime) {
-                showToast(`⚠️ Too early! Check-in allowed from ${allowedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, 'error')
+                showToast(`Too early! Check-in allowed from ${allowedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, 'error')
                 setLoading(false)
                 return
               }
@@ -360,7 +360,7 @@ const ReceptionDashboard = () => {
           ? ` Badge ${updatedVisitor.badge_number} assigned.`
           : '';
 
-        showToast(`✅ ${visitorToCheckIn.name} checked in successfully!${badgeInfo}`, 'success')
+        showToast(`${visitorToCheckIn.name} checked in successfully!${badgeInfo}`, 'success')
 
         setShowQRModal(false)
         setQrInput('')
@@ -368,7 +368,7 @@ const ReceptionDashboard = () => {
         await loadData()
         await loadBadgeStats()
       } else {
-        showToast('❌ Invalid code! Code does not match this visitor.', 'error')
+        showToast('Invalid code! Code does not match this visitor.', 'error')
       }
     } catch (error) {
       console.error('Check-in failed:', error)
@@ -396,7 +396,7 @@ const ReceptionDashboard = () => {
         ? ` Badge ${badgeNumber} returned to inventory.`
         : ''
 
-      showToast(`✅ ${visitorToCheckOut.name} checked out successfully!${badgeInfo}`, 'success')
+      showToast(`${visitorToCheckOut.name} checked out successfully!${badgeInfo}`, 'success')
 
       setShowCheckOutModal(false)
       setVisitorToCheckOut(null)

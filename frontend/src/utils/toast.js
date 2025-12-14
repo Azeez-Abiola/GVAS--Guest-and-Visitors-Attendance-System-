@@ -12,11 +12,11 @@ export const showToast = (message, type = 'success') => {
   const toast = document.createElement('div');
   toast.id = 'custom-toast';
   toast.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out flex items-center gap-3 max-w-md`;
-  
+
   // Style based on type
   const styles = {
     success: {
-      bg: 'bg-green-500',
+      bg: 'bg-slate-900',
       icon: `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>`
@@ -45,9 +45,10 @@ export const showToast = (message, type = 'success') => {
   toast.className += ` ${style.bg}`;
 
   toast.innerHTML = `
+    ${style.icon ? `
     <div class="flex-shrink-0">
       ${style.icon}
-    </div>
+    </div>` : ''}
     <p class="text-white font-medium flex-1">${message}</p>
     <button id="close-toast" class="flex-shrink-0 ml-2 text-white hover:text-gray-200 transition-colors">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +73,7 @@ export const showToast = (message, type = 'success') => {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
   };
-  
+
   closeBtn.addEventListener('click', closeToast);
 
   // Auto dismiss after 4 seconds

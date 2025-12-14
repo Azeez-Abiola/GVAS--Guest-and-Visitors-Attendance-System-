@@ -272,7 +272,7 @@ const DashboardLayout = ({ children }) => {
       {/* Sidebar - Desktop */}
       <motion.aside
         initial={false}
-        animate={{ width: sidebarOpen ? 280 : 80 }}
+        animate={{ width: sidebarOpen ? 320 : 80 }}
         className="hidden lg:block fixed left-0 top-0 h-screen bg-slate-900 border-r border-gray-800 z-40 text-white"
       >
         <div className="flex flex-col h-full">
@@ -415,7 +415,7 @@ const DashboardLayout = ({ children }) => {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: 'tween' }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-white z-50 shadow-xl"
+              className="lg:hidden fixed left-0 top-0 h-screen w-[320px] bg-white z-50 shadow-xl"
             >
               <div className="flex flex-col h-full">
                 {/* Logo */}
@@ -605,7 +605,7 @@ const DashboardLayout = ({ children }) => {
       <main
         className={`
           transition-all duration-300 pt-16 lg:pt-0
-          ${sidebarOpen ? 'lg:ml-[280px]' : 'lg:ml-[80px]'}
+          ${sidebarOpen ? 'lg:ml-[320px]' : 'lg:ml-[80px]'}
         `}
       >
         {/* Desktop Header */}
