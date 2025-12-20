@@ -187,6 +187,27 @@ const AdminVisitorPage = () => {
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Visit Date *</label>
+                            <input
+                                type="date"
+                                name="visit_date"
+                                value={formData.visit_date}
+                                onChange={handleChange}
+                                required
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Visit Time</label>
+                            <input
+                                type="time"
+                                name="visit_time"
+                                value={formData.visit_time}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                            />
+                        </div>
                     </div>
 
                     <div className="flex justify-end pt-4">

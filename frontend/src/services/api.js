@@ -413,7 +413,7 @@ class ApiService {
         user_id: visitor.host_id,
         type: 'visitor_pre_registered',
         title: 'Guest Pre-registered',
-        message: `New visitor ${visitor.name} from ${visitor.company || 'N/A'} has pre-registered to visit you on ${visitor.visit_date}`,
+        message: `New visitor ${visitor.name} from ${visitor.company || 'N/A'} has pre-registered to visit you on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
         is_read: false,
         data: {
           visitor_id: visitor.id,
@@ -436,7 +436,7 @@ class ApiService {
             user_id: admin.id,
             type: 'visitor_pre_registered',
             title: 'Guest Pre-registered',
-            message: `New visitor ${visitor.name} has pre-registered to visit ${visitor.host_name} on ${visitor.visit_date}`,
+            message: `New visitor ${visitor.name} has pre-registered to visit ${visitor.host_name} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
             is_read: false,
             data: {
               visitor_id: visitor.id,
@@ -489,7 +489,7 @@ class ApiService {
                 user_id: receptionist.id,
                 type: 'visitor_pre_registered',
                 title: 'Guest Pre-registered',
-                message: `New visitor ${visitor.name} will visit floor ${visitor.floor_number} on ${visitor.visit_date}`,
+                message: `New visitor ${visitor.name} will visit floor ${visitor.floor_number} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
                 is_read: false,
                 data: {
                   visitor_id: visitor.id,

@@ -61,7 +61,9 @@ const ReceptionDashboard = () => {
     purpose: '',
     host_id: '',
     floor: '',
-    expected_duration: 4
+    expected_duration: 4,
+    visit_date: new Date().toISOString().split('T')[0],
+    visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   })
 
 
@@ -449,7 +451,9 @@ const ReceptionDashboard = () => {
         purpose: '',
         host_id: '',
         floor: '',
-        expected_duration: 4
+        expected_duration: 4,
+        visit_date: new Date().toISOString().split('T')[0],
+        visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
       })
 
       // Show success message with badge info
@@ -1238,6 +1242,24 @@ const ReceptionDashboard = () => {
                           onChange={(e) => setNewVisitor({ ...newVisitor, company: e.target.value })}
                           className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                           placeholder="Company name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Visit Date *</label>
+                        <input
+                          type="date"
+                          value={newVisitor.visit_date}
+                          onChange={(e) => setNewVisitor({ ...newVisitor, visit_date: e.target.value })}
+                          className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Visit Time</label>
+                        <input
+                          type="time"
+                          value={newVisitor.visit_time}
+                          onChange={(e) => setNewVisitor({ ...newVisitor, visit_time: e.target.value })}
+                          className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                         />
                       </div>
                     </div>
