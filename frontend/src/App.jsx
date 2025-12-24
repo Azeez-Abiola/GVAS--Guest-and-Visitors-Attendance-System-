@@ -30,6 +30,7 @@ import HostAnalytics from './pages/host/HostAnalytics'
 import BadgeManagementHost from './pages/host/BadgeManagement'
 import VisitorKiosk from './pages/receptionist/VisitorKiosk'
 import AdminVisitorPage from './pages/admin/AdminVisitorPage'
+import Resources from './pages/Resources'
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
               <Route path="/pre-registration" element={<PreRegistrationPortal />} />
               <Route path="/checkout" element={<CheckoutFlow />} />
               <Route path="/success" element={<CheckInSuccess />} />
+              <Route path="/resources" element={<Resources />} />
 
               {/* Protected Routes - Role-based Dashboards */}
               <Route

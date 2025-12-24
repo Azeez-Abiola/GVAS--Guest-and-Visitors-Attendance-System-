@@ -38,7 +38,9 @@ const AdminDashboard = () => {
     purpose: '',
     host_id: '',
     floor: '',
-    expected_duration: 4
+    expected_duration: 4,
+    visit_date: new Date().toISOString().split('T')[0],
+    visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   })
 
   useEffect(() => {
@@ -108,7 +110,9 @@ const AdminDashboard = () => {
         purpose: '',
         host_id: '',
         floor: '',
-        expected_duration: 4
+        expected_duration: 4,
+        visit_date: new Date().toISOString().split('T')[0],
+        visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
       })
       loadData() // Reload data to show new visitor
     } catch (error) {
@@ -163,7 +167,9 @@ const AdminDashboard = () => {
         purpose: '',
         host_id: '',
         floor: '',
-        expected_duration: 4
+        expected_duration: 4,
+        visit_date: new Date().toISOString().split('T')[0],
+        visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
       })
       loadData()
     } catch (err) {
@@ -539,6 +545,30 @@ const AdminDashboard = () => {
                           onChange={(e) => setNewVisitor({ ...newVisitor, company: e.target.value })}
                           className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                           placeholder="Company name"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Visit Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={newVisitor.visit_date}
+                          onChange={(e) => setNewVisitor({ ...newVisitor, visit_date: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Visit Time
+                        </label>
+                        <input
+                          type="time"
+                          value={newVisitor.visit_time}
+                          onChange={(e) => setNewVisitor({ ...newVisitor, visit_time: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                         />
                       </div>
                     </div>

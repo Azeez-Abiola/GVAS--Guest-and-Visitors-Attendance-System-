@@ -74,7 +74,7 @@ const LandingPage = () => {
 
           {/* Desktop Links */}
           <div className="hidden lg:flex items-center space-x-8">
-            {['Features', 'Solutions', 'Enterprise', 'Resources'].map((item) => (
+            {['Features', 'Solutions', 'Enterprise'].map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
@@ -83,6 +83,12 @@ const LandingPage = () => {
                 {item}
               </a>
             ))}
+            <button
+              onClick={() => navigate('/resources')}
+              className="text-sm font-medium text-[#070f2b]/70 dark:text-white/70 hover:text-[#070f2b] dark:hover:text-white transition-colors"
+            >
+              Resources
+            </button>
           </div>
 
           {/* Actions */}
@@ -127,7 +133,7 @@ const LandingPage = () => {
             className="fixed inset-x-4 top-24 z-40 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-[#070f2b]/10 dark:border-white/10 p-6 lg:hidden"
           >
             <div className="flex flex-col space-y-4">
-              {['Features', 'Solutions', 'Enterprise', 'Resources'].map((item) => (
+              {['Features', 'Solutions', 'Enterprise'].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -137,6 +143,15 @@ const LandingPage = () => {
                   {item}
                 </a>
               ))}
+              <button
+                onClick={() => {
+                  navigate('/resources')
+                  setIsMobileMenuOpen(false)
+                }}
+                className="text-lg font-medium text-[#070f2b] dark:text-white text-left"
+              >
+                Resources
+              </button>
               <div className="pt-4 flex flex-col space-y-3 border-t border-[#070f2b]/10 dark:border-white/10">
                 <button
                   onClick={() => navigate('/login')}
@@ -259,8 +274,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Trusted By Section */}
-      <section className="py-12 border-y border-[#070f2b]/5 dark:border-white/5 bg-[#070f2b]/[0.02] dark:bg-white/[0.02] overflow-hidden">
+      {/* Trusted By Section / Enterprise */}
+      <section id="enterprise" className="py-12 border-y border-[#070f2b]/5 dark:border-white/5 bg-[#070f2b]/[0.02] dark:bg-white/[0.02] overflow-hidden">
         <div className="container mx-auto px-6">
           <p className="text-[#070f2b]/50 dark:text-white/50 text-xs md:text-sm mb-8 text-center font-bold tracking-[0.2em] uppercase">Trusted by forward-thinking companies</p>
 
@@ -347,8 +362,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 bg-[#070f2b] text-white overflow-hidden relative">
+      {/* Testimonials / Solutions */}
+      <section id="solutions" className="py-24 bg-[#070f2b] text-white overflow-hidden relative">
         {/* Background decorations */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px]"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-[100px]"></div>
