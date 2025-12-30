@@ -38,8 +38,11 @@ import {
   KeyIcon,
   ShieldCheckIcon,
   UserGroupIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  CloudArrowUpIcon
 } from '@heroicons/react/24/outline';
+import BulkImportModal from './components/BulkImportModal';
+
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -53,6 +56,8 @@ const UserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+
 
   // Define available roles
   const roles = [
@@ -886,13 +891,22 @@ const UserManagement = () => {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
             <p className="text-gray-500 dark:text-gray-400">Manage user accounts, roles, and floor assignments</p>
           </div>
-          <button
-            onClick={handleAddUser}
-            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg text-base font-semibold hover:bg-slate-800 dark:hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
-          >
-            <UserPlusIcon className="h-5 w-5" />
-            Add User
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsBulkImportOpen(true)}
+              className="bg-white dark:bg-slate-800 text-slate-700 dark:text-gray-200 border-2 border-slate-200 dark:border-slate-700 px-6 py-3 rounded-lg text-base font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+            >
+              <CloudArrowUpIcon className="h-5 w-5" />
+              Bulk Import
+            </button>
+            <button
+              onClick={handleAddUser}
+              className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg text-base font-semibold hover:bg-slate-800 dark:hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+            >
+              <UserPlusIcon className="h-5 w-5" />
+              Add User
+            </button>
+          </div>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border-2 border-gray-100 dark:border-slate-800">
@@ -1328,7 +1342,18 @@ const UserManagement = () => {
           </motion.div>
         </DialogPanel>
       </Dialog>
-    </DashboardLayout>
+
+
+      {/* Bulk Import Modal */}
+      <BulkImportModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+        onComplete={() => {
+          loadUsers();
+          // Keep modal open to show results (it handles closing itself)
+        }}
+      />
+    </DashboardLayout >
   );
 };
 
