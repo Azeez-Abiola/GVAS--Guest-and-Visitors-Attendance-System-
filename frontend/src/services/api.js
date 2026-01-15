@@ -367,7 +367,7 @@ class ApiService {
       console.log('Final visitor data before insert:', visitorData);
 
       // Ensure all required fields are present (tenant_id is now optional)
-      const requiredFields = ['name', 'email', 'phone', 'host_id', 'host_name', 'visitor_id', 'purpose'];
+      const requiredFields = ['name', 'phone', 'host_id', 'host_name', 'visitor_id', 'purpose'];
       const missingFields = requiredFields.filter(field => !visitorData[field]);
 
       if (missingFields.length > 0) {

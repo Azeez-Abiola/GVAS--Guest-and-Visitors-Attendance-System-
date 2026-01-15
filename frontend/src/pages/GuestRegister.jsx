@@ -65,9 +65,7 @@ const GuestRegister = () => {
     const newErrors = {}
 
     if (!formData.name.trim()) newErrors.name = 'Name is required'
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    if (formData.email.trim() && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Invalid email format'
     }
     if (!formData.phone.trim()) {
@@ -479,7 +477,7 @@ const GuestRegister = () => {
                   </div>
 
                   <div>
-                    <label className={labelClasses}>Email Address *</label>
+                    <label className={labelClasses}>Email Address</label>
                     <input
                       type="email"
                       value={formData.email}
@@ -589,10 +587,14 @@ const GuestRegister = () => {
                     <div>
                       <label className={labelClasses}>Expected Time</label>
                       <div className="relative">
-                        <input
-                          type="time"
-                          value={formData.visit_time}
-                          onChange={(e) => setFormData({ ...formData, visit_time: e.target.value })}
+                        <DatePicker
+                          selected={formData.visit_time ? new Date(`2000-01-01T${formData.visit_time}`) : null}
+                          onChange={(date) => setFormData({ ...formData, visit_time: date.toTimeString().split(' ')[0].substring(0, 5) })}
+                          showTimeSelect
+                          showTimeSelectOnly
+                          timeIntervals={15}
+                          timeCaption="Time"
+                          dateFormat="h:mm aa"
                           className={inputClasses}
                         />
                       </div>

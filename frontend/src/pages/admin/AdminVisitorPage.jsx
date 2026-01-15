@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import ApiService from '../../services/api';
 import DashboardLayout from '../../components/DashboardLayout';
 import { CheckCircle, X, User } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 const AdminVisitorPage = () => {
     const navigate = useNavigate();
@@ -128,13 +130,12 @@ const AdminVisitorPage = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                             <input
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                required
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                             />
                         </div>
@@ -189,22 +190,24 @@ const AdminVisitorPage = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Visit Date *</label>
-                            <input
-                                type="date"
-                                name="visit_date"
-                                value={formData.visit_date}
-                                onChange={handleChange}
-                                required
+                            <DatePicker
+                                selected={formData.visit_date ? new Date(formData.visit_date) : null}
+                                onChange={(date) => setFormData(prev => ({ ...prev, visit_date: date.toISOString().split('T')[0] }))}
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                                dateFormat="MMMM d, yyyy"
+                                minDate={new Date()}
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Visit Time</label>
-                            <input
-                                type="time"
-                                name="visit_time"
-                                value={formData.visit_time}
-                                onChange={handleChange}
+                            <DatePicker
+                                selected={formData.visit_time ? new Date(`2000-01-01T${formData.visit_time}`) : null}
+                                onChange={(date) => setFormData(prev => ({ ...prev, visit_time: date.toTimeString().split(' ')[0].substring(0, 5) }))}
+                                showTimeSelect
+                                showTimeSelectOnly
+                                timeIntervals={15}
+                                timeCaption="Time"
+                                dateFormat="h:mm aa"
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                             />
                         </div>

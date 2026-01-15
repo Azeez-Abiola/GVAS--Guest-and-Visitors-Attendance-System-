@@ -1,15 +1,16 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { 
-  Lock, 
-  Mail, 
-  Eye, 
-  EyeOff, 
+import {
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
   Shield,
   AlertCircle,
-  Loader
+  Loader,
+  ArrowLeft
 } from 'lucide-react'
 import GvasLogo from '../components/GvasLogo'
 
@@ -32,7 +33,7 @@ const Login = () => {
       if (!signIn) {
         throw new Error('Authentication service is not available. Please refresh the page.')
       }
-      
+
       console.log('Attempting login for:', email)
       const result = await signIn(email, password)
       console.log('SignIn result received:', result.error ? 'Error' : 'Success')
@@ -49,7 +50,7 @@ const Login = () => {
         console.log('User profile:', result.profile)
         console.log('Profile role:', result.profile?.role)
         console.log('Profile object keys:', result.profile ? Object.keys(result.profile) : 'no profile')
-        
+
         // Redirect based on user role (with fallback)
         const roleRoutes = {
           admin: '/admin',
@@ -57,15 +58,15 @@ const Login = () => {
           host: '/approvals',
           security: '/security'
         }
-        
+
         const userRole = result.profile?.role || 'reception' // Default to reception if no profile
         const targetRoute = roleRoutes[userRole] || '/reception'
         console.log('User role detected:', userRole)
         console.log('Redirecting to:', targetRoute, 'for role:', userRole)
-        
+
         // Important: Set loading to false before navigation to prevent UI stuck
         setLoading(false)
-        
+
         // Small delay to ensure state updates
         setTimeout(() => {
           navigate(targetRoute, { replace: true })
@@ -104,10 +105,21 @@ const Login = () => {
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }}></div>
       </div>
-      
+
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+      {/* Back Button */}
+      <Link
+        to="/"
+        className="absolute top-8 left-8 flex items-center gap-2 text-blue-100/60 hover:text-white transition-colors z-20 group"
+      >
+        <div className="p-2 rounded-full bg-white/5 group-hover:bg-white/10 border border-white/10">
+          <ArrowLeft size={20} />
+        </div>
+        <span className="font-medium">Back to Homepage</span>
+      </Link>
 
       <div className="w-full max-w-6xl flex gap-8 relative z-10">
         {/* Left Side - Login Form */}

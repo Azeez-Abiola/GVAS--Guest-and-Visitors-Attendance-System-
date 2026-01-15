@@ -498,7 +498,7 @@ const DashboardLayout = ({ children }) => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="fixed top-20 lg:top-4 right-4 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[600px] flex flex-col"
+              className="fixed top-20 lg:top-4 right-4 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-800 z-50 max-h-[600px] flex flex-col"
             >
               {/* Header */}
               <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-slate-900 text-white rounded-t-xl">

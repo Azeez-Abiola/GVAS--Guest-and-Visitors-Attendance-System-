@@ -34,6 +34,9 @@ const ReceptionistDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showCheckInConfirm, setShowCheckInConfirm] = useState(false);
+  const [showCheckOutConfirm, setShowCheckOutConfirm] = useState(false);
+  const [pendingVisitorAction, setPendingVisitorAction] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -138,32 +141,33 @@ const ReceptionistDashboard = () => {
   };
 
   const handleCheckIn = async (visitor) => {
+    setPendingVisitorAction(visitor);
+    setShowCheckInConfirm(true);
+  };
+
+  const confirmCheckIn = async () => {
+    if (!pendingVisitorAction) return;
+    const visitor = pendingVisitorAction;
     try {
       setCheckingIn(visitor.id);
 
-      // Generate access code
       const accessCode = generateAccessCode(6);
-
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Update visitor
-      const updatedVisitor = await ApiService.updateVisitor(visitor.id, {
+      await ApiService.updateVisitor(visitor.id, {
         status: 'checked_in',
-        checked_in_at: new Date().toISOString(),
+        check_in_time: new Date().toISOString(),
         checked_in_by: user.id,
         access_code: accessCode
       });
 
-      // Create notification for receptionists on the same floor
       if (visitor.floor && currentUser?.assigned_floors?.includes(visitor.floor)) {
         await createCheckInNotification(visitor, accessCode);
       }
 
-      // Reload visitors
       await loadTodayVisitors();
-
-      // Show success message
+      setShowCheckInConfirm(false);
+      setPendingVisitorAction(null);
       alert(`✅ Checked in successfully!\n\nAccess Code: ${accessCode}\n\nPlease provide this code to the visitor.`);
     } catch (error) {
       console.error('Failed to check in visitor:', error);
@@ -174,17 +178,24 @@ const ReceptionistDashboard = () => {
   };
 
   const handleCheckOut = async (visitor) => {
+    setPendingVisitorAction(visitor);
+    setShowCheckOutConfirm(true);
+  };
+
+  const confirmCheckOut = async () => {
+    if (!pendingVisitorAction) return;
+    const visitor = pendingVisitorAction;
     try {
       setCheckingIn(visitor.id);
 
-      // Update visitor
       await ApiService.updateVisitor(visitor.id, {
         status: 'checked_out',
-        checked_out_at: new Date().toISOString()
+        check_out_time: new Date().toISOString()
       });
 
-      // Reload visitors
       await loadTodayVisitors();
+      setShowCheckOutConfirm(false);
+      setPendingVisitorAction(null);
     } catch (error) {
       console.error('Failed to check out visitor:', error);
       alert('Failed to check out visitor. Please try again.');
@@ -477,6 +488,8 @@ const ReceptionistDashboard = () => {
                 <TableHeaderCell>Contact</TableHeaderCell>
                 <TableHeaderCell>Host</TableHeaderCell>
                 <TableHeaderCell>Access Code</TableHeaderCell>
+                <TableHeaderCell>Check In</TableHeaderCell>
+                <TableHeaderCell>Check Out</TableHeaderCell>
                 <TableHeaderCell>Status</TableHeaderCell>
                 <TableHeaderCell>Actions</TableHeaderCell>
               </TableRow>
@@ -484,13 +497,13 @@ const ReceptionistDashboard = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-600"></div>
                   </TableCell>
                 </TableRow>
               ) : filteredVisitors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                     No visitors found
                   </TableCell>
                 </TableRow>
@@ -529,6 +542,16 @@ const ReceptionistDashboard = () => {
                       ) : (
                         <Text className="text-gray-400">Not generated</Text>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <Text className="text-sm">
+                        {visitor.check_in_time ? new Date(visitor.check_in_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Text className="text-sm">
+                        {visitor.check_out_time ? new Date(visitor.check_out_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </Text>
                     </TableCell>
                     <TableCell>{getStatusBadge(visitor.status)}</TableCell>
                     <TableCell>
@@ -569,6 +592,77 @@ const ReceptionistDashboard = () => {
         hostName={currentUser?.full_name}
         hostId={currentUser?.id}
       />
+
+      {/* Confirmation Modals */}
+      <AnimatePresence>
+        {showCheckInConfirm && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-slate-800"
+            >
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserCheck size={32} className="text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirm Check In</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to check in <strong>{pendingVisitorAction?.full_name}</strong>?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowCheckInConfirm(false); setPendingVisitorAction(null); }}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmCheckIn}
+                  disabled={checkingIn}
+                  className="flex-1 px-4 py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {showCheckOutConfirm && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-slate-800"
+            >
+              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock size={32} className="text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirm Check Out</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to check out <strong>{pendingVisitorAction?.full_name}</strong>?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowCheckOutConfirm(false); setPendingVisitorAction(null); }}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmCheckOut}
+                  disabled={checkingIn}
+                  className="flex-1 px-4 py-2.5 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-colors disabled:opacity-50"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div >
   );
 };

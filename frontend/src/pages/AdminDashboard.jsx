@@ -1,12 +1,15 @@
 ﻿import { useState, useEffect } from 'react'
-import { Card, Title, Text, Metric, Flex, Grid, ProgressBar, AreaChart, DonutChart, Badge as TremorBadge } from '@tremor/react'
+import { Card, Title, Text, Metric, Flex, Grid, ProgressBar, AreaChart, DonutChart, Badge as TremorBadge, Button, Table, TableHead, TableRow, TableHeaderCell, TableBody, TableCell } from '@tremor/react'
 import { Users, UserCheck, Clock, TrendingUp, Calendar, Eye, UserPlus, Shield, Building2, X, MonitorPlay, Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css"
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
 import ApiService from '../services/api'
 import showToast from '../utils/toast'
 import { useAuth } from '../contexts/AuthContext'
+import { generateAccessCode } from '../utils/auth'
 import HostSelector from '../components/HostSelector'
 import FloorSelector from '../components/FloorSelector'
 import VisitorDetailModal from '../components/VisitorDetailModal'
@@ -29,6 +32,10 @@ const AdminDashboard = () => {
   const [isEditVisitorOpen, setIsEditVisitorOpen] = useState(false)
   const [isViewVisitorOpen, setIsViewVisitorOpen] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState(null)
+  const [checkingIn, setCheckingIn] = useState(null)
+  const [showCheckInConfirm, setShowCheckInConfirm] = useState(false)
+  const [showCheckOutConfirm, setShowCheckOutConfirm] = useState(false)
+  const [pendingVisitorAction, setPendingVisitorAction] = useState(null)
   const [hosts, setHosts] = useState([])
   const [newVisitor, setNewVisitor] = useState({
     name: '',
@@ -189,6 +196,69 @@ const AdminDashboard = () => {
     setIsViewVisitorOpen(true)
   }
 
+  const handleCheckIn = async (visitor, e) => {
+    if (e) e.stopPropagation();
+    setPendingVisitorAction(visitor);
+    setShowCheckInConfirm(true);
+  };
+
+  const confirmCheckIn = async () => {
+    if (!pendingVisitorAction) return;
+    const visitor = pendingVisitorAction;
+    try {
+      setCheckingIn(visitor.id || visitor);
+      const accessCode = generateAccessCode(6);
+      const visitorId = visitor.id || visitor;
+
+      await ApiService.updateVisitor(visitorId, {
+        status: 'checked_in',
+        check_in_time: new Date().toISOString(),
+        checked_in_by: profile?.id,
+        access_code: accessCode
+      });
+
+      await loadData();
+      setShowCheckInConfirm(false);
+      setPendingVisitorAction(null);
+      alert(`✅ Checked in successfully!\n\nAccess Code: ${accessCode}\n\nPlease provide this code to the visitor.`);
+    } catch (error) {
+      console.error('Failed to check in visitor:', error);
+      alert('Failed to check in visitor. Please try again.');
+    } finally {
+      setCheckingIn(null);
+    }
+  };
+
+  const handleCheckOut = async (visitor, e) => {
+    if (e) e.stopPropagation();
+    setPendingVisitorAction(visitor);
+    setShowCheckOutConfirm(true);
+  };
+
+  const confirmCheckOut = async () => {
+    if (!pendingVisitorAction) return;
+    const visitor = pendingVisitorAction;
+    try {
+      const visitorId = visitor.id || visitor;
+      setCheckingIn(visitorId);
+
+      await ApiService.updateVisitor(visitorId, {
+        status: 'checked_out',
+        check_out_time: new Date().toISOString()
+      });
+
+      await loadData();
+      setShowCheckOutConfirm(false);
+      setPendingVisitorAction(null);
+    } catch (error) {
+      console.error('Failed to check out visitor:', error);
+      alert('Failed to check out visitor. Please try again.');
+    } finally {
+      setCheckingIn(null);
+    }
+  };
+
+
   const floorDistribution = [
     { name: 'Floor 1-3', value: 45 },
     { name: 'Floor 4-6', value: 32 },
@@ -197,11 +267,18 @@ const AdminDashboard = () => {
   ]
 
   const recentActivity = visitors.slice(0, 5).map(v => ({
+    // Map check_in_time and check_out_time directly from the visitor object
+    check_in_time: v.check_in_time ? new Date(v.check_in_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
+    check_out_time: v.check_out_time ? new Date(v.check_out_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
     name: v.name,
     time: v.check_in_time ? new Date(v.check_in_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
     status: v.status,
-    badge: v.badge_number
+    badge: v.badge_number,
+    id: v.id,
+    full_name: v.full_name,
+    floor: v.floor_number || v.floor
   }))
+
 
   return (
     <DashboardLayout>
@@ -387,77 +464,113 @@ const AdminDashboard = () => {
               View All
             </button>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-slate-700">
-                  <th className="pb-3 pl-2">Visitor</th>
-                  <th className="pb-3">Floor</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3">Time</th>
-                  <th className="pb-3">Badge</th>
-                  <th className="pb-3 text-right pr-2">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
-                {recentActivity.length > 0 ? recentActivity.map((activity, i) => (
-                  <tr
-                    key={i}
-                    onClick={() => handleViewVisitor(activity)}
-                    className="group hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                  >
-                    <td className="py-3 pl-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 dark:from-slate-600 dark:to-slate-800 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                          {activity.name?.charAt(0) || 'V'}
-                        </div>
-                        <span className="font-medium text-gray-900 dark:text-white group-hover:text-slate-900 dark:group-hover:text-gray-100">{activity.name || 'Unknown'}</span>
+          <Table className="mt-4">
+            <TableHead>
+              <TableRow className="border-b border-gray-100 dark:border-slate-800">
+                <TableHeaderCell>Visitor</TableHeaderCell>
+                <TableHeaderCell>Floor</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+                <TableHeaderCell>Check In</TableHeaderCell>
+                <TableHeaderCell>Check Out</TableHeaderCell>
+                <TableHeaderCell>Badge</TableHeaderCell>
+                <TableHeaderCell>Action</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {recentActivity.length > 0 ? recentActivity.map((activity, i) => (
+                <TableRow
+                  key={i}
+                  onClick={() => handleViewVisitor(activity)}
+                  className="group hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 dark:from-slate-600 dark:to-slate-800 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                        {activity.name?.charAt(0) || 'V'}
                       </div>
-                    </td>
-                    <td className="py-3">
-                      {activity.floor ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                          {activity.floor}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-400 dark:text-gray-500">-</span>
+                      <Text className="font-medium text-gray-900 dark:text-white">{activity.name || 'Unknown'}</Text>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {activity.floor ? (
+                      <TremorBadge color="blue" size="xs">
+                        {activity.floor}
+                      </TremorBadge>
+                    ) : (
+                      <Text className="text-gray-400 dark:text-gray-500">-</Text>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <TremorBadge
+                      color={activity.status === 'checked_in' ? 'green' : activity.status === 'pre_registered' ? 'blue' : (activity.status === 'pending' || activity.status === 'pending_approval') ? 'amber' : 'gray'}
+                      size="xs"
+                    >
+                      {activity.status === 'checked_in' ? 'Checked In'
+                        : activity.status === 'pre_registered' ? 'Pre-registered'
+                          : activity.status === 'pending' ? 'Pending'
+                            : activity.status === 'pending_approval' ? 'Awaiting Approval'
+                              : 'Checked Out'}
+                    </TremorBadge>
+                  </TableCell>
+                  <TableCell>
+                    <Text className="text-sm text-gray-500 dark:text-gray-400">{activity.check_in_time}</Text>
+                  </TableCell>
+                  <TableCell>
+                    <Text className="text-sm text-gray-500 dark:text-gray-400">{activity.check_out_time}</Text>
+                  </TableCell>
+                  <TableCell>
+                    <Text className="text-sm text-gray-500 dark:text-gray-400">#{activity.badge || 'N/A'}</Text>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {activity.status !== 'checked_in' && activity.status !== 'checked_out' && (
+                        <Button
+                          size="xs"
+                          color="green"
+                          loading={checkingIn === activity.id}
+                          disabled={checkingIn === activity.id}
+                          onClick={(e) => handleCheckIn(activity, e)}
+                        >
+                          Check In
+                        </Button>
                       )}
-                    </td>
-                    <td className="py-3">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activity.status === 'checked_in'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                        : activity.status === 'pre_registered'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                          : activity.status === 'pending' || activity.status === 'pending_approval'
-                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                        }`}>
-                        {activity.status === 'checked_in' ? 'Checked In'
-                          : activity.status === 'pre_registered' ? 'Pre-registered'
-                            : activity.status === 'pending' ? 'Pending'
-                              : activity.status === 'pending_approval' ? 'Awaiting Approval'
-                                : 'Checked Out'}
-                      </span>
-                    </td>
-                    <td className="py-3 text-sm text-gray-500 dark:text-gray-400">{activity.time}</td>
-                    <td className="py-3 text-sm text-gray-500 dark:text-gray-400">#{activity.badge || 'N/A'}</td>
-                    <td className="py-3 text-right pr-2">
-                      <Eye size={16} className="text-gray-400 dark:text-gray-500 group-hover:text-slate-900 dark:group-hover:text-gray-300 transition-colors inline-block" />
-                    </td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan="5" className="py-8 text-center text-gray-500 dark:text-gray-400">No recent activity</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                      {activity.status === 'checked_in' && (
+                        <Button
+                          size="xs"
+                          variant="secondary"
+                          loading={checkingIn === activity.id}
+                          disabled={checkingIn === activity.id}
+                          onClick={(e) => handleCheckOut(activity, e)}
+                        >
+                          Check Out
+                        </Button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewVisitor(activity);
+                        }}
+                        className="p-1 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-gray-300 transition-colors"
+                      >
+                        <Eye size={18} />
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-10 text-gray-400">
+                    No recent activity found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </Card>
       </div>
 
       {/* Add Visitor Modal */}
-      <AnimatePresence>
+      < AnimatePresence >
         {isAddVisitorOpen && (
           <>
             {/* Backdrop */}
@@ -511,7 +624,7 @@ const AdminDashboard = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Email Address *
+                          Email Address
                         </label>
                         <input
                           type="email"
@@ -552,11 +665,12 @@ const AdminDashboard = () => {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Visit Date *
                         </label>
-                        <input
-                          type="date"
-                          value={newVisitor.visit_date}
-                          onChange={(e) => setNewVisitor({ ...newVisitor, visit_date: e.target.value })}
+                        <DatePicker
+                          selected={newVisitor.visit_date ? new Date(newVisitor.visit_date) : null}
+                          onChange={(date) => setNewVisitor({ ...newVisitor, visit_date: date.toISOString().split('T')[0] })}
                           className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
+                          dateFormat="MMMM d, yyyy"
+                          minDate={new Date()}
                         />
                       </div>
 
@@ -564,10 +678,14 @@ const AdminDashboard = () => {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Visit Time
                         </label>
-                        <input
-                          type="time"
-                          value={newVisitor.visit_time}
-                          onChange={(e) => setNewVisitor({ ...newVisitor, visit_time: e.target.value })}
+                        <DatePicker
+                          selected={newVisitor.visit_time ? new Date(`2000-01-01T${newVisitor.visit_time}`) : null}
+                          onChange={(date) => setNewVisitor({ ...newVisitor, visit_time: date.toTimeString().split(' ')[0].substring(0, 5) })}
+                          showTimeSelect
+                          showTimeSelectOnly
+                          timeIntervals={15}
+                          timeCaption="Time"
+                          dateFormat="h:mm aa"
                           className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
                         />
                       </div>
@@ -632,7 +750,7 @@ const AdminDashboard = () => {
                       </button>
                       <button
                         onClick={handleAddVisitor}
-                        disabled={!newVisitor.name || !newVisitor.email || !newVisitor.phone || !newVisitor.host_id || !newVisitor.purpose}
+                        disabled={!newVisitor.name || !newVisitor.phone || !newVisitor.host_id || !newVisitor.purpose}
                         className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <UserPlus size={18} />
@@ -645,10 +763,10 @@ const AdminDashboard = () => {
             </div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence >
 
       {/* Edit Visitor Modal */}
-      <AnimatePresence>
+      < AnimatePresence >
         {isEditVisitorOpen && (
           <>
             {/* Backdrop */}
@@ -796,10 +914,10 @@ const AdminDashboard = () => {
             </div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence >
 
       {/* View Visitor Details Modal */}
-      <AnimatePresence>
+      < AnimatePresence >
         {isViewVisitorOpen && selectedVisitor && (
           <>
             {/* Backdrop */}
@@ -931,10 +1049,10 @@ const AdminDashboard = () => {
             </div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence >
 
       {/* Visitor Detail Modal */}
-      <VisitorDetailModal
+      < VisitorDetailModal
         visitor={selectedVisitor}
         isOpen={isViewVisitorOpen}
         onClose={() => {
@@ -961,13 +1079,85 @@ const AdminDashboard = () => {
           setIsEditVisitorOpen(true)
         }}
       />
-      <GuestInviteModal
+      < GuestInviteModal
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         hostName={profile?.full_name}
         hostId={profile?.id}
       />
-    </DashboardLayout>
+
+      {/* Confirmation Modals */}
+      < AnimatePresence >
+        {showCheckInConfirm && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-slate-800"
+            >
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserCheck size={32} className="text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirm Check In</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to check in <strong>{pendingVisitorAction?.full_name}</strong>?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowCheckInConfirm(false); setPendingVisitorAction(null); }}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmCheckIn}
+                  disabled={checkingIn}
+                  className="flex-1 px-4 py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {
+          showCheckOutConfirm && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-slate-800"
+              >
+                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock size={32} className="text-amber-600 dark:text-amber-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirm Check Out</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Are you sure you want to check out <strong>{pendingVisitorAction?.full_name}</strong>?
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setShowCheckOutConfirm(false); setPendingVisitorAction(null); }}
+                    className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmCheckOut}
+                    disabled={checkingIn}
+                    className="flex-1 px-4 py-2.5 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-colors disabled:opacity-50"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+      </AnimatePresence>
+    </DashboardLayout >
   )
 }
 
