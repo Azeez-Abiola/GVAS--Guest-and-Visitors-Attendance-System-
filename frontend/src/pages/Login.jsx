@@ -111,144 +111,145 @@ const Login = () => {
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
-      {/* Back Button */}
-      <Link
-        to="/"
-        className="absolute top-8 left-8 flex items-center gap-2 text-blue-100/60 hover:text-white transition-colors z-20 group"
-      >
-        <div className="p-2 rounded-full bg-white/5 group-hover:bg-white/10 border border-white/10">
-          <ArrowLeft size={20} />
-        </div>
-        <span className="font-medium">Back to Homepage</span>
-      </Link>
 
       <div className="w-full max-w-6xl flex gap-8 relative z-10">
-        {/* Left Side - Login Form */}
-        <motion.div
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex-1 bg-white rounded-3xl shadow-2xl p-8 md:p-12"
-        >
-          <div className="max-w-md mx-auto">
-            {/* Logo and Header */}
-            <div className="text-center mb-8">
-              <div className="flex justify-center mb-6">
-                <GvasLogo variant="color" className="scale-150" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome to GVAS
-              </h1>
-              <p className="text-gray-600">
-                UAC House Visitor Management System
-              </p>
-            </div>
+        <div className="flex-1 relative">
+          {/* Back Button */}
+          <Link
+            to="/"
+            className="absolute -top-10 left-0 flex items-center gap-1.5 text-blue-100/60 hover:text-white transition-colors z-20 group"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-xs font-bold uppercase tracking-widest">Back to Homepage</span>
+          </Link>
 
-            {/* Error Message */}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 flex items-start space-x-3"
-              >
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+          {/* Left Side - Login Form */}
+          <motion.div
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12"
+          >
+            <div className="max-w-md mx-auto">
+              {/* Logo and Header */}
+              <div className="text-center mb-8">
+                <div className="flex justify-center mb-6">
+                  <GvasLogo variant="color" className="scale-150" />
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Welcome to GVAS
+                </h1>
+                <p className="text-gray-600">
+                  UAC House Visitor Management System
+                </p>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 flex items-start space-x-3"
+                >
+                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-red-800 font-medium">Login Failed</p>
+                    <p className="text-red-600 text-sm mt-1">{error}</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Login Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Email Input */}
                 <div>
-                  <p className="text-red-800 font-medium">Login Failed</p>
-                  <p className="text-red-600 text-sm mt-1">{error}</p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email Input */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition-all duration-200 outline-none"
+                      placeholder="your.email@uachouse.com"
+                      required
+                      disabled={loading}
+                    />
                   </div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition-all duration-200 outline-none"
-                    placeholder="your.email@uachouse.com"
-                    required
-                    disabled={loading}
-                  />
                 </div>
-              </div>
 
-              {/* Password Input */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                {/* Password Input */}
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition-all duration-200 outline-none"
+                      placeholder="••••••••"
+                      required
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                      disabled={loading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
                   </div>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition-all duration-200 outline-none"
-                    placeholder="••••••••"
-                    required
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
-                    disabled={loading}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    )}
-                  </button>
                 </div>
+
+                {/* Submit Button */}
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
+                  disabled={loading}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader className="h-5 w-5 animate-spin" />
+                      <span>Signing in...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-5 w-5" />
+                      <span>Sign In</span>
+                    </>
+                  )}
+                </motion.button>
+              </form>
+
+              {/* Forgot Password */}
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  className="text-slate-700 hover:text-slate-900 text-sm font-medium"
+                  disabled={loading}
+                >
+                  Forgot your password?
+                </button>
               </div>
-
-              {/* Submit Button */}
-              <motion.button
-                type="submit"
-                whileHover={{ scale: loading ? 1 : 1.02 }}
-                whileTap={{ scale: loading ? 1 : 0.98 }}
-                disabled={loading}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader className="h-5 w-5 animate-spin" />
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="h-5 w-5" />
-                    <span>Sign In</span>
-                  </>
-                )}
-              </motion.button>
-            </form>
-
-            {/* Forgot Password */}
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                className="text-slate-700 hover:text-slate-900 text-sm font-medium"
-                disabled={loading}
-              >
-                Forgot your password?
-              </button>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         {/* Right Side - Demo Credentials */}
         <motion.div
@@ -277,9 +278,7 @@ const Login = () => {
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-bold text-lg mb-1 text-white group-hover:text-blue-300 transition-colors">{cred.role}</p>
-                    <p className="text-blue-100/80 text-sm mb-2">{cred.email}</p>
-                    <p className="text-blue-100/60 text-xs font-mono">{cred.password}</p>
+                    <p className="font-bold text-lg text-white group-hover:text-blue-300 transition-colors uppercase tracking-wider">{cred.role}</p>
                   </div>
                   <Shield className="h-6 w-6 text-blue-200 group-hover:text-blue-300 transition-colors" />
                 </div>
