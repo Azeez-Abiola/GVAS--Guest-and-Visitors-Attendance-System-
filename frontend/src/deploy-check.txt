@@ -1,0 +1,4 @@
+GVAS Deployment ID: 2026-01-16-13-10
+Status: ACTIVE
+Type: Vite/React SPA
+Root: frontend
