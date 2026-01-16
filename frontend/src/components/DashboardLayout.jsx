@@ -25,7 +25,8 @@ import {
   TrendingUp,
   Sun,
   Moon,
-  CreditCard
+  CreditCard,
+  Building2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GvasLogo from './GvasLogo'
@@ -183,6 +184,10 @@ const DashboardLayout = ({ children }) => {
       items.push({ name: 'Badge Management', path: '/host/badge-management', icon: Badge, feature: 'host-badges' })
     } else if (profile?.role === 'security') {
       items.push({ name: 'Security', path: '/security', icon: Shield, feature: 'security' })
+    } else if (profile?.role === 'super_admin') {
+      items.push({ name: 'Super Admin', path: '/super-admin', icon: Shield, feature: 'super_admin' })
+      items.push({ name: 'Organizations', path: '/super-admin/organizations', icon: Building2, feature: 'super_admin' })
+      items.push({ name: 'Transactions', path: '/super-admin/transactions', icon: CreditCard, feature: 'super_admin' })
     }
 
     // Additional features based on permissions

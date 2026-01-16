@@ -1037,6 +1037,77 @@ app.post('/api/reports/generate', async (req, res) => {
   }
 });
 
+// ==================== SUPER ADMIN APIs ====================
+
+// Get platform-wide stats (Revenue, Clients, Visitors)
+app.get('/api/super-admin/stats', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('system_stats')
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Super Admin stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all organizations
+app.get('/api/super-admin/organizations', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('system_organizations')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Super Admin organizations error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new organization
+app.post('/api/super-admin/organizations', async (req, res) => {
+  try {
+    const orgData = req.body;
+    const { data, error } = await supabase
+      .from('system_organizations')
+      .insert([orgData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Super Admin org creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all transactions/subscriptions
+app.get('/api/super-admin/transactions', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('system_subscriptions')
+      .select(`
+        *,
+        organization:org_id(name)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Super Admin transactions error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Helper functions
 async function generateVisitorId() {
   const { data, error } = await supabase.rpc('generate_visitor_id');

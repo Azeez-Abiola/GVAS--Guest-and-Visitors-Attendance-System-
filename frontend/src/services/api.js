@@ -1116,6 +1116,26 @@ class ApiService {
   async healthCheck() {
     return this.request('/health');
   }
+
+  // Super Admin APIs
+  async getSuperAdminStats() {
+    return this.request('/super-admin/stats');
+  }
+
+  async getOrganizations() {
+    return this.request('/super-admin/organizations');
+  }
+
+  async createOrganization(data) {
+    return this.request('/super-admin/organizations', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async getTransactions() {
+    return this.request('/super-admin/transactions');
+  }
 }
 
 export default new ApiService();

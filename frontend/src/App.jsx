@@ -33,6 +33,9 @@ import BadgeManagementHost from './pages/host/BadgeManagement'
 import VisitorKiosk from './pages/receptionist/VisitorKiosk'
 import AdminVisitorPage from './pages/admin/AdminVisitorPage'
 import Resources from './pages/Resources'
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard'
+import ClientManagement from './pages/superadmin/ClientManagement'
+import Transactions from './pages/superadmin/Transactions'
 
 function App() {
   return (
@@ -191,6 +194,34 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Super Admin Routes */}
+              <Route
+                path="/super-admin"
+                element={
+                  <ProtectedRoute requiredRole="super_admin">
+                    <SuperAdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/super-admin/organizations"
+                element={
+                  <ProtectedRoute requiredRole="super_admin">
+                    <ClientManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/super-admin/transactions"
+                element={
+                  <ProtectedRoute requiredRole="super_admin">
+                    <Transactions />
+                  </ProtectedRoute>
+                }
+              />
+              />
+
               <Route
                 path="/profile"
                 element={

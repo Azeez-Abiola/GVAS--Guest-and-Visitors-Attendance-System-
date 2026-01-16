@@ -53,6 +53,7 @@ const Login = () => {
 
         // Redirect based on user role (with fallback)
         const roleRoutes = {
+          super_admin: '/super-admin',
           admin: '/admin',
           reception: '/reception',
           host: '/approvals',

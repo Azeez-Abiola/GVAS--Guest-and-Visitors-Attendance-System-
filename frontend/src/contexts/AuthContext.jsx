@@ -279,6 +279,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const userRole = profile.role.toLowerCase()
+    if (userRole === 'super_admin') return true
     if (userRole === 'admin') return true
 
     if (Array.isArray(requiredRole)) {
@@ -295,6 +296,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const permissions = {
+      super_admin: ['reception', 'badges', 'evacuation', 'approvals', 'blacklist', 'settings', 'users', 'super_admin'],
       admin: ['reception', 'badges', 'evacuation', 'approvals', 'blacklist', 'settings', 'users'],
       reception: ['reception', 'badges'],
       host: ['approvals', 'host-analytics', 'host-badges'],
@@ -315,7 +317,8 @@ export const AuthProvider = ({ children }) => {
     hasRole,
     canAccess,
     isAuthenticated: !!user,
-    isAdmin: profile?.role === 'admin',
+    isSuperAdmin: profile?.role === 'super_admin',
+    isAdmin: profile?.role === 'admin' || profile?.role === 'super_admin',
     isReception: profile?.role === 'reception',
     isHost: profile?.role === 'host',
     isSecurity: profile?.role === 'security'
