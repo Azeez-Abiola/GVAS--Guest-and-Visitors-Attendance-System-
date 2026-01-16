@@ -22,6 +22,8 @@ import SystemSettings from './pages/admin/SystemSettings'
 import UserManagement from './pages/admin/UserManagement'
 import AuditLogs from './pages/admin/AuditLogs'
 import ReportsAnalytics from './pages/admin/ReportsAnalytics'
+import PricingPlans from './pages/admin/PricingPlans'
+import PublicPricing from './pages/PublicPricing'
 import PreRegistrationPortal from './pages/PreRegistrationPortal'
 import ProfilePage from './pages/ProfilePage'
 import ReceptionAnalytics from './pages/ReceptionAnalytics'
@@ -55,6 +57,7 @@ function App() {
               <Route path="/pre-registration" element={<PreRegistrationPortal />} />
               <Route path="/checkout" element={<CheckoutFlow />} />
               <Route path="/success" element={<CheckInSuccess />} />
+              <Route path="/pricing" element={<PublicPricing />} />
               <Route path="/resources" element={<Resources />} />
 
               {/* Protected Routes - Role-based Dashboards */}
@@ -177,6 +180,14 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <ReportsAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/pricing"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <PricingPlans />
                   </ProtectedRoute>
                 }
               />

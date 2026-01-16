@@ -74,10 +74,16 @@ const LandingPage = () => {
 
           {/* Desktop Links */}
           <div className="hidden lg:flex items-center space-x-8">
-            {['Features', 'Solutions', 'Enterprise'].map((item) => (
+            {['Features', 'Solutions', 'Pricing'].map((item) => (
               <a
                 key={item}
-                href={`#${item.toLowerCase()}`}
+                href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase()}`}
+                onClick={(e) => {
+                  if (item === 'Pricing') {
+                    e.preventDefault();
+                    navigate('/pricing');
+                  }
+                }}
                 className="text-sm font-medium text-[#070f2b]/70 dark:text-white/70 hover:text-[#070f2b] dark:hover:text-white transition-colors"
               >
                 {item}
@@ -133,12 +139,18 @@ const LandingPage = () => {
             className="fixed inset-x-4 top-24 z-40 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-[#070f2b]/10 dark:border-white/10 p-6 lg:hidden"
           >
             <div className="flex flex-col space-y-4">
-              {['Features', 'Solutions', 'Enterprise'].map((item) => (
+              {['Features', 'Solutions', 'Pricing'].map((item) => (
                 <a
                   key={item}
-                  href={`#${item.toLowerCase()}`}
+                  href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase()}`}
                   className="text-lg font-medium text-[#070f2b] dark:text-white"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    setIsMobileMenuOpen(false);
+                    if (item === 'Pricing') {
+                      e.preventDefault();
+                      navigate('/pricing');
+                    }
+                  }}
                 >
                   {item}
                 </a>

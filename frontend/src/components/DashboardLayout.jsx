@@ -24,7 +24,8 @@ import {
   User,
   TrendingUp,
   Sun,
-  Moon
+  Moon,
+  CreditCard
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GvasLogo from './GvasLogo'
@@ -216,6 +217,7 @@ const DashboardLayout = ({ children }) => {
       items.push({ name: 'System Settings', path: '/system-settings', icon: Settings, feature: 'admin' })
       items.push({ name: 'Audit Logs', path: '/audit-logs', icon: FileText, feature: 'admin' })
       items.push({ name: 'Reports & Analytics', path: '/reports-analytics', icon: BarChart3, feature: 'admin' })
+      items.push({ name: 'Pricing & Plans', path: '/admin/pricing', icon: CreditCard, feature: 'admin' })
       items.push({ name: 'Profile', path: '/profile', icon: User, feature: 'profile' })
     } else if (canAccess('settings')) {
       // Non-admin users get personal settings
