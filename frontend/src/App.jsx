@@ -36,6 +36,7 @@ import Resources from './pages/Resources'
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard'
 import ClientManagement from './pages/superadmin/ClientManagement'
 import Transactions from './pages/superadmin/Transactions'
+import NotFound from './pages/NotFound'
 
 function App() {
   return (
@@ -220,7 +221,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              />
 
               <Route
                 path="/profile"
@@ -254,6 +254,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </motion.div>
         </div>
