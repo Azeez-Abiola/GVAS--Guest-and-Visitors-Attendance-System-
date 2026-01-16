@@ -41,9 +41,9 @@ const PublicPricing = () => {
     const plans = [
         {
             name: 'Standard',
-            price: isYearly ? '₦720,000' : '₦75,000',
+            price: isYearly ? '₦1,500,000' : '₦150,000',
             period: isYearly ? '/ year' : '/ month',
-            savings: isYearly ? 'Save ₦180,000 yearly' : null,
+            savings: isYearly ? 'Save ₦300,000 yearly' : null,
             description: 'Essential toolkit for smaller offices.',
             features: [
                 'Visitor Pre-Registration',
@@ -66,9 +66,9 @@ const PublicPricing = () => {
         {
             name: 'Business',
             isBestValue: true,
-            price: isYearly ? '₦1,440,000' : '₦150,000',
+            price: isYearly ? '₦2,500,000' : '₦250,000',
             period: isYearly ? '/ year' : '/ month',
-            savings: isYearly ? 'Save ₦360,000 yearly' : null,
+            savings: isYearly ? 'Save ₦500,000 yearly' : null,
             description: 'High-traffic corporate environments.',
             features: [
                 'Everything in Standard',
@@ -183,8 +183,8 @@ const PublicPricing = () => {
                         <button
                             onClick={() => setIsYearly(false)}
                             className={`px-8 py-3 rounded-xl text-sm font-black transition-all duration-300 ${!isYearly
-                                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xl'
-                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xl'
+                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                                 }`}
                         >
                             Monthly
@@ -192,8 +192,8 @@ const PublicPricing = () => {
                         <button
                             onClick={() => setIsYearly(true)}
                             className={`px-8 py-3 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${isYearly
-                                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xl'
-                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xl'
+                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                                 }`}
                         >
                             Yearly
@@ -224,20 +224,20 @@ const PublicPricing = () => {
                                 </div>
                             )}
                             <Card className={`h-full border-0 ${plan.isBestValue
-                                    ? 'ring-2 ring-emerald-500 dark:ring-emerald-400 bg-white dark:bg-slate-900'
-                                    : 'ring-1 ring-gray-200 dark:ring-slate-800 bg-white/80 dark:bg-slate-900/80'
+                                ? 'ring-2 ring-emerald-500 dark:ring-emerald-400 bg-white dark:bg-slate-900'
+                                : 'ring-1 ring-gray-200 dark:ring-slate-800 bg-white/80 dark:bg-slate-900/80'
                                 } rounded-[2.5rem] p-10 overflow-hidden group transition-all duration-500 shadow-2xl backdrop-blur-xl`}>
 
                                 {/* Decorative Pattern */}
                                 <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-10 ${plan.color === 'blue' ? 'bg-blue-500' :
-                                        plan.color === 'emerald' ? 'bg-emerald-500' : 'bg-indigo-500'
+                                    plan.color === 'emerald' ? 'bg-emerald-500' : 'bg-indigo-500'
                                     }`} />
 
                                 <div className="flex flex-col h-full relative z-10">
                                     <div className="flex items-center gap-5 mb-8">
                                         <div className={`p-4 rounded-2xl ${plan.color === 'blue' ? 'bg-blue-100/50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' :
-                                                plan.color === 'emerald' ? 'bg-emerald-100/50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' :
-                                                    'bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400'
+                                            plan.color === 'emerald' ? 'bg-emerald-100/50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' :
+                                                'bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400'
                                             }`}>
                                             <plan.icon size={32} strokeWidth={2.5} />
                                         </div>
@@ -263,7 +263,7 @@ const PublicPricing = () => {
                                         {plan.features.map((feature) => (
                                             <div key={feature} className="flex items-start gap-4">
                                                 <div className={`mt-1 p-1 rounded-full ${plan.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                                                        plan.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-indigo-100 dark:bg-indigo-900/30'
+                                                    plan.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-indigo-100 dark:bg-indigo-900/30'
                                                     }`}>
                                                     <CheckCircle size={16} className={
                                                         plan.color === 'blue' ? 'text-blue-500' :
@@ -290,8 +290,8 @@ const PublicPricing = () => {
                                     <button
                                         onClick={() => navigate('/guest-register')}
                                         className={`w-full mt-12 py-5 rounded-[1.5rem] font-black text-lg tracking-wide transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 ${plan.isBestValue
-                                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-2xl shadow-emerald-500/30'
-                                                : 'bg-[#070f2b] dark:bg-white text-white dark:text-[#070f2b] hover:opacity-90 shadow-xl'
+                                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-2xl shadow-emerald-500/30'
+                                            : 'bg-[#070f2b] dark:bg-white text-white dark:text-[#070f2b] hover:opacity-90 shadow-xl'
                                             }`}
                                     >
                                         {plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started Now'}

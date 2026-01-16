@@ -8,9 +8,9 @@ GVAS (Guest and Visitor Attendance System) offers flexible pricing tiers designe
 
 | Feature | Standard | **Business (Best Value)** | Enterprise |
 | :--- | :--- | :--- | :--- |
-| **Monthly Price** | ₦75,000 | **₦150,000** | Custom |
-| **Annual Price** | ₦720,000 | **₦1,440,000** | Custom |
-| **Annual Savings** | ₦180,000 (20%) | **₦360,000 (20%)** | N/A |
+| **Monthly Price** | ₦150,000 | **₦250,000** | Custom |
+| **Annual Price** | ₦1,500,000 | **₦2,500,000** | Custom |
+| **Annual Savings** | ₦300,000 (20%) | **₦500,000 (20%)** | N/A |
 | **Setup Fee** | ₦50,000 | **₦100,000** | Waived |
 | **Target User** | Single-Office branches | **Multi-Floor Buildings** | Multi-Site Corps |
 
