@@ -200,6 +200,9 @@ const UserManagement = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [autoGeneratePassword, setAutoGeneratePassword] = useState(!isEdit);
     const [passwordCopied, setPasswordCopied] = useState(false);
+    const [manualPassword, setManualPassword] = useState('');
+    const [showManualPassword, setShowManualPassword] = useState(false);
+    const [changePassword, setChangePassword] = useState(false);
     const [userCreated, setUserCreated] = useState(false); // Track if user was just created
 
     // Dynamic Floors State
@@ -279,11 +282,15 @@ const UserManagement = () => {
       try {
         let password = null;
 
-        // Generate password for new users if auto-generate is enabled
-        if (!isEdit && autoGeneratePassword) {
-          password = generateSecurePassword(12);
-          setGeneratedPassword(password);
-          setShowPassword(true);
+        // Generate password for new users or if changing password
+        if (!isEdit || changePassword) {
+          if (autoGeneratePassword) {
+            password = generateSecurePassword(12);
+            setGeneratedPassword(password);
+            setShowPassword(true);
+          } else {
+            password = manualPassword;
+          }
         }
 
         const userData = {
@@ -297,7 +304,11 @@ const UserManagement = () => {
 
         let savedUser;
         if (isEdit) {
-          await ApiService.updateUser(user.id, userData);
+          const updates = { ...userData };
+          if (changePassword && password) {
+            updates.password = password;
+          }
+          await ApiService.updateUser(user.id, updates);
           savedUser = user;
         } else {
           // Create user with password handled separately
@@ -594,10 +605,11 @@ const UserManagement = () => {
               </div>
             </div>
 
-            {/* Password Generation Section (Only for new users) */}
-            {!isEdit && (
-              <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-gray-100 dark:border-slate-700">
+            {/* Password Generation Section */}
+            <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
+
+              <div className="flex items-center justify-between mb-4 pb-4 border-b-2 border-gray-100 dark:border-slate-700">
+                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
                     <svg className="w-5 h-5 text-slate-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -605,23 +617,82 @@ const UserManagement = () => {
                   </div>
                   <h3 className="font-bold text-gray-900 dark:text-white text-base">Account Security</h3>
                 </div>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="autoGeneratePassword"
-                    checked={autoGeneratePassword}
-                    onChange={(e) => setAutoGeneratePassword(e.target.checked)}
-                    className="w-5 h-5 text-slate-700 dark:text-blue-400 rounded border-2 border-gray-300 dark:border-slate-600 focus:ring-slate-500 focus:ring-2"
-                  />
-                  <label htmlFor="autoGeneratePassword" className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer">
-                    Auto-generate secure password
-                  </label>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 ml-8">
-                  A secure 12-character password will be generated and displayed after creation
-                </p>
+
+                {isEdit && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="changePassword"
+                      checked={changePassword}
+                      onChange={(e) => {
+                        setChangePassword(e.target.checked);
+                        if (!e.target.checked) {
+                          setGeneratedPassword('');
+                          setShowPassword(false);
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <label htmlFor="changePassword" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                      Change Password
+                    </label>
+                  </div>
+                )}
               </div>
-            )}
+
+              {(!isEdit || changePassword) && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="autoGeneratePassword"
+                      checked={autoGeneratePassword}
+                      onChange={(e) => setAutoGeneratePassword(e.target.checked)}
+                      className="w-5 h-5 text-slate-700 dark:text-blue-400 rounded border-2 border-gray-300 dark:border-slate-600 focus:ring-slate-500 focus:ring-2"
+                    />
+                    <label htmlFor="autoGeneratePassword" className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer">
+                      Auto-generate secure password
+                    </label>
+                  </div>
+
+                  {autoGeneratePassword ? (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-8">
+                      A secure 12-character password will be generated and displayed after creation
+                    </p>
+                  ) : (
+                    <div className="ml-8">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Password *</label>
+                      <div className="relative">
+                        <input
+                          type={showManualPassword ? "text" : "password"}
+                          value={manualPassword}
+                          onChange={(e) => setManualPassword(e.target.value)}
+                          placeholder="Enter password"
+                          className="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all pr-12"
+                          required={!autoGeneratePassword}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowManualPassword(!showManualPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          {showManualPassword ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Generated Password Display */}
             {showPassword && generatedPassword && (

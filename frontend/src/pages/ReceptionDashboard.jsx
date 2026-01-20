@@ -1032,7 +1032,8 @@ const ReceptionDashboard = () => {
                     <th className="pb-3">Host</th>
                     <th className="pb-3">Floor</th>
                     <th className="pb-3">Status</th>
-                    <th className="pb-3">Time</th>
+                    <th className="pb-3">Check In</th>
+                    <th className="pb-3">Check Out</th>
                     <th className="pb-3 text-right pr-2">Actions</th>
                   </tr>
                 </thead>
@@ -1100,6 +1101,9 @@ const ReceptionDashboard = () => {
                       </td>
                       <td className="py-3 text-sm text-gray-500 dark:text-gray-400">
                         {visitor.check_in_time ? new Date(visitor.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </td>
+                      <td className="py-3 text-sm text-gray-500 dark:text-gray-400">
+                        {visitor.check_out_time ? new Date(visitor.check_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </td>
                       <td className="py-3 text-right pr-2">
                         {visitor.status === 'checked_in' ? (
@@ -1215,7 +1219,7 @@ const ReceptionDashboard = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                         <input
                           type="email"
                           value={newVisitor.email}
@@ -1264,7 +1268,6 @@ const ReceptionDashboard = () => {
                       </div>
                     </div>
 
-                    {/* NEW ENHANCED HOST SELECTOR - v2.0 */}
                     <HostSelector
                       hosts={hosts}
                       value={newVisitor.host_id}
@@ -1277,6 +1280,7 @@ const ReceptionDashboard = () => {
                         setNewVisitor({ ...newVisitor, host_id: hostId, floor: hostFloor });
                       }}
                       label="Host"
+                      required={false}
                     />
 
                     <FloorSelector
@@ -1320,7 +1324,7 @@ const ReceptionDashboard = () => {
                     </button>
                     <button
                       onClick={handleWalkInCheckIn}
-                      disabled={!newVisitor.name || !newVisitor.email || !newVisitor.phone || !newVisitor.host_id || !newVisitor.purpose || !newVisitor.floor}
+                      disabled={!newVisitor.name || !newVisitor.phone || !newVisitor.purpose || !newVisitor.floor}
                       className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       <UserPlus size={18} />

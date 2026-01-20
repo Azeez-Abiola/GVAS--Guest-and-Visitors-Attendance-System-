@@ -237,6 +237,12 @@ class ApiService {
       // Fetch host details to populate required fields
       let visitorData = { ...data };
 
+      // Clean up optional fields specifically for UUIDs to avoid 22P02 "invalid input syntax"
+      if (!visitorData.host_id) delete visitorData.host_id;
+      if (!visitorData.tenant_id) delete visitorData.tenant_id;
+      // Also clean up email if it's an empty string (optional field)
+      if (visitorData.email === '') visitorData.email = null;
+
       if (data.host_id) {
         console.log('Looking up host with ID:', data.host_id);
 
@@ -341,7 +347,10 @@ class ApiService {
           floor_number: visitorData.floor_number
         });
       } else {
-        throw new Error('host_id is required');
+        // If no host selected, use a default value for host_name to satisfy DB constraint
+        if (!visitorData.host_name) {
+          visitorData.host_name = 'Reception Walk-in';
+        }
       }
 
       // Generate visitor_id if not provided
@@ -367,13 +376,16 @@ class ApiService {
       console.log('Final visitor data before insert:', visitorData);
 
       // Ensure all required fields are present (tenant_id is now optional)
-      const requiredFields = ['name', 'phone', 'host_id', 'host_name', 'visitor_id', 'purpose'];
+
+      const requiredFields = ['name', 'phone', 'visitor_id', 'purpose'];
       const missingFields = requiredFields.filter(field => !visitorData[field]);
 
       if (missingFields.length > 0) {
         console.error('Missing fields:', missingFields);
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
+
+
 
       const { data: visitor, error } = await supabase
         .from('visitors')
@@ -395,6 +407,7 @@ class ApiService {
 
       return visitor;
     }
+
     return this.request('/visitors', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -1064,6 +1077,30 @@ class ApiService {
 
   async updateUser(id, updates) {
     if (this.useDirectSupabase) {
+      // If password update is requested, we MUST use the Edge Function
+      if (updates.password) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('You must be logged in to update users');
+
+        const response = await fetch(`${this.supabaseUrl}/functions/v1/update-user`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id, ...updates })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to update user password');
+        }
+
+        return result.user;
+      }
+
+      // Standard update for non-sensitive fields
       const { data, error } = await supabase
         .from('users')
         .update(updates)

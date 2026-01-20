@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Search, Building2, Users, MapPin } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const HostSelector = ({ hosts, value, onChange, label = "Select Host" }) => {
+const HostSelector = ({ hosts, value, onChange, label = "Select Host", required = true }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -53,7 +53,7 @@ const HostSelector = ({ hosts, value, onChange, label = "Select Host" }) => {
   return (
     <div className="relative">
       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        {label} *
+        {label} {required && '*'}
       </label>
 
       {/* Selected Host Display / Trigger */}
@@ -167,14 +167,14 @@ const HostSelector = ({ hosts, value, onChange, label = "Select Host" }) => {
                             setSearchQuery('')
                           }}
                           className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-all duration-150 border-l-4 ${value === host.id
-                              ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-800'
-                              : 'border-transparent hover:border-gray-300 dark:hover:border-slate-600'
+                            ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-800'
+                            : 'border-transparent hover:border-gray-300 dark:hover:border-slate-600'
                             }`}
                         >
                           {/* Avatar */}
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md ${value === host.id
-                              ? 'bg-gradient-to-br from-slate-700 to-slate-900'
-                              : 'bg-gradient-to-br from-gray-400 to-gray-600'
+                            ? 'bg-gradient-to-br from-slate-700 to-slate-900'
+                            : 'bg-gradient-to-br from-gray-400 to-gray-600'
                             }`}>
                             {getInitials(host.name)}
                           </div>
