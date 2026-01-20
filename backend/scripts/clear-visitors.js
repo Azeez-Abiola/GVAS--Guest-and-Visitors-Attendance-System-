@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -15,19 +15,37 @@ async function clearVisitors() {
     console.log('Clearing all visitor data...');
 
     try {
-        // Delete all rows from visitors table
-        const { error } = await supabase
+        // 1. Reset all badge statuses to available
+        console.log('Resetting badge statuses...');
+        const { error: badgeError } = await supabase
+            .from('badges')
+            .update({
+                status: 'available',
+                current_visitor_id: null,
+                last_issued_at: null
+            })
+            .neq('id', '00000000-0000-0000-0000-000000000000'); // Targeted all rows
+
+        if (badgeError) {
+            console.warn('Warning: Could not reset badges:', badgeError.message);
+        } else {
+            console.log('Badge statuses reset successfully.');
+        }
+
+        // 2. Delete all rows from visitors table
+        console.log('Deleting visitors...');
+        const { error: visitorError } = await supabase
             .from('visitors')
             .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows where id is not an impossible UUID (effectively all)
+            .neq('id', '00000000-0000-0000-0000-000000000000');
 
-        if (error) {
-            throw error;
+        if (visitorError) {
+            throw visitorError;
         }
 
         console.log('Successfully cleared all visitor data.');
     } catch (error) {
-        console.error('Error clearing visitor data:', error);
+        console.error('Error clearing data:', error);
         process.exit(1);
     }
 }

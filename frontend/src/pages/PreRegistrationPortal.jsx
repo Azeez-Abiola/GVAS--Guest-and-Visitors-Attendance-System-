@@ -34,7 +34,7 @@ const PreRegistrationPortal = () => {
     phone: '',
     company: '',
     jobTitle: '',
-    
+
     // Visit Details
     visitDate: null,
     visitTime: '',
@@ -43,13 +43,13 @@ const PreRegistrationPortal = () => {
     hostName: '',
     hostEmail: '',
     department: '',
-    
+
     // Additional Information
     specialRequirements: '',
     vehicleInfo: '',
     emergencyContact: '',
     emergencyPhone: '',
-    
+
     // Terms and Conditions
     agreeToTerms: false,
     agreeToDataProcessing: false
@@ -68,36 +68,34 @@ const PreRegistrationPortal = () => {
 
   const validateStep = (step) => {
     const newErrors = {};
-    
+
     switch (step) {
       case 1:
         if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
         if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-        if (!formData.email.trim()) newErrors.email = 'Email is required';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-        if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+        if (formData.email.trim() && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+        if (formData.phone.trim() && !/^[0-9+\-\s()]+$/.test(formData.phone)) newErrors.phone = 'Phone number is invalid';
         if (!formData.company.trim()) newErrors.company = 'Company name is required';
         break;
-      
+
       case 2:
         if (!formData.visitDate) newErrors.visitDate = 'Visit date is required';
         if (!formData.visitTime) newErrors.visitTime = 'Visit time is required';
         if (!formData.purpose.trim()) newErrors.purpose = 'Purpose of visit is required';
-        if (!formData.hostName.trim()) newErrors.hostName = 'Host name is required';
-        if (!formData.hostEmail.trim()) newErrors.hostEmail = 'Host email is required';
-        else if (!/\S+@\S+\.\S+/.test(formData.hostEmail)) newErrors.hostEmail = 'Host email is invalid';
+        // hostName and hostEmail are optional
+        if (formData.hostEmail.trim() && !/\S+@\S+\.\S+/.test(formData.hostEmail)) newErrors.hostEmail = 'Host email is invalid';
         break;
-      
+
       case 3:
         // Optional fields, no validation required
         break;
-      
+
       case 4:
         if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree to terms and conditions';
         if (!formData.agreeToDataProcessing) newErrors.agreeToDataProcessing = 'You must agree to data processing';
         break;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -114,13 +112,13 @@ const PreRegistrationPortal = () => {
 
   const handleSubmit = async () => {
     if (!validateStep(4)) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       console.log('Pre-registration submitted:', formData);
       setSubmissionSuccess(true);
     } catch (error) {
@@ -168,13 +166,13 @@ const PreRegistrationPortal = () => {
                 <Text>{formData.hostName}</Text>
               </div>
             </div>
-            <Button 
+            <Button
               className="w-full"
               onClick={() => {
                 setCurrentStep(1);
                 setFormData({
                   firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '',
-                  visitDate: null, visitTime: '', duration: '', purpose: '', hostName: '', 
+                  visitDate: null, visitTime: '', duration: '', purpose: '', hostName: '',
                   hostEmail: '', department: '', specialRequirements: '', vehicleInfo: '',
                   emergencyContact: '', emergencyPhone: '', agreeToTerms: false, agreeToDataProcessing: false
                 });
@@ -214,8 +212,8 @@ const PreRegistrationPortal = () => {
               <div key={step.id} className="flex items-center">
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
-                  ${currentStep >= step.id 
-                    ? 'bg-blue-600 text-white' 
+                  ${currentStep >= step.id
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-500'
                   }
                 `}>
@@ -230,7 +228,7 @@ const PreRegistrationPortal = () => {
               </div>
             ))}
           </div>
-          
+
           <div className="text-center">
             <Title className="mb-1">{steps[currentStep - 1].title}</Title>
             <Text className="text-gray-600">{steps[currentStep - 1].description}</Text>
@@ -251,7 +249,7 @@ const PreRegistrationPortal = () => {
               {currentStep === 1 && (
                 <div className="space-y-4">
                   <Title className="mb-4">Personal Information</Title>
-                  
+
                   <Grid numItems={2} className="gap-4">
                     <div>
                       <Text className="mb-2">First Name *</Text>
@@ -265,7 +263,7 @@ const PreRegistrationPortal = () => {
                         <Text className="text-red-600 text-sm mt-1">{errors.firstName}</Text>
                       )}
                     </div>
-                    
+
                     <div>
                       <Text className="mb-2">Last Name *</Text>
                       <TextInput
@@ -296,7 +294,7 @@ const PreRegistrationPortal = () => {
 
                   <Grid numItems={2} className="gap-4">
                     <div>
-                      <Text className="mb-2">Phone Number *</Text>
+                      <Text className="mb-2">Phone Number</Text>
                       <TextInput
                         type="tel"
                         placeholder="Enter your phone number"
@@ -308,7 +306,7 @@ const PreRegistrationPortal = () => {
                         <Text className="text-red-600 text-sm mt-1">{errors.phone}</Text>
                       )}
                     </div>
-                    
+
                     <div>
                       <Text className="mb-2">Job Title</Text>
                       <TextInput
@@ -338,7 +336,7 @@ const PreRegistrationPortal = () => {
               {currentStep === 2 && (
                 <div className="space-y-4">
                   <Title className="mb-4">Visit Details</Title>
-                  
+
                   <Grid numItems={2} className="gap-4">
                     <div>
                       <Text className="mb-2">Visit Date *</Text>
@@ -351,7 +349,7 @@ const PreRegistrationPortal = () => {
                         <Text className="text-red-600 text-sm mt-1">{errors.visitDate}</Text>
                       )}
                     </div>
-                    
+
                     <div>
                       <Text className="mb-2">Visit Time *</Text>
                       <Select
@@ -388,7 +386,7 @@ const PreRegistrationPortal = () => {
                         <SelectItem value="full-day">Full day (8 hours)</SelectItem>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <Text className="mb-2">Department</Text>
                       <Select
@@ -438,7 +436,7 @@ const PreRegistrationPortal = () => {
                         <Text className="text-red-600 text-sm mt-1">{errors.hostName}</Text>
                       )}
                     </div>
-                    
+
                     <div>
                       <Text className="mb-2">Host Email *</Text>
                       <TextInput
@@ -460,7 +458,7 @@ const PreRegistrationPortal = () => {
               {currentStep === 3 && (
                 <div className="space-y-4">
                   <Title className="mb-4">Additional Information</Title>
-                  
+
                   <div>
                     <Text className="mb-2">Special Requirements or Accessibility Needs</Text>
                     <Textarea
@@ -489,7 +487,7 @@ const PreRegistrationPortal = () => {
                         onChange={(e) => updateFormData('emergencyContact', e.target.value)}
                       />
                     </div>
-                    
+
                     <div>
                       <Text className="mb-2">Emergency Contact Phone</Text>
                       <TextInput
@@ -507,7 +505,7 @@ const PreRegistrationPortal = () => {
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <Title className="mb-4">Review Your Information</Title>
-                  
+
                   {/* Review Cards */}
                   <div className="space-y-4">
                     <Card className="p-4">
@@ -595,7 +593,7 @@ const PreRegistrationPortal = () => {
                           className="mt-1"
                         />
                         <Text className="text-sm">
-                          I agree to the <span className="text-blue-600 underline cursor-pointer">Terms and Conditions</span> and 
+                          I agree to the <span className="text-blue-600 underline cursor-pointer">Terms and Conditions</span> and
                           understand that I must follow all security protocols during my visit.
                         </Text>
                       </label>
@@ -611,7 +609,7 @@ const PreRegistrationPortal = () => {
                           className="mt-1"
                         />
                         <Text className="text-sm">
-                          I consent to the processing of my personal data for visitor management purposes 
+                          I consent to the processing of my personal data for visitor management purposes
                           in accordance with the <span className="text-blue-600 underline cursor-pointer">Privacy Policy</span>.
                         </Text>
                       </label>
@@ -634,14 +632,14 @@ const PreRegistrationPortal = () => {
             >
               Previous
             </Button>
-            
+
             <div className="flex space-x-3">
               {currentStep < 4 ? (
                 <Button onClick={handleNext}>
                   Next Step
                 </Button>
               ) : (
-                <Button 
+                <Button
                   onClick={handleSubmit}
                   disabled={isSubmitting}
                   loading={isSubmitting}

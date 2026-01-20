@@ -68,14 +68,12 @@ const GuestRegister = () => {
     if (formData.email.trim() && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Invalid email format'
     }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required'
-    } else if (!/^[0-9+\-\s()]+$/.test(formData.phone)) {
+    if (formData.phone.trim() && !/^[0-9+\-\s()]+$/.test(formData.phone)) {
       newErrors.phone = 'Invalid phone number'
     }
     if (!formData.company.trim()) newErrors.company = 'Company is required'
     if (!formData.purpose.trim()) newErrors.purpose = 'Purpose of visit is required'
-    if (!formData.host_id) newErrors.host_id = 'Please select a host'
+    // host_id is optional
     if (!formData.visit_date) newErrors.visit_date = 'Visit date is required'
 
     setErrors(newErrors)
@@ -489,7 +487,7 @@ const GuestRegister = () => {
                   </div>
 
                   <div>
-                    <label className={labelClasses}>Phone Number *</label>
+                    <label className={labelClasses}>Phone Number</label>
                     <input
                       type="tel"
                       value={formData.phone}

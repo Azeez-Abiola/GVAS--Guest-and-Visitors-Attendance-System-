@@ -140,13 +140,12 @@ const AdminVisitorPage = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                             <input
                                 type="tel"
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                required
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                             />
                         </div>
@@ -161,12 +160,11 @@ const AdminVisitorPage = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Host *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Host</label>
                             <select
                                 name="host_id"
                                 value={formData.host_id}
                                 onChange={handleHostChange}
-                                required
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                             >
                                 <option value="">Select Host</option>

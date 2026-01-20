@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react'
 import { Card, Title, Text, Metric, Flex, Grid, ProgressBar, AreaChart, DonutChart, Badge as TremorBadge, Button, Table, TableHead, TableRow, TableHeaderCell, TableBody, TableCell } from '@tremor/react'
-import { Users, UserCheck, Clock, TrendingUp, Calendar, Eye, UserPlus, Shield, Building2, X, MonitorPlay, Mail } from 'lucide-react'
+import { Users, UserCheck, Clock, TrendingUp, Calendar, Eye, UserPlus, Shield, Building2, X, MonitorPlay, Mail, QrCode, CheckCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
@@ -33,10 +33,12 @@ const AdminDashboard = () => {
   const [isViewVisitorOpen, setIsViewVisitorOpen] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState(null)
   const [checkingIn, setCheckingIn] = useState(null)
-  const [showCheckInConfirm, setShowCheckInConfirm] = useState(false)
   const [showCheckOutConfirm, setShowCheckOutConfirm] = useState(false)
   const [pendingVisitorAction, setPendingVisitorAction] = useState(null)
   const [hosts, setHosts] = useState([])
+  const [showQRModal, setShowQRModal] = useState(false)
+  const [qrInput, setQrInput] = useState('')
+  const [loading, setLoading] = useState(false)
   const [newVisitor, setNewVisitor] = useState({
     name: '',
     email: '',
@@ -50,15 +52,14 @@ const AdminDashboard = () => {
     visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   })
 
-  useEffect(() => {
-    loadData()
-    loadHosts()
-  }, [])
-
   const loadHosts = async () => {
     try {
       const hostsData = await ApiService.getHosts()
-      setHosts(hostsData || [])
+      if (typeof setHosts === 'function') {
+        setHosts(hostsData || [])
+      } else {
+        console.error('setHosts is not a function in loadHosts');
+      }
     } catch (error) {
       console.error('Failed to load hosts:', error)
     }
@@ -100,6 +101,11 @@ const AdminDashboard = () => {
       console.error('Failed to load data:', error)
     }
   }
+
+  useEffect(() => {
+    loadData()
+    loadHosts()
+  }, [])
 
   const handleAddVisitor = async () => {
     try {
@@ -199,35 +205,84 @@ const AdminDashboard = () => {
   const handleCheckIn = async (visitor, e) => {
     if (e) e.stopPropagation();
     setPendingVisitorAction(visitor);
-    setShowCheckInConfirm(true);
+    setShowQRModal(true);
   };
 
-  const confirmCheckIn = async () => {
-    if (!pendingVisitorAction) return;
-    const visitor = pendingVisitorAction;
-    try {
-      setCheckingIn(visitor.id || visitor);
-      const accessCode = generateAccessCode(6);
-      const visitorId = visitor.id || visitor;
-
-      await ApiService.updateVisitor(visitorId, {
-        status: 'checked_in',
-        check_in_time: new Date().toISOString(),
-        checked_in_by: profile?.id,
-        access_code: accessCode
-      });
-
-      await loadData();
-      setShowCheckInConfirm(false);
-      setPendingVisitorAction(null);
-      alert(`✅ Checked in successfully!\n\nAccess Code: ${accessCode}\n\nPlease provide this code to the visitor.`);
-    } catch (error) {
-      console.error('Failed to check in visitor:', error);
-      alert('Failed to check in visitor. Please try again.');
-    } finally {
-      setCheckingIn(null);
+  const handleVerifyAndCheckIn = async () => {
+    if (!qrInput.trim()) {
+      showToast('Please enter guest code or scan QR code', 'error')
+      return
     }
-  };
+
+    try {
+      setLoading(true)
+
+      // Verify the code matches the visitor
+      if (pendingVisitorAction && (
+        qrInput.toLowerCase() === pendingVisitorAction.guest_code?.toLowerCase() ||
+        qrInput === pendingVisitorAction.visitor_id ||
+        qrInput === pendingVisitorAction.id
+      )) {
+
+        // --- Time Restriction Logic (Optional but good for consistency) ---
+        if (pendingVisitorAction.visit_date) {
+          const now = new Date()
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+
+          const visitDate = new Date(pendingVisitorAction.visit_date)
+          visitDate.setHours(0, 0, 0, 0)
+
+          if (visitDate > today) {
+            showToast(`Cannot check in yet. Visit is scheduled for ${new Date(pendingVisitorAction.visit_date).toLocaleDateString()}.`, 'error')
+            setLoading(false)
+            return
+          }
+
+          if (visitDate.getTime() === today.getTime() && pendingVisitorAction.visit_time) {
+            try {
+              const [hours, mins] = pendingVisitorAction.visit_time.split(':')
+              const scheduledTime = new Date()
+              scheduledTime.setHours(parseInt(hours), parseInt(mins), 0, 0)
+
+              const allowedTime = new Date(scheduledTime.getTime() - 60 * 60 * 1000) // 60 mins buffer
+
+              if (now < allowedTime) {
+                showToast(`Too early! Check-in allowed from ${allowedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, 'error')
+                setLoading(false)
+                return
+              }
+            } catch (e) {
+              console.warn('Error parsing visit time:', e)
+            }
+          }
+        }
+
+        const updatedVisitor = await ApiService.checkIn(pendingVisitorAction.id)
+
+        // Show success toast with badge info
+        const badgeInfo = updatedVisitor.badge_number
+          ? ` Badge ${updatedVisitor.badge_number} assigned.`
+          : '';
+
+        showToast(`${pendingVisitorAction.name} checked in successfully!${badgeInfo}`, 'success')
+
+        setShowQRModal(false)
+        setQrInput('')
+        setPendingVisitorAction(null)
+        await loadData()
+      } else {
+        showToast('Invalid code! Code does not match this visitor.', 'error')
+      }
+    } catch (error) {
+      console.error('Check-in failed:', error)
+      showToast('Failed to check in visitor. Please try again.', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
 
   const handleCheckOut = async (visitor, e) => {
     if (e) e.stopPropagation();
@@ -267,6 +322,7 @@ const AdminDashboard = () => {
   ]
 
   const recentActivity = visitors.slice(0, 5).map(v => ({
+    ...v,
     // Map check_in_time and check_out_time directly from the visitor object
     check_in_time: v.check_in_time ? new Date(v.check_in_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
     check_out_time: v.check_out_time ? new Date(v.check_out_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
@@ -637,7 +693,7 @@ const AdminDashboard = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Phone Number *
+                          Phone Number
                         </label>
                         <input
                           type="tel"
@@ -703,13 +759,14 @@ const AdminDashboard = () => {
                         setNewVisitor({ ...newVisitor, host_id: hostId, floor: hostFloor });
                       }}
                       label="Host"
+                      required={false}
                     />
 
                     <FloorSelector
                       value={newVisitor.floor}
                       onChange={(floor) => setNewVisitor({ ...newVisitor, floor })}
                       label="Floor Assignment"
-                      required={true}
+                      required={false}
                     />
 
                     <div>
@@ -750,7 +807,7 @@ const AdminDashboard = () => {
                       </button>
                       <button
                         onClick={handleAddVisitor}
-                        disabled={!newVisitor.name || !newVisitor.phone || !newVisitor.host_id || !newVisitor.purpose}
+                        disabled={!newVisitor.name || !newVisitor.purpose}
                         className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <UserPlus size={18} />
@@ -902,7 +959,7 @@ const AdminDashboard = () => {
                       </button>
                       <button
                         onClick={handleEditVisitor}
-                        disabled={!newVisitor.name || !newVisitor.email || !newVisitor.phone || !newVisitor.purpose}
+                        disabled={!newVisitor.name || !newVisitor.purpose}
                         className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         Save Changes
@@ -1088,37 +1145,98 @@ const AdminDashboard = () => {
 
       {/* Confirmation Modals */}
       < AnimatePresence >
-        {showCheckInConfirm && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        {showQRModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-slate-800"
-            >
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserCheck size={32} className="text-green-600 dark:text-green-400" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirm Check In</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Are you sure you want to check in <strong>{pendingVisitorAction?.full_name}</strong>?
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => { setShowCheckInConfirm(false); setPendingVisitorAction(null); }}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowQRModal(false)
+                setQrInput('')
+                setPendingVisitorAction(null)
+              }}
+              className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+            />
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+              <div className="flex min-h-full items-center justify-center p-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmCheckIn}
-                  disabled={checkingIn}
-                  className="flex-1 px-4 py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50"
-                >
-                  Confirm
-                </button>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">Verify Guest</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {pendingVisitorAction ? `Verifying: ${pendingVisitorAction.name || pendingVisitorAction.full_name}` : 'Enter guest code to verify'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowQRModal(false)
+                        setQrInput('')
+                        setPendingVisitorAction(null)
+                      }}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Guest Code or QR Code
+                      </label>
+                      <input
+                        type="text"
+                        value={qrInput}
+                        onChange={(e) => setQrInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleVerifyAndCheckIn()}
+                        placeholder="Enter guest code (e.g., GC-XXXXX)"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                        autoFocus
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        {pendingVisitorAction
+                          ? `Enter the guest code to verify ${pendingVisitorAction.name || pendingVisitorAction.full_name}`
+                          : 'Enter the visitor\'s guest code or scan their QR code'}
+                      </p>
+                    </div>
+
+                    <div className="text-center py-8 bg-gray-50 dark:bg-slate-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-600">
+                      <QrCode size={64} className="mx-auto mb-4 text-gray-400 dark:text-slate-500" />
+                      <p className="text-gray-600 dark:text-gray-300 font-medium mb-2">QR Scanner Ready</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Enter code above or use QR scanner device</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-slate-700">
+                    <button
+                      onClick={() => {
+                        setShowQRModal(false)
+                        setQrInput('')
+                        setPendingVisitorAction(null)
+                      }}
+                      className="px-5 py-2.5 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleVerifyAndCheckIn}
+                      disabled={!qrInput.trim() || loading}
+                      className="px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-700 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <CheckCircle size={18} />
+                      {loading ? 'Verifying...' : 'Verify & Check In'}
+                    </button>
+                  </div>
+                </motion.div>
               </div>
-            </motion.div>
+            </div>
           </div>
         )}
 

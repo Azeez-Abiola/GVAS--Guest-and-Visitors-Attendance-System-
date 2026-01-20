@@ -377,7 +377,7 @@ class ApiService {
 
       // Ensure all required fields are present (tenant_id is now optional)
 
-      const requiredFields = ['name', 'phone', 'visitor_id', 'purpose'];
+      const requiredFields = ['name', 'visitor_id', 'purpose'];
       const missingFields = requiredFields.filter(field => !visitorData[field]);
 
       if (missingFields.length > 0) {

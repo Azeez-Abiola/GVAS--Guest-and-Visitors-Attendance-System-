@@ -1229,7 +1229,7 @@ const ReceptionDashboard = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
                         <input
                           type="tel"
                           value={newVisitor.phone}
@@ -1287,7 +1287,7 @@ const ReceptionDashboard = () => {
                       value={newVisitor.floor}
                       onChange={(floor) => setNewVisitor({ ...newVisitor, floor })}
                       label="Floor Assignment"
-                      required={true}
+                      required={false}
                     />
 
                     <div>
@@ -1324,7 +1324,7 @@ const ReceptionDashboard = () => {
                     </button>
                     <button
                       onClick={handleWalkInCheckIn}
-                      disabled={!newVisitor.name || !newVisitor.phone || !newVisitor.purpose || !newVisitor.floor}
+                      disabled={!newVisitor.name || !newVisitor.purpose}
                       className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       <UserPlus size={18} />
