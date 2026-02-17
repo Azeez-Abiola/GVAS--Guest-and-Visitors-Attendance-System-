@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../../services/api';
 import DashboardLayout from '../../components/DashboardLayout';
-import { CheckCircle, X, User } from 'lucide-react';
+import { CheckCircle, X, User, CreditCard } from 'lucide-react';
 import DatePicker from 'react-datepicker';
+import BadgeSelector from '../../components/BadgeSelector';
 import "react-datepicker/dist/react-datepicker.css";
 
 const AdminVisitorPage = () => {
@@ -19,14 +20,26 @@ const AdminVisitorPage = () => {
         floor_number: '',
         visit_date: new Date().toISOString().split('T')[0],
         visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+        badge_id: '',
     });
+    const [availableBadges, setAvailableBadges] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
         loadHosts();
+        loadBadges();
     }, []);
+
+    const loadBadges = async () => {
+        try {
+            const data = await ApiService.getAvailableBadges();
+            setAvailableBadges(data || []);
+        } catch (error) {
+            console.error('Failed to load badges:', error);
+        }
+    };
 
     const loadHosts = async () => {
         try {
@@ -82,7 +95,9 @@ const AdminVisitorPage = () => {
                 floor_number: '',
                 visit_date: new Date().toISOString().split('T')[0],
                 visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                badge_id: '',
             });
+            loadBadges(); // Refresh available badges
         } catch (err) {
             setError('Failed to register visitor. Please try again.');
         } finally {
@@ -207,6 +222,15 @@ const AdminVisitorPage = () => {
                                 timeCaption="Time"
                                 dateFormat="h:mm aa"
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <BadgeSelector
+                                badges={availableBadges}
+                                value={formData.badge_id}
+                                onChange={(badgeId) => setFormData(prev => ({ ...prev, badge_id: badgeId }))}
+                                label="Assign Badge"
+                                required={false}
                             />
                         </div>
                     </div>

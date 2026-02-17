@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react'
 import { Card, Title, Text, Metric, Flex, Grid, ProgressBar, AreaChart, DonutChart, Badge as TremorBadge, Button, Table, TableHead, TableRow, TableHeaderCell, TableBody, TableCell } from '@tremor/react'
-import { Users, UserCheck, Clock, TrendingUp, Calendar, Eye, UserPlus, Shield, Building2, X, MonitorPlay, Mail, QrCode, CheckCircle } from 'lucide-react'
+import { Users, UserCheck, Clock, TrendingUp, Calendar, Eye, UserPlus, Shield, Building2, X, MonitorPlay, Mail, QrCode, CheckCircle, Package } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
@@ -14,6 +14,7 @@ import HostSelector from '../components/HostSelector'
 import FloorSelector from '../components/FloorSelector'
 import VisitorDetailModal from '../components/VisitorDetailModal'
 import GuestInviteModal from '../components/GuestInviteModal'
+import BadgeSelector from '../components/BadgeSelector'
 
 const AdminDashboard = () => {
   const { profile } = useAuth()
@@ -24,6 +25,9 @@ const AdminDashboard = () => {
     activeVisitors: 0,
     todayCheckIns: 0,
     pendingApprovals: 0,
+    totalDeliveries: 0,
+    activeDeliveries: 0,
+    completedDeliveries: 0,
     weeklyGrowth: 12.5
   })
   const [visitors, setVisitors] = useState([])
@@ -36,6 +40,8 @@ const AdminDashboard = () => {
   const [showCheckOutConfirm, setShowCheckOutConfirm] = useState(false)
   const [pendingVisitorAction, setPendingVisitorAction] = useState(null)
   const [hosts, setHosts] = useState([])
+  const [availableBadges, setAvailableBadges] = useState([])
+  const [checkInBadgeId, setCheckInBadgeId] = useState('')
   const [showQRModal, setShowQRModal] = useState(false)
   const [qrInput, setQrInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -47,10 +53,22 @@ const AdminDashboard = () => {
     purpose: '',
     host_id: '',
     floor: '',
+    badge_id: '',
     expected_duration: 4,
     visit_date: new Date().toISOString().split('T')[0],
     visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   })
+
+  const getFloorName = (number) => {
+    if (number === 0 || number === '0') return 'Ground Floor';
+    const n = parseInt(number);
+    if (isNaN(n)) return number;
+    const j = n % 10, k = n % 100;
+    if (j === 1 && k !== 11) return n + "st Floor";
+    if (j === 2 && k !== 12) return n + "nd Floor";
+    if (j === 3 && k !== 13) return n + "rd Floor";
+    return n + "th Floor";
+  };
 
   const loadHosts = async () => {
     try {
@@ -65,6 +83,15 @@ const AdminDashboard = () => {
     }
   }
 
+  const loadBadges = async () => {
+    try {
+      const badges = await ApiService.getAvailableBadges()
+      setAvailableBadges(badges || [])
+    } catch (error) {
+      console.error('Failed to load badges:', error)
+    }
+  }
+
   const loadData = async () => {
     try {
       const visitorsData = await ApiService.getVisitors({ status: 'all' })
@@ -75,11 +102,19 @@ const AdminDashboard = () => {
       const active = visitorsData.filter(v => v.status === 'checked_in')
       const pending = visitorsData.filter(v => v.status === 'pre_registered' || v.status === 'pending_approval')
 
+      const allDeliveries = visitorsData.filter(v => v.visitor_type === 'delivery')
+      const totalDeliveries = allDeliveries.length
+      const activeDeliveries = allDeliveries.filter(v => v.status === 'checked_in').length
+      const completedDeliveries = allDeliveries.filter(v => v.status === 'checked_out').length
+
       setStats({
         totalVisitors: visitorsData.length,
         activeVisitors: active.length,
         todayCheckIns: todayVisitors.length,
         pendingApprovals: pending.length,
+        totalDeliveries: totalDeliveries,
+        activeDeliveries: activeDeliveries,
+        completedDeliveries: completedDeliveries,
         weeklyGrowth: 12.5
       })
 
@@ -105,6 +140,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadData()
     loadHosts()
+    loadBadges()
   }, [])
 
   const handleAddVisitor = async () => {
@@ -123,11 +159,13 @@ const AdminDashboard = () => {
         purpose: '',
         host_id: '',
         floor: '',
+        badge_id: '',
         expected_duration: 4,
         visit_date: new Date().toISOString().split('T')[0],
         visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
       })
       loadData() // Reload data to show new visitor
+      loadBadges() // Reload available badges
     } catch (error) {
       console.error('Failed to add visitor:', error)
       showToast('Failed to add visitor. Please try again.', 'error');
@@ -258,7 +296,9 @@ const AdminDashboard = () => {
           }
         }
 
-        const updatedVisitor = await ApiService.checkIn(pendingVisitorAction.id)
+        console.log('Checking in with badge:', checkInBadgeId)
+
+        const updatedVisitor = await ApiService.checkIn(pendingVisitorAction.id, checkInBadgeId)
 
         // Show success toast with badge info
         const badgeInfo = updatedVisitor.badge_number
@@ -269,8 +309,10 @@ const AdminDashboard = () => {
 
         setShowQRModal(false)
         setQrInput('')
+        setCheckInBadgeId('')
         setPendingVisitorAction(null)
         await loadData()
+        await loadBadges()
       } else {
         showToast('Invalid code! Code does not match this visitor.', 'error')
       }
@@ -332,7 +374,7 @@ const AdminDashboard = () => {
     badge: v.badge_number,
     id: v.id,
     full_name: v.full_name,
-    floor: v.floor_number || v.floor
+    floor: (v.floor_number !== undefined && v.floor_number !== null) ? getFloorName(v.floor_number) : (v.floor || '-')
   }))
 
 
@@ -351,6 +393,12 @@ const AdminDashboard = () => {
               className="px-4 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 rounded-lg transition-colors shadow-sm"
             >
               Visitor Kiosk
+            </button>
+            <button
+              onClick={() => navigate('/reception/delivery-kiosk')}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
+            >
+              Record Delivery
             </button>
             <button
               onClick={() => setShowInviteModal(true)}
@@ -375,7 +423,7 @@ const AdminDashboard = () => {
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-sm font-medium text-gray-300">Live Update</span>
               </div>
-              <h2 className="text-2xl font-bold mb-2">Welcome back, {profile?.full_name?.split(' ')[0]}!</h2>
+              <h2 className="text-2xl font-bold mb-2">Welcome back, {profile?.full_name?.split(' ')[0]?.toLowerCase() === 'system' ? 'Admin' : profile?.full_name?.split(' ')[0]}!</h2>
               <p className="text-gray-400 mb-6 text-sm">
                 Visitor traffic has increased by <span className="text-blue-400 font-bold">+{stats.weeklyGrowth}%</span> this week.
                 Keep up the great work managing the flow!
@@ -447,6 +495,34 @@ const AdminDashboard = () => {
                   <Clock className="text-amber-600 dark:text-amber-400" size={24} />
                 </div>
               </Flex>
+            </Card>
+
+            <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900 md:col-span-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Text className="text-gray-500 dark:text-gray-400 font-medium">Deliveries Overview</Text>
+                  <Metric className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{stats.totalDeliveries}</Metric>
+                </div>
+                <div className="bg-blue-50 dark:bg-blue-900/30 p-2.5 rounded-xl">
+                  <Package className="text-blue-600 dark:text-blue-400" size={20} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4 border-t border-gray-100 dark:border-slate-800 pt-4">
+                <div>
+                  <Text className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold">In Building</Text>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <Text className="text-lg font-bold text-gray-900 dark:text-white">{stats.activeDeliveries}</Text>
+                  </div>
+                </div>
+                <div>
+                  <Text className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold">Completed</Text>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400/50" />
+                    <Text className="text-lg font-bold text-gray-900 dark:text-white">{stats.completedDeliveries}</Text>
+                  </div>
+                </div>
+              </div>
             </Card>
           </div>
         </div>
@@ -548,7 +624,7 @@ const AdminDashboard = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {activity.floor ? (
+                    {activity.floor && activity.floor !== '-' ? (
                       <TremorBadge color="blue" size="xs">
                         {activity.floor}
                       </TremorBadge>
@@ -766,6 +842,14 @@ const AdminDashboard = () => {
                       value={newVisitor.floor}
                       onChange={(floor) => setNewVisitor({ ...newVisitor, floor })}
                       label="Floor Assignment"
+                      required={false}
+                    />
+
+                    <BadgeSelector
+                      badges={availableBadges}
+                      value={newVisitor.badge_id}
+                      onChange={(badgeId) => setNewVisitor({ ...newVisitor, badge_id: badgeId })}
+                      label="Assign Badge"
                       required={false}
                     />
 
@@ -1205,6 +1289,16 @@ const AdminDashboard = () => {
                           ? `Enter the guest code to verify ${pendingVisitorAction.name || pendingVisitorAction.full_name}`
                           : 'Enter the visitor\'s guest code or scan their QR code'}
                       </p>
+                    </div>
+
+                    <div className="pt-2">
+                      <BadgeSelector
+                        badges={availableBadges}
+                        value={checkInBadgeId}
+                        onChange={(badgeId) => setCheckInBadgeId(badgeId)}
+                        label="Assign Badge (Optional)"
+                        required={false}
+                      />
                     </div>
 
                     <div className="text-center py-8 bg-gray-50 dark:bg-slate-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-600">

@@ -31,12 +31,14 @@ import GuestRegister from './pages/GuestRegister'
 import HostAnalytics from './pages/host/HostAnalytics'
 import BadgeManagementHost from './pages/host/BadgeManagement'
 import VisitorKiosk from './pages/receptionist/VisitorKiosk'
+import DeliveryKiosk from './pages/receptionist/DeliveryKiosk'
 import AdminVisitorPage from './pages/admin/AdminVisitorPage'
 import Resources from './pages/Resources'
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard'
 import ClientManagement from './pages/superadmin/ClientManagement'
 import Transactions from './pages/superadmin/Transactions'
 import NotFound from './pages/NotFound'
+import DeliveryManagement from './pages/DeliveryManagement'
 
 function App() {
   return (
@@ -106,6 +108,14 @@ function App() {
                 }
               />
               <Route
+                path="/reception/delivery-kiosk"
+                element={
+                  <ProtectedRoute>
+                    <DeliveryKiosk />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/approvals"
                 element={
                   <ProtectedRoute feature="approvals">
@@ -128,6 +138,14 @@ function App() {
                 element={
                   <ProtectedRoute feature="badges">
                     <BadgeManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/deliveries"
+                element={
+                  <ProtectedRoute>
+                    <DeliveryManagement />
                   </ProtectedRoute>
                 }
               />

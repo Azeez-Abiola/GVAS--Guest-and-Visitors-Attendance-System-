@@ -50,7 +50,7 @@ const VisitorKiosk = () => {
         setFormData({
             ...formData,
             host_id: hostId,
-            floor_number: selectedHost?.floor_number || ''
+            floor_number: (selectedHost?.floor_number !== undefined && selectedHost?.floor_number !== null) ? selectedHost.floor_number : ''
         })
     }
 
@@ -97,7 +97,8 @@ const VisitorKiosk = () => {
                 company: formData.company || null,
                 purpose: formData.purpose,
                 host_id: formData.host_id,
-                floor_number: formData.floor_number || selectedHost.floor_number || null,
+                floor_number: (formData.floor_number !== undefined && formData.floor_number !== null && formData.floor_number !== '') ? formData.floor_number :
+                    (selectedHost.floor_number !== undefined && selectedHost.floor_number !== null) ? selectedHost.floor_number : null,
                 visit_date: formData.visit_date.toISOString().split('T')[0],
                 visit_time: formData.visit_time || null,
                 guest_code: generatedCode,

@@ -14,7 +14,8 @@ import {
   LogOut,
   LogIn,
   X,
-  Mail
+  Mail,
+  ChevronDown
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
@@ -65,6 +66,7 @@ const ReceptionDashboard = () => {
     visit_date: new Date().toISOString().split('T')[0],
     visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   })
+  const [visibleCount, setVisibleCount] = useState(10)
 
 
 
@@ -842,7 +844,7 @@ const ReceptionDashboard = () => {
 
   console.log('📊 Filtered visitors (after search):', filteredVisitors.length, 'visitors')
 
-  const recentVisitors = filteredVisitors.slice(0, 10)
+  const recentVisitors = filteredVisitors.slice(0, visibleCount)
 
   console.log('📊 Recent visitors (top 10):', recentVisitors.length, 'visitors')
 
@@ -1168,6 +1170,21 @@ const ReceptionDashboard = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {!loading && filteredVisitors.length > visibleCount && (
+            <div className="mt-8 text-center pb-4">
+              <button
+                onClick={() => setVisibleCount(prev => prev + 10)}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 hover:border-gray-300 dark:hover:border-slate-600 shadow-sm transition-all group"
+              >
+                <span>See More Visitors</span>
+                <ChevronDown size={18} className="group-hover:translate-y-0.5 transition-transform" />
+              </button>
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Showing {visibleCount} of {filteredVisitors.length} visitors
+              </p>
             </div>
           )}
         </Card>

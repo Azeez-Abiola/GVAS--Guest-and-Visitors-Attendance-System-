@@ -6,8 +6,6 @@ const HostSelector = ({ hosts, value, onChange, label = "Select Host", required 
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  console.log('🎯 HostSelector rendered with', hosts.length, 'hosts, selected value:', value)
-
   const selectedHost = hosts.find(h => h.id === value)
 
   const filteredHosts = useMemo(() => {
@@ -216,7 +214,7 @@ const HostSelector = ({ hosts, value, onChange, label = "Select Host", required 
       </AnimatePresence>
 
       {/* Custom Scrollbar Styles */}
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
         }

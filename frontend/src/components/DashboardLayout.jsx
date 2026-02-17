@@ -26,7 +26,8 @@ import {
   Sun,
   Moon,
   CreditCard,
-  Building2
+  Building2,
+  Package
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GvasLogo from './GvasLogo'
@@ -62,7 +63,7 @@ const DashboardLayout = ({ children }) => {
         // Map DB notifications to UI format
         const formattedNotifications = (data || []).map(n => ({
           id: n.id,
-          type: n.type === 'visitor_pre_registered' ? 'pre_registered' : 'info', // Map types as needed
+          type: n.type === 'visitor_pre_registered' ? 'pre_registered' : (n.type === 'delivery_registered' ? 'delivery' : 'info'), // Map types as needed
           title: n.title,
           message: n.message,
           time: new Date(n.created_at).toLocaleString(), // Simple formatting
@@ -94,7 +95,7 @@ const DashboardLayout = ({ children }) => {
           const n = payload.new
           const newNotif = {
             id: n.id,
-            type: n.type === 'visitor_pre_registered' ? 'pre_registered' : 'info',
+            type: n.type === 'visitor_pre_registered' ? 'pre_registered' : (n.type === 'delivery_registered' ? 'delivery' : 'info'),
             title: n.title,
             message: n.message,
             time: 'Just now',
@@ -175,9 +176,11 @@ const DashboardLayout = ({ children }) => {
     // Dashboard - everyone gets a dashboard
     if (profile?.role === 'admin') {
       items.push({ name: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, feature: 'admin' })
+      items.push({ name: 'Deliveries', path: '/deliveries', icon: Package, feature: 'admin' })
       items.push({ name: 'User Management', path: '/user-management', icon: Users, feature: 'admin' })
     } else if (profile?.role === 'reception') {
       items.push({ name: 'Reception', path: '/reception', icon: UserCheck, feature: 'reception' })
+      items.push({ name: 'Deliveries', path: '/deliveries', icon: Package, feature: 'reception' })
     } else if (profile?.role === 'host') {
       items.push({ name: 'Approvals', path: '/approvals', icon: Users, feature: 'approvals' })
       items.push({ name: 'Host Analytics', path: '/host/host-analytics', icon: TrendingUp, feature: 'host-analytics' })
@@ -542,6 +545,7 @@ const DashboardLayout = ({ children }) => {
                         switch (notification.type) {
                           case 'walk_in': return 'bg-orange-500'
                           case 'pre_registered': return 'bg-blue-500'
+                          case 'delivery': return 'bg-amber-500'
                           case 'arrival': return 'bg-green-500'
                           case 'security': return 'bg-red-500'
                           default: return !notification.read ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'

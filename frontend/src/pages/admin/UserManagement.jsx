@@ -326,7 +326,7 @@ const UserManagement = () => {
             email: formData.email,
             phone: formData.phone || '',
             office_number: formData.office_number || '',
-            floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+            floor_number: (formData.floor_number !== undefined && formData.floor_number !== null) ? parseInt(formData.floor_number) : null,
             role: 'host',
             active: formData.is_active
           };

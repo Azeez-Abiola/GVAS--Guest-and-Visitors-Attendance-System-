@@ -157,9 +157,7 @@ class ApiService {
     return data;
   }
 
-  async getAvailableBadges() {
-    return this.getBadges('available');
-  }
+
 
   // Visitors
   async getVisitors(filters = {}) {
@@ -180,6 +178,9 @@ class ApiService {
       if (filters.tenantId) {
         query = query.eq('tenant_id', filters.tenantId);
       }
+      if (filters.visitor_type) {
+        query = query.eq('visitor_type', filters.visitor_type);
+      }
       if (filters.date) {
         query = query.gte('created_at', `${filters.date}T00:00:00`)
           .lte('created_at', `${filters.date}T23:59:59`);
@@ -192,6 +193,10 @@ class ApiService {
 
     const params = new URLSearchParams(filters);
     return this.request(`/visitors?${params}`);
+  }
+
+  async getDeliveries(filters = {}) {
+    return this.getVisitors({ ...filters, visitor_type: 'delivery' });
   }
 
   async getVisitor(id) {
@@ -337,7 +342,8 @@ class ApiService {
         visitorData.host_name = host.name || visitorData.host_name;
 
         // Use host's floor number if not provided
-        if (!visitorData.floor_number && host.floor_number) {
+        if ((visitorData.floor_number === undefined || visitorData.floor_number === null || visitorData.floor_number === '') &&
+          (host.floor_number !== undefined && host.floor_number !== null)) {
           visitorData.floor_number = host.floor_number;
         }
 
@@ -349,7 +355,7 @@ class ApiService {
       } else {
         // If no host selected, use a default value for host_name to satisfy DB constraint
         if (!visitorData.host_name) {
-          visitorData.host_name = 'Reception Walk-in';
+          visitorData.host_name = visitorData.visitor_type === 'delivery' ? 'Front Desk' : 'Reception Walk-in';
         }
       }
 
@@ -400,6 +406,16 @@ class ApiService {
 
       console.log('Visitor created successfully:', visitor);
 
+      // If a badge was selected during registration, assign it properly
+      if (visitorData.badge_id && this.isValidUUID(visitorData.badge_id)) {
+        try {
+          await this.assignBadge(visitor.id, visitorData.badge_id);
+          console.log(`✅ Badge ${visitorData.badge_id} assigned during registration`);
+        } catch (badgeError) {
+          console.warn('⚠️ Badge assignment failed during registration:', badgeError.message);
+        }
+      }
+
       // Try to create notifications (but don't fail if it fails)
       this.createVisitorNotifications(visitor).catch(err => {
         console.warn('Background notification creation failed:', err);
@@ -419,22 +435,33 @@ class ApiService {
     try {
       const notifications = [];
 
+      const isDelivery = visitor.visitor_type === 'delivery';
+
       // 1. Notification for the host
       // Note: visitor.host_id maps to user_id in the notifications table
       // We store additional metadata in the 'data' JSONB column
-      notifications.push({
-        user_id: visitor.host_id,
-        type: 'visitor_pre_registered',
-        title: 'Guest Pre-registered',
-        message: `New visitor ${visitor.name} from ${visitor.company || 'N/A'} has pre-registered to visit you on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
-        is_read: false,
-        data: {
+      if (visitor.host_id) {
+        notifications.push({
+          user_id: visitor.host_id,
           visitor_id: visitor.id,
           host_id: visitor.host_id,
-          role: 'host'
-        },
-        created_at: new Date().toISOString()
-      });
+          type: isDelivery ? 'delivery_registered' : 'visitor_pre_registered',
+          title: isDelivery ? 'New Delivery Registered' : 'Guest Pre-registered',
+          message: isDelivery
+            ? `A new delivery from ${visitor.company || 'N/A'} has been registered for you. Item: ${visitor.purpose || 'N/A'}`
+            : `New visitor ${visitor.name} from ${visitor.company || 'N/A'} has pre-registered to visit you on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
+          is_read: false,
+          template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
+          status: 'unread',
+          data: {
+            visitor_id: visitor.id,
+            host_id: visitor.host_id,
+            role: 'host',
+            visitor_type: visitor.visitor_type
+          },
+          created_at: new Date().toISOString()
+        });
+      }
 
       // 2. Notification for admin(s)
       const { data: admins } = await supabase
@@ -447,14 +474,21 @@ class ApiService {
         admins.forEach(admin => {
           notifications.push({
             user_id: admin.id,
-            type: 'visitor_pre_registered',
-            title: 'Guest Pre-registered',
-            message: `New visitor ${visitor.name} has pre-registered to visit ${visitor.host_name} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
+            visitor_id: visitor.id,
+            host_id: visitor.host_id,
+            type: isDelivery ? 'delivery_registered' : 'visitor_pre_registered',
+            title: isDelivery ? 'New Delivery Registered' : 'Guest Pre-registered',
+            message: isDelivery
+              ? `New delivery for ${visitor.host_name || 'Front Desk'} from ${visitor.company || 'N/A'} has been recorded.`
+              : `New visitor ${visitor.name} has pre-registered to visit ${visitor.host_name} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
             is_read: false,
+            template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
+            status: 'unread',
             data: {
               visitor_id: visitor.id,
               host_id: visitor.host_id,
-              role: 'admin'
+              role: 'admin',
+              visitor_type: visitor.visitor_type
             },
             created_at: new Date().toISOString()
           });
@@ -500,15 +534,22 @@ class ApiService {
             if (isAssigned) {
               notifications.push({
                 user_id: receptionist.id,
-                type: 'visitor_pre_registered',
-                title: 'Guest Pre-registered',
-                message: `New visitor ${visitor.name} will visit floor ${visitor.floor_number} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
+                visitor_id: visitor.id,
+                host_id: visitor.host_id,
+                type: isDelivery ? 'delivery_registered' : 'visitor_pre_registered',
+                title: isDelivery ? 'New Delivery Registered' : 'Guest Pre-registered',
+                message: isDelivery
+                  ? `New delivery recorded for floor ${visitor.floor_number} (${visitor.host_name || 'Front Desk'})`
+                  : `New visitor ${visitor.name} will visit floor ${visitor.floor_number} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
                 is_read: false,
+                template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
+                status: 'unread',
                 data: {
                   visitor_id: visitor.id,
                   host_id: visitor.host_id,
                   role: 'reception',
-                  floor: visitor.floor_number
+                  floor: visitor.floor_number,
+                  visitor_type: visitor.visitor_type
                 },
                 created_at: new Date().toISOString()
               });
@@ -580,16 +621,17 @@ class ApiService {
   }
 
   // Shorthand aliases for convenience
-  async checkIn(visitorId) {
+  async checkIn(visitorId, badgeId = null) {
     if (this.useDirectSupabase) {
-      // First, try to assign an available badge
-      let badgeAssigned = null;
-      try {
-        badgeAssigned = await this.assignBadge(visitorId, 'visitor');
-        console.log(`✅ Badge ${badgeAssigned.badge_number} assigned to visitor`);
-      } catch (badgeError) {
-        console.warn('⚠️ Badge assignment failed:', badgeError.message);
-        // Continue check-in even if badge assignment fails
+      // Manual badge assignment if badgeId provided
+      if (badgeId) {
+        try {
+          await this.assignBadge(visitorId, badgeId);
+          console.log(`✅ Badge ${badgeId} assigned to visitor`);
+        } catch (badgeError) {
+          console.warn('⚠️ Badge assignment failed:', badgeError.message);
+          throw badgeError; // Fail check-in if badge assignment was explicitly requested but failed
+        }
       }
 
       // Update visitor status to checked-in
@@ -606,7 +648,7 @@ class ApiService {
       if (error) throw error;
       return data;
     }
-    return this.checkInVisitor({ visitor_id: visitorId });
+    return this.checkInVisitor({ visitor_id: visitorId, badge_id: badgeId });
   }
 
   async checkOut(visitorId) {
@@ -638,23 +680,25 @@ class ApiService {
   }
 
   // Badge Management Functions
-  async assignBadge(visitorId, badgeType = 'visitor') {
-    // Find first available badge of the specified type
-    const { data: availableBadges, error: fetchError } = await supabase
+  async assignBadge(visitorId, badgeId) {
+    // If second arg is not a UUID, it might be the old 'badgeType' behavior which we want to avoid
+    if (!this.isValidUUID(badgeId)) {
+      console.warn('assignBadge called without a valid badgeId. Automatic assignment is disabled.');
+      return null;
+    }
+
+    // Get the specific badge
+    const { data: badge, error: fetchError } = await supabase
       .from('badges')
       .select('*')
-      .eq('badge_type', badgeType)
-      .eq('status', 'available')
-      .order('badge_number', { ascending: true })
-      .limit(1);
+      .eq('id', badgeId)
+      .single();
 
     if (fetchError) throw fetchError;
 
-    if (!availableBadges || availableBadges.length === 0) {
-      throw new Error(`No available ${badgeType} badges. Please add more badges to inventory.`);
+    if (!badge || badge.status !== 'available') {
+      throw new Error(`The selected badge is not available.`);
     }
-
-    const badge = availableBadges[0];
 
     // Update visitor record with badge info
     const { error: updateVisitorError } = await supabase

@@ -250,6 +250,10 @@ app.get('/api/visitors', async (req, res) => {
       query = query.eq('status', status);
     }
 
+    if (req.query.visitor_type) {
+      query = query.eq('visitor_type', req.query.visitor_type);
+    }
+
     // Apply date filter
     if (date) {
       const startOfDay = new Date(date);
