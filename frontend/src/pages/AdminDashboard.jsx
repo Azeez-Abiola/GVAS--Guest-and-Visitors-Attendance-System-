@@ -45,6 +45,8 @@ const AdminDashboard = () => {
   const [showQRModal, setShowQRModal] = useState(false)
   const [qrInput, setQrInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [newVisitor, setNewVisitor] = useState({
     name: '',
     email: '',
@@ -92,13 +94,25 @@ const AdminDashboard = () => {
     }
   }
 
-  const loadData = async () => {
+  const loadData = async (date = selectedDate) => {
     try {
       const visitorsData = await ApiService.getVisitors({ status: 'all' })
-      setVisitors(visitorsData || [])
+      const filterDate = selectedDate.toISOString().split('T')[0]
+      const visitorsFilteredByDate = visitorsData.filter(v =>
+        (v.check_in_time && new Date(v.check_in_time).toISOString().split('T')[0] === filterDate) ||
+        (v.visit_date === filterDate)
+      )
 
-      const today = new Date().toISOString().split('T')[0]
-      const todayVisitors = visitorsData.filter(v => v.check_in_time?.startsWith(today))
+      setVisitors(visitorsFilteredByDate || [])
+
+      // Calculate stats from filtered visitors
+      // Count today's check-ins (visitors who checked in today, regardless of current status)
+      const dateFilteredVisitors = visitorsFilteredByDate.filter(v => {
+        if (!v.check_in_time) return false
+        const checkInDate = new Date(v.check_in_time).toISOString().split('T')[0]
+        return checkInDate === filterDate
+      })
+
       const active = visitorsData.filter(v => v.status === 'checked_in')
       const pending = visitorsData.filter(v => v.status === 'pre_registered' || v.status === 'pending_approval')
 
@@ -110,7 +124,7 @@ const AdminDashboard = () => {
       setStats({
         totalVisitors: visitorsData.length,
         activeVisitors: active.length,
-        todayCheckIns: todayVisitors.length,
+        todayCheckIns: dateFilteredVisitors.length,
         pendingApprovals: pending.length,
         totalDeliveries: totalDeliveries,
         activeDeliveries: activeDeliveries,
@@ -118,30 +132,34 @@ const AdminDashboard = () => {
         weeklyGrowth: 12.5
       })
 
-      // Generate chart data for last 7 days
-      const last7Days = []
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date()
-        date.setDate(date.getDate() - i)
-        const dateStr = date.toISOString().split('T')[0]
+      // Generate chart data for 7 days around selected date
+      const chartDays = []
+      for (let i = 3; i >= -3; i--) {
+        const d = new Date(date)
+        d.setDate(d.getDate() - i)
+        const dateStr = d.toISOString().split('T')[0]
         const count = visitorsData.filter(v => v.check_in_time?.startsWith(dateStr)).length
-        last7Days.push({
-          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        chartDays.push({
+          date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           'Check-ins': count,
           'Check-outs': Math.max(0, count - Math.floor(Math.random() * 3))
         })
       }
-      setChartData(last7Days)
+      setChartData(chartDays)
     } catch (error) {
       console.error('Failed to load data:', error)
     }
   }
 
   useEffect(() => {
-    loadData()
     loadHosts()
     loadBadges()
+    loadData(selectedDate)
   }, [])
+
+  useEffect(() => {
+    loadData(selectedDate)
+  }, [selectedDate])
 
   const handleAddVisitor = async () => {
     try {
@@ -356,12 +374,27 @@ const AdminDashboard = () => {
   };
 
 
-  const floorDistribution = [
-    { name: 'Floor 1-3', value: 45 },
-    { name: 'Floor 4-6', value: 32 },
-    { name: 'Floor 7-9', value: 18 },
-    { name: 'Floor 10-12', value: 15 }
-  ]
+  const getFloorDistribution = () => {
+    const counts = {
+      'Floor 1-3': 0,
+      'Floor 4-6': 0,
+      'Floor 7-9': 0,
+      'Floor 10+': 0
+    }
+
+    visitors.forEach(v => {
+      const floor = parseInt(v.floor_number)
+      if (isNaN(floor)) return
+      if (floor >= 1 && floor <= 3) counts['Floor 1-3']++
+      else if (floor >= 4 && floor <= 6) counts['Floor 4-6']++
+      else if (floor >= 7 && floor <= 9) counts['Floor 7-9']++
+      else if (floor >= 10) counts['Floor 10+']++
+    })
+
+    return Object.entries(counts).map(([name, value]) => ({ name, value }))
+  }
+
+  const floorDistribution = getFloorDistribution()
 
   const recentActivity = visitors.slice(0, 5).map(v => ({
     ...v,
@@ -474,12 +507,35 @@ const AdminDashboard = () => {
             <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
               <Flex alignItems="start" justifyContent="between">
                 <div>
-                  <Text className="text-gray-500 dark:text-gray-400 font-medium">Today's Check-ins</Text>
+                  <Text className="text-gray-500 dark:text-gray-400 font-medium">
+                    {selectedDate.toDateString() === new Date().toDateString() ? "Today's Check-ins" : `${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}'s Check-ins`}
+                  </Text>
                   <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.todayCheckIns}</Metric>
-                  <Text className="mt-2 text-gray-500 dark:text-gray-400 text-sm">Since midnight</Text>
+                  <Text className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
+                    {selectedDate.toDateString() === new Date().toDateString() ? "Since midnight" : `On ${selectedDate.toLocaleDateString()}`}
+                  </Text>
                 </div>
-                <div className="bg-violet-50 dark:bg-violet-900/30 p-3 rounded-xl">
-                  <Calendar className="text-violet-600 dark:text-violet-400" size={24} />
+                <div className="relative">
+                  <button
+                    onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                    className="bg-violet-50 dark:bg-violet-900/30 p-3 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-colors"
+                  >
+                    <Calendar className="text-violet-600 dark:text-violet-400" size={24} />
+                  </button>
+                  {isCalendarOpen && (
+                    <div className="absolute right-0 top-full mt-2 z-50">
+                      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-800 p-2">
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={(date) => {
+                            setSelectedDate(date)
+                            setIsCalendarOpen(false)
+                          }}
+                          inline
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Flex>
             </Card>

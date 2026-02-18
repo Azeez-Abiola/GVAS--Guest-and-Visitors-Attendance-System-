@@ -15,9 +15,12 @@ import {
   LogIn,
   X,
   Mail,
-  ChevronDown
+  ChevronDown,
+  Calendar
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css"
 import DashboardLayout from '../components/DashboardLayout'
 import ApiService from '../services/api'
 import showToast from '../utils/toast'
@@ -67,6 +70,8 @@ const ReceptionDashboard = () => {
     visit_time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   })
   const [visibleCount, setVisibleCount] = useState(10)
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
 
 
@@ -188,37 +193,20 @@ const ReceptionDashboard = () => {
         console.log(`✅ Filtered to ${visitorsData.length} visitors for receptionist's floors`)
       }
 
-      setVisitors(visitorsData || [])
+      const filterDate = selectedDate.toISOString().split('T')[0]
+      const filteredByDate = visitorsData.filter(v =>
+        (v.check_in_time && new Date(v.check_in_time).toISOString().split('T')[0] === filterDate) ||
+        (v.visit_date === filterDate)
+      )
 
-      console.log('✅ FINAL VISITORS SET TO STATE:', visitorsData.length, 'visitors')
-      console.log('✅ FINAL VISITORS:', visitorsData.map(v => ({
-        name: v.name,
-        status: v.status,
-        floor: v.floor_number,
-        check_in_time: v.check_in_time
-      })))
+      setVisitors(filteredByDate || [])
 
       // Calculate stats from filtered visitors
-      // Get today's date in UTC to match database timestamps
-      const now = new Date()
-      const todayISO = now.toISOString().split('T')[0]
-
-      console.log('📅 Today\'s date (ISO):', todayISO)
-      console.log('📅 Current time:', now.toISOString())
-
-      // Count today's check-ins (visitors who checked in today, regardless of current status)
-      const todayCheckIns = visitorsData.filter(v => {
+      const dateFilteredVisitors = filteredByDate.filter(v => {
         if (!v.check_in_time) return false
         const checkInDate = new Date(v.check_in_time).toISOString().split('T')[0]
-        console.log(`  🔍 Checking ${v.name}: check_in_time=${v.check_in_time}, date=${checkInDate}, matches today=${checkInDate === todayISO}`)
-        return checkInDate === todayISO
+        return checkInDate === filterDate
       })
-
-      console.log('📊 Today\'s check-ins breakdown:', todayCheckIns.map(v => ({
-        name: v.name,
-        check_in_time: v.check_in_time,
-        status: v.status
-      })))
 
       // Count active visitors (currently checked in, not checked out)
       const activeVisitors = visitorsData.filter(v =>
@@ -228,22 +216,9 @@ const ReceptionDashboard = () => {
       // Count pending checkouts (same as active visitors)
       const pendingCheckOuts = activeVisitors.length
 
-      console.log('📊 Stats calculated:', {
-        todayCheckIns: todayCheckIns.length,
-        activeVisitors: activeVisitors.length,
-        pendingCheckOuts: pendingCheckOuts,
-        calculatedFrom: visitorsData.length + ' visitors'
-      })
-
-      console.log('📊 SETTING STATS TO STATE:', {
-        todayCheckIns: todayCheckIns.length,
-        activeVisitors: activeVisitors.length,
-        pendingCheckOuts: pendingCheckOuts
-      })
-
       setStats(prev => ({
         ...prev,
-        todayCheckIns: todayCheckIns.length,
+        todayCheckIns: dateFilteredVisitors.length,
         activeVisitors: activeVisitors.length,
         pendingCheckOuts: pendingCheckOuts,
         avgCheckInTime: '2.5 min'
@@ -279,7 +254,7 @@ const ReceptionDashboard = () => {
         availableBadges: 0
       })
     }
-  }, [profile, user?.id])
+  }, [profile, user?.id, selectedDate])
 
   // Real-time updates subscription
   useEffect(() => {
@@ -899,11 +874,32 @@ const ReceptionDashboard = () => {
           <Card className="rounded-2xl shadow-sm border-none ring-1 ring-gray-100 dark:ring-slate-800 dark:bg-slate-900">
             <Flex alignItems="start" justifyContent="between">
               <div>
-                <Text className="text-gray-500 dark:text-gray-400 font-medium">Today's Check-ins</Text>
+                <Text className="text-gray-500 dark:text-gray-400 font-medium">
+                  {selectedDate.toDateString() === new Date().toDateString() ? "Today's Check-ins" : `${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}'s Check-ins`}
+                </Text>
                 <Metric className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.todayCheckIns}</Metric>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
-                <UserPlus className="text-blue-600 dark:text-blue-400" size={24} />
+              <div className="relative">
+                <button
+                  onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                  className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                >
+                  <Calendar className="text-blue-600 dark:text-blue-400" size={24} />
+                </button>
+                {isCalendarOpen && (
+                  <div className="absolute right-0 top-full mt-2 z-50">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-800 p-2">
+                      <DatePicker
+                        selected={selectedDate}
+                        onChange={(date) => {
+                          setSelectedDate(date)
+                          setIsCalendarOpen(false)
+                        }}
+                        inline
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </Flex>
           </Card>
