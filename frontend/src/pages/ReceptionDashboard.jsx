@@ -30,6 +30,7 @@ import VisitorDetailModal from '../components/VisitorDetailModal'
 import NotificationListener from '../components/NotificationListener'
 import { useAuth } from '../contexts/AuthContext'
 import GuestInviteModal from '../components/GuestInviteModal'
+import BadgeSelector from '../components/BadgeSelector'
 
 const ReceptionDashboard = () => {
   const { profile, user } = useAuth()
@@ -42,6 +43,7 @@ const ReceptionDashboard = () => {
   })
   const [visitors, setVisitors] = useState([])
   const [hosts, setHosts] = useState([])
+  const [availableBadges, setAvailableBadges] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [showCheckInModal, setShowCheckInModal] = useState(false)
   const [showQRModal, setShowQRModal] = useState(false)
@@ -64,6 +66,7 @@ const ReceptionDashboard = () => {
     company: '',
     purpose: '',
     host_id: '',
+    badge_id: '',
     floor: '',
     expected_duration: 4,
     visit_date: new Date().toISOString().split('T')[0],
@@ -83,6 +86,15 @@ const ReceptionDashboard = () => {
       setHosts(hostsData || [])
     } catch (error) {
       console.error('❌ Failed to load hosts:', error)
+    }
+  }
+
+  const loadAvailableBadges = async () => {
+    try {
+      const badges = await ApiService.getAvailableBadges()
+      setAvailableBadges(badges || [])
+    } catch (error) {
+      console.error('Failed to load available badges:', error)
     }
   }
 
@@ -241,6 +253,7 @@ const ReceptionDashboard = () => {
       loadData()
       loadHosts()
       loadBadgeStats()
+      loadAvailableBadges()
     } else if (!profile && !user) {
       // Clear data when logged out
       console.log('🔄 User logged out - Clearing data')
@@ -266,6 +279,7 @@ const ReceptionDashboard = () => {
       // Refresh data on any visitor change
       loadData(true)
       loadBadgeStats()
+      loadAvailableBadges()
     })
 
     return () => {
@@ -412,8 +426,8 @@ const ReceptionDashboard = () => {
       const createdVisitor = await ApiService.createVisitor(newVisitor)
       console.log('✅ Visitor created:', createdVisitor)
 
-      // Auto check-in the newly created visitor (badge will be assigned automatically)
-      const checkedInVisitor = await ApiService.checkIn(createdVisitor.id)
+      // Auto check-in the newly created visitor (badge will be assigned automatically if badge_id is null)
+      const checkedInVisitor = await ApiService.checkIn(createdVisitor.id, newVisitor.badge_id)
       console.log('✅ Visitor checked in')
 
       // Show success toast
@@ -427,6 +441,7 @@ const ReceptionDashboard = () => {
         company: '',
         purpose: '',
         host_id: '',
+        badge_id: '',
         floor: '',
         expected_duration: 4,
         visit_date: new Date().toISOString().split('T')[0],
@@ -1300,6 +1315,14 @@ const ReceptionDashboard = () => {
                       value={newVisitor.floor}
                       onChange={(floor) => setNewVisitor({ ...newVisitor, floor })}
                       label="Floor Assignment"
+                      required={false}
+                    />
+
+                    <BadgeSelector
+                      badges={availableBadges}
+                      value={newVisitor.badge_id}
+                      onChange={(badgeId) => setNewVisitor({ ...newVisitor, badge_id: badgeId })}
+                      label="Assign Badge"
                       required={false}
                     />
 
