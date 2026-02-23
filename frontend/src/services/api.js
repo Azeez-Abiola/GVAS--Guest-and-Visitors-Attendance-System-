@@ -443,21 +443,19 @@ class ApiService {
       if (visitor.host_id) {
         notifications.push({
           user_id: visitor.host_id,
-          visitor_id: visitor.id,
-          host_id: visitor.host_id,
           type: isDelivery ? 'delivery_registered' : 'visitor_pre_registered',
           title: isDelivery ? 'New Delivery Registered' : 'Guest Pre-registered',
           message: isDelivery
             ? `A new delivery from ${visitor.company || 'N/A'} has been registered for you. Item: ${visitor.purpose || 'N/A'}`
             : `New visitor ${visitor.name} from ${visitor.company || 'N/A'} has pre-registered to visit you on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
           is_read: false,
-          template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
-          status: 'unread',
           data: {
             visitor_id: visitor.id,
             host_id: visitor.host_id,
             role: 'host',
-            visitor_type: visitor.visitor_type
+            visitor_type: visitor.visitor_type,
+            template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
+            status: 'unread'
           },
           created_at: new Date().toISOString()
         });
@@ -474,21 +472,19 @@ class ApiService {
         admins.forEach(admin => {
           notifications.push({
             user_id: admin.id,
-            visitor_id: visitor.id,
-            host_id: visitor.host_id,
             type: isDelivery ? 'delivery_registered' : 'visitor_pre_registered',
             title: isDelivery ? 'New Delivery Registered' : 'Guest Pre-registered',
             message: isDelivery
               ? `New delivery for ${visitor.host_name || 'Front Desk'} from ${visitor.company || 'N/A'} has been recorded.`
               : `New visitor ${visitor.name} has pre-registered to visit ${visitor.host_name} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
             is_read: false,
-            template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
-            status: 'unread',
             data: {
               visitor_id: visitor.id,
               host_id: visitor.host_id,
               role: 'admin',
-              visitor_type: visitor.visitor_type
+              visitor_type: visitor.visitor_type,
+              template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
+              status: 'unread'
             },
             created_at: new Date().toISOString()
           });
@@ -534,22 +530,20 @@ class ApiService {
             if (isAssigned) {
               notifications.push({
                 user_id: receptionist.id,
-                visitor_id: visitor.id,
-                host_id: visitor.host_id,
                 type: isDelivery ? 'delivery_registered' : 'visitor_pre_registered',
                 title: isDelivery ? 'New Delivery Registered' : 'Guest Pre-registered',
                 message: isDelivery
                   ? `New delivery recorded for floor ${visitor.floor_number} (${visitor.host_name || 'Front Desk'})`
                   : `New visitor ${visitor.name} will visit floor ${visitor.floor_number} on ${visitor.visit_date || new Date().toISOString().split('T')[0]}`,
                 is_read: false,
-                template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
-                status: 'unread',
                 data: {
                   visitor_id: visitor.id,
                   host_id: visitor.host_id,
                   role: 'reception',
                   floor: visitor.floor_number,
-                  visitor_type: visitor.visitor_type
+                  visitor_type: visitor.visitor_type,
+                  template: isDelivery ? 'delivery_arrival' : 'visitor_pre_registered',
+                  status: 'unread'
                 },
                 created_at: new Date().toISOString()
               });
@@ -696,7 +690,16 @@ class ApiService {
 
     if (fetchError) throw fetchError;
 
-    if (!badge || badge.status !== 'available') {
+    if (!badge) {
+      throw new Error(`Badge not found.`);
+    }
+
+    if (badge.status !== 'available') {
+      // If the badge is already assigned to THIS visitor, we can treat it as success
+      if (badge.status === 'issued' && badge.current_visitor_id === visitorId) {
+        console.log(`✅ Badge ${badgeId} is already assigned to visitor ${visitorId}`);
+        return badge;
+      }
       throw new Error(`The selected badge is not available.`);
     }
 
