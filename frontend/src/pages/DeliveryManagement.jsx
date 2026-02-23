@@ -4,7 +4,8 @@ import {
     Package, Plus, Search, Filter,
     Clock, MapPin, User, Building2,
     UserCheck, LogOut, MoreVertical,
-    Calendar, Phone, CreditCard, AlertCircle
+    Calendar, Phone, CreditCard, AlertCircle,
+    ChevronDown, X
 } from 'lucide-react'
 import { Card, Title, Text, Metric, Grid, Badge, Button, Table, TableHead, TableRow, TableHeaderCell, TableBody, TableCell } from '@tremor/react'
 import DashboardLayout from '../components/DashboardLayout'
@@ -25,6 +26,8 @@ const DeliveryManagement = () => {
     const [deliveryToCheckout, setDeliveryToCheckout] = useState(null)
     const [searchTerm, setSearchTerm] = useState('')
     const [filterStatus, setFilterStatus] = useState('all')
+    const [filterDate, setFilterDate] = useState('')
+    const [visibleCount, setVisibleCount] = useState(10)
 
     useEffect(() => {
         loadData()
@@ -90,12 +93,22 @@ const DeliveryManagement = () => {
         setIsDetailOpen(true)
     }
 
-    const filteredDeliveries = deliveries.filter(d =>
-        (d.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const filteredDeliveries = deliveries.filter(d => {
+        const matchesSearch = (d.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             d.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            d.purpose?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (filterStatus === 'all' || d.status === filterStatus)
-    )
+            d.purpose?.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesStatus = (filterStatus === 'all' || d.status === filterStatus);
+
+        let matchesDate = true;
+        if (filterDate) {
+            const deliveryDate = d.check_in_time ? d.check_in_time.split('T')[0] : '';
+            matchesDate = deliveryDate === filterDate;
+        }
+
+        return matchesSearch && matchesStatus && matchesDate;
+    })
+
+    const displayedDeliveries = filteredDeliveries.slice(0, visibleCount)
 
     const stats = {
         active: deliveries.filter(d => d.status === 'checked_in').length,
@@ -164,15 +177,35 @@ const DeliveryManagement = () => {
                             className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 outline-none text-gray-900 dark:text-white"
                         />
                     </div>
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="px-4 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 outline-none text-gray-900 dark:text-white cursor-pointer"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="checked_in">In Building</option>
-                        <option value="checked_out">Completed</option>
-                    </select>
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <div className="relative flex-1 md:flex-none">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                            <input
+                                type="date"
+                                value={filterDate}
+                                onChange={(e) => setFilterDate(e.target.value)}
+                                className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 outline-none text-gray-900 dark:text-white cursor-pointer w-full"
+                            />
+                        </div>
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="flex-1 md:flex-none px-4 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 outline-none text-gray-900 dark:text-white cursor-pointer"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="checked_in">In Building</option>
+                            <option value="checked_out">Completed</option>
+                        </select>
+                        {filterDate && (
+                            <button
+                                onClick={() => setFilterDate('')}
+                                className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                title="Clear date filter"
+                            >
+                                <X size={18} />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Deliveries Table */}
@@ -207,7 +240,7 @@ const DeliveryManagement = () => {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredDeliveries.map((delivery) => (
+                                displayedDeliveries.map((delivery) => (
                                     <TableRow
                                         key={delivery.id}
                                         className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800/40 transition-colors"
@@ -289,6 +322,22 @@ const DeliveryManagement = () => {
                         </TableBody>
                     </Table>
                 </Card>
+
+                {/* See More Button */}
+                {!loading && filteredDeliveries.length > visibleCount && (
+                    <div className="flex flex-col items-center justify-center pt-2 pb-6">
+                        <button
+                            onClick={() => setVisibleCount(prev => prev + 10)}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-sm group"
+                        >
+                            <span>See More Deliveries</span>
+                            <ChevronDown size={18} className="group-hover:translate-y-0.5 transition-transform" />
+                        </button>
+                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            Showing {Math.min(visibleCount, filteredDeliveries.length)} of {filteredDeliveries.length} deliveries
+                        </p>
+                    </div>
+                )}
             </div>
 
             <DeliveryFormModal
