@@ -60,9 +60,9 @@ BEGIN
     INSERT INTO system_stats (id, total_revenue, active_organizations, total_visitors_logged, last_updated)
     SELECT 
         COALESCE((SELECT id FROM system_stats LIMIT 1), gen_random_uuid()),
-        (SELECT SUM(amount_paid) FROM system_subscriptions WHERE status = 'active'),
-        (SELECT COUNT(*) FROM system_organizations WHERE status = 'active'),
-        (SELECT COUNT(*) FROM visitors),
+        COALESCE((SELECT SUM(amount_paid) FROM system_subscriptions WHERE status = 'active'), 0),
+        COALESCE((SELECT COUNT(*) FROM system_organizations WHERE status = 'active'), 0),
+        COALESCE((SELECT COUNT(*) FROM visitors), 0),
         NOW()
     ON CONFLICT (id) DO UPDATE SET
         total_revenue = EXCLUDED.total_revenue,
@@ -72,7 +72,7 @@ BEGIN
     
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 5. Triggers to keep stats in sync
 CREATE TRIGGER trigger_update_stats_org

@@ -56,7 +56,7 @@ BEGIN
     
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Drop trigger if exists and recreate
 DROP TRIGGER IF EXISTS populate_host_details ON visitors;

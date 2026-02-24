@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS system_stats (
 
 -- 2. Create the internal calculation logic as a STANDARD function
 -- This can be called both manually and by a trigger
+-- Added SECURITY DEFINER to allow non-admins to trigger the update
 CREATE OR REPLACE FUNCTION refresh_system_stats_internal()
 RETURNS VOID AS $$
 BEGIN
@@ -26,7 +27,7 @@ BEGIN
         total_visitors_logged = EXCLUDED.total_visitors_logged,
         last_updated = EXCLUDED.last_updated;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 3. Create the TRIGGER wrapper function
 CREATE OR REPLACE FUNCTION update_system_stats_trigger_fn()
@@ -35,7 +36,7 @@ BEGIN
     PERFORM refresh_system_stats_internal();
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 4. Drop existing trigger if it exists
 DROP TRIGGER IF EXISTS trigger_update_stats_visitors ON visitors;
