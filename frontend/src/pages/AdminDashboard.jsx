@@ -122,7 +122,7 @@ const AdminDashboard = () => {
       const completedDeliveries = allDeliveries.filter(v => v.status === 'checked_out').length
 
       setStats({
-        totalVisitors: visitorsData.length,
+        totalVisitors: visitorsData.totalCount || visitorsData.length,
         activeVisitors: active.length,
         todayCheckIns: dateFilteredVisitors.length,
         pendingApprovals: pending.length,

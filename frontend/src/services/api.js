@@ -168,7 +168,7 @@ class ApiService {
           *,
           host:hosts!visitors_host_id_fkey(id, name, email, tenant_id),
           tenant:tenants(id, name, floor_number)
-        `)
+        `, { count: 'exact' })
         .order('created_at', { ascending: false });
 
       // Apply filters
@@ -186,8 +186,17 @@ class ApiService {
           .lte('created_at', `${filters.date}T23:59:59`);
       }
 
-      const { data, error } = await query;
+      // Increase default limit to 5000 if not specified (Supabase default is 1000)
+      query = query.limit(filters.limit || 5000);
+
+      const { data, count, error } = await query;
       if (error) throw error;
+      
+      // Attach count to the data array so metrics can use the real total
+      if (data && count !== null) {
+        data.totalCount = count;
+      }
+      
       return data;
     }
 

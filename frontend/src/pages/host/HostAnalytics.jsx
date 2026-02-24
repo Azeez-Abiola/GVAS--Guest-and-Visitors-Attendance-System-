@@ -30,7 +30,7 @@ const HostAnalytics = () => {
     try {
       // Fetch all visitors for this host
       const visitors = await ApiService.getVisitors({ host_id: profile.id });
-      const totalVisitors = visitors.length;
+      const totalVisitors = visitors.totalCount || visitors.length;
       const pendingApprovals = visitors.filter(v => v.status === 'pending' || v.status === 'pending_approval').length;
       const checkedIn = visitors.filter(v => v.status === 'checked_in').length;
       const checkedOut = visitors.filter(v => v.status === 'checked_out').length;

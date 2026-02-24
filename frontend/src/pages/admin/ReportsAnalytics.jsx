@@ -373,10 +373,12 @@ const ReportsAnalytics = () => {
                         <div className="flex-1">
                           <Text className="text-blue-100 font-medium">Total Visitors</Text>
                           <Metric className="text-white text-4xl font-bold mt-2">
-                            {/* Sum visitors from the filtered chart data */}
-                            {loading ? '...' : visitorData.reduce((acc, curr) => acc + curr.visitors, 0)}
+                            {/* Use totalCount if available from API, otherwise sum from filtered data */}
+                            {loading ? '...' : (visitors.totalCount || visitorData.reduce((acc, curr) => acc + curr.visitors, 0))}
                           </Metric>
-                          <Text className="text-sm text-blue-100 mt-1">In selected period</Text>
+                          <Text className="text-sm text-blue-100 mt-1">
+                            {visitors.totalCount ? 'System Total' : 'In selected period'}
+                          </Text>
                         </div>
                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                           <ChartBarIcon className="h-6 w-6 text-white" />

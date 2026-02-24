@@ -26,7 +26,9 @@ const ReceptionAnalytics = () => {
       setLoading(true)
       const visitors = await ApiService.getVisitors({ status: 'all' })
 
-      // Filter by assigned floors if receptionist
+      // Handle statistics properly with the real total count
+      const totalVisitorsCount = visitors.totalCount || visitors.length
+
       // Filter by assigned floors if receptionist
       let filteredVisitors = visitors
       if (profile?.role === 'reception' && profile?.assigned_floors?.length > 0) {
@@ -101,7 +103,7 @@ const ReceptionAnalytics = () => {
         .sort((a, b) => parseInt(a.time) - parseInt(b.time))
 
       setAnalytics({
-        totalVisitors: filteredVisitors.length,
+        totalVisitors: totalVisitorsCount,
         todayVisitors: todayVisitors.length,
         weeklyVisitors: weeklyData,
         floorDistribution,
