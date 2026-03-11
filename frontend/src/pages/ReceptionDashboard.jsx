@@ -426,11 +426,16 @@ const ReceptionDashboard = () => {
     setWalkInLoading(true);
     try {
       console.log('🚀 Creating visitor with data:', newVisitor)
-      const createdVisitor = await ApiService.createVisitor(newVisitor)
+      // Ensure badge_id is null if empty string
+      const visitorData = {
+        ...newVisitor,
+        badge_id: newVisitor.badge_id ? newVisitor.badge_id : null
+      };
+      const createdVisitor = await ApiService.createVisitor(visitorData)
       console.log('✅ Visitor created:', createdVisitor)
 
       // Auto check-in the newly created visitor (badge will be assigned automatically if badge_id is null)
-      const checkedInVisitor = await ApiService.checkIn(createdVisitor.id, newVisitor.badge_id)
+      const checkedInVisitor = await ApiService.checkIn(createdVisitor.id, visitorData.badge_id)
       console.log('✅ Visitor checked in')
 
       // Show success toast

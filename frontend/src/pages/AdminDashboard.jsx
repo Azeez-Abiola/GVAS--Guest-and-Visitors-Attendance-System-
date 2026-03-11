@@ -166,7 +166,12 @@ const AdminDashboard = () => {
     if (addVisitorLoading) return;
     setAddVisitorLoading(true);
     try {
-      await ApiService.createVisitor(newVisitor)
+      // Ensure badge_id is null if empty string
+      const visitorData = {
+        ...newVisitor,
+        badge_id: newVisitor.badge_id ? newVisitor.badge_id : null
+      };
+      await ApiService.createVisitor(visitorData)
 
       // Show success toast
       showToast(`Visitor ${newVisitor.name} added successfully!`, 'success');
