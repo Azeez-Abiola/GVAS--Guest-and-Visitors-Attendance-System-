@@ -45,6 +45,7 @@ const AdminDashboard = () => {
   const [showQRModal, setShowQRModal] = useState(false)
   const [qrInput, setQrInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [addVisitorLoading, setAddVisitorLoading] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [newVisitor, setNewVisitor] = useState({
@@ -162,6 +163,8 @@ const AdminDashboard = () => {
   }, [selectedDate])
 
   const handleAddVisitor = async () => {
+    if (addVisitorLoading) return;
+    setAddVisitorLoading(true);
     try {
       await ApiService.createVisitor(newVisitor)
 
@@ -187,6 +190,8 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Failed to add visitor:', error)
       showToast('Failed to add visitor. Please try again.', 'error');
+    } finally {
+      setAddVisitorLoading(false);
     }
   }
 
@@ -947,11 +952,11 @@ const AdminDashboard = () => {
                       </button>
                       <button
                         onClick={handleAddVisitor}
-                        disabled={!newVisitor.name || !newVisitor.purpose}
+                        disabled={!newVisitor.name || !newVisitor.purpose || addVisitorLoading}
                         className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <UserPlus size={18} />
-                        Add Visitor
+                        {addVisitorLoading ? 'Adding...' : 'Add Visitor'}
                       </button>
                     </div>
                   </div>

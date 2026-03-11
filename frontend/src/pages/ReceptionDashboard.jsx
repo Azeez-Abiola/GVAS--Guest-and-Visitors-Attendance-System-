@@ -55,6 +55,7 @@ const ReceptionDashboard = () => {
   const [visitorToCheckOut, setVisitorToCheckOut] = useState(null)
   const [visitorToCheckIn, setVisitorToCheckIn] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [walkInLoading, setWalkInLoading] = useState(false)
   const [qrInput, setQrInput] = useState('')
   const [printSearch, setPrintSearch] = useState('')
   const [printVisitor, setPrintVisitor] = useState(null)
@@ -421,6 +422,8 @@ const ReceptionDashboard = () => {
   }
 
   const handleWalkInCheckIn = async () => {
+    if (walkInLoading) return;
+    setWalkInLoading(true);
     try {
       console.log('🚀 Creating visitor with data:', newVisitor)
       const createdVisitor = await ApiService.createVisitor(newVisitor)
@@ -460,6 +463,8 @@ const ReceptionDashboard = () => {
       console.error('❌ Walk-in check-in failed:', error)
       console.error('Error details:', error.message)
       alert(`Failed to check in visitor: ${error.message || 'Please try again.'}`)
+    } finally {
+      setWalkInLoading(false);
     }
   }
 
@@ -1360,11 +1365,11 @@ const ReceptionDashboard = () => {
                     </button>
                     <button
                       onClick={handleWalkInCheckIn}
-                      disabled={!newVisitor.name || !newVisitor.purpose}
+                      disabled={!newVisitor.name || !newVisitor.purpose || walkInLoading}
                       className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       <UserPlus size={18} />
-                      Check In Visitor
+                      {walkInLoading ? 'Checking In...' : 'Check In Visitor'}
                     </button>
                   </div>
                 </motion.div>
