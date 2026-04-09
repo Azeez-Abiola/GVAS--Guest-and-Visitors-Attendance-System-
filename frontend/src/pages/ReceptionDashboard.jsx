@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import DashboardLayout from '../components/DashboardLayout'
+import TimePicker from '../components/TimePicker'
 import ApiService from '../services/api'
 import showToast from '../utils/toast'
 import HostSelector from '../components/HostSelector'
@@ -1295,15 +1296,11 @@ const ReceptionDashboard = () => {
                           className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Visit Time</label>
-                        <input
-                          type="time"
-                          value={newVisitor.visit_time}
-                          onChange={(e) => setNewVisitor({ ...newVisitor, visit_time: e.target.value })}
-                          className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                        />
-                      </div>
+                      <TimePicker
+                        label="Visit Time"
+                        value={newVisitor.visit_time}
+                        onChange={(val) => setNewVisitor({ ...newVisitor, visit_time: val })}
+                      />
                     </div>
 
                     <HostSelector

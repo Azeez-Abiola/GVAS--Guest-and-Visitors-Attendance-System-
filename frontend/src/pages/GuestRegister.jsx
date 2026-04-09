@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import ApiService from '../services/api'
+import TimePicker from '../components/TimePicker'
 import GvasLogo from '../components/GvasLogo'
 
 const GuestRegister = () => {
@@ -582,21 +583,11 @@ const GuestRegister = () => {
                       {errors.visit_date && <p className="text-red-500 text-xs mt-1 font-medium">{errors.visit_date}</p>}
                     </div>
 
-                    <div>
-                      <label className={labelClasses}>Expected Time</label>
-                      <div className="relative">
-                        <DatePicker
-                          selected={formData.visit_time ? new Date(`2000-01-01T${formData.visit_time}`) : null}
-                          onChange={(date) => setFormData({ ...formData, visit_time: date.toTimeString().split(' ')[0].substring(0, 5) })}
-                          showTimeSelect
-                          showTimeSelectOnly
-                          timeIntervals={15}
-                          timeCaption="Time"
-                          dateFormat="h:mm aa"
-                          className={inputClasses}
-                        />
-                      </div>
-                    </div>
+                    <TimePicker
+                      label="Expected Time"
+                      value={formData.visit_time}
+                      onChange={(val) => setFormData({ ...formData, visit_time: val })}
+                    />
                   </div>
 
                 </div>

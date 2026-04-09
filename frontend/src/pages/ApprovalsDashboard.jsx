@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
+import TimePicker from '../components/TimePicker'
 import ApiService from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 import GuestInviteModal from '../components/GuestInviteModal'
@@ -433,17 +434,11 @@ const ApprovalsDashboard = () => {
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Expected Time
-                    </label>
-                    <input
-                      type="time"
-                      value={formData.visit_time}
-                      onChange={(e) => setFormData({ ...formData, visit_time: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 focus:border-transparent transition-all outline-none"
-                    />
-                  </div>
+                  <TimePicker
+                    label="Expected Time"
+                    value={formData.visit_time}
+                    onChange={(val) => setFormData({ ...formData, visit_time: val })}
+                  />
                 </div>
 
                 <div className="space-y-1">

@@ -32,6 +32,7 @@ import HostAnalytics from './pages/host/HostAnalytics'
 import BadgeManagementHost from './pages/host/BadgeManagement'
 import VisitorKiosk from './pages/receptionist/VisitorKiosk'
 import DeliveryKiosk from './pages/receptionist/DeliveryKiosk'
+import BulkUpload from './pages/receptionist/BulkUpload'
 import AdminVisitorPage from './pages/admin/AdminVisitorPage'
 import Resources from './pages/Resources'
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard'
@@ -112,6 +113,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DeliveryKiosk />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reception/bulk-upload"
+                element={
+                  <ProtectedRoute>
+                    <BulkUpload />
                   </ProtectedRoute>
                 }
               />

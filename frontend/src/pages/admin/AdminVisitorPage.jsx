@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../../services/api';
 import DashboardLayout from '../../components/DashboardLayout';
+import TimePicker from '../../components/TimePicker';
 import { CheckCircle, X, User, CreditCard } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import BadgeSelector from '../../components/BadgeSelector';
@@ -211,19 +212,11 @@ const AdminVisitorPage = () => {
                                 minDate={new Date()}
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Visit Time</label>
-                            <DatePicker
-                                selected={formData.visit_time ? new Date(`2000-01-01T${formData.visit_time}`) : null}
-                                onChange={(date) => setFormData(prev => ({ ...prev, visit_time: date.toTimeString().split(' ')[0].substring(0, 5) }))}
-                                showTimeSelect
-                                showTimeSelectOnly
-                                timeIntervals={15}
-                                timeCaption="Time"
-                                dateFormat="h:mm aa"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                            />
-                        </div>
+                        <TimePicker
+                            label="Visit Time"
+                            value={formData.visit_time}
+                            onChange={(val) => setFormData(prev => ({ ...prev, visit_time: val }))}
+                        />
                         <div className="md:col-span-2">
                             <BadgeSelector
                                 badges={availableBadges}

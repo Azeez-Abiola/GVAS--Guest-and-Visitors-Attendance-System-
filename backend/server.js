@@ -1,10 +1,25 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const multer = require('multer');
 const { createClient } = require('@supabase/supabase-js');
 const QRCode = require('qrcode');
 const nodemailer = require('nodemailer');
+
+// Configure multer for CSV file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'), false);
+    }
+  }
+});
 
 
 const app = express();
@@ -1134,6 +1149,140 @@ async function generateGuestCode() {
     return code;
   }
   return data;
+}
+
+// Bulk upload visitors from CSV
+app.post('/api/bulk-upload', upload.single('csv'), async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not initialized. Check backend environment variables.' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No CSV file uploaded' });
+    }
+
+    const csvContent = req.file.buffer.toString('utf-8');
+    const lines = csvContent.split(/\r?\n/).filter(line => line.trim());
+
+    if (lines.length < 2) {
+      return res.status(400).json({ error: 'CSV file must have a header row and at least one data row' });
+    }
+
+    // Parse header
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+    const requiredHeaders = ['name', 'host', 'purpose'];
+    const missing = requiredHeaders.filter(h => !headers.includes(h));
+    if (missing.length > 0) {
+      return res.status(400).json({ error: `Missing required columns: ${missing.join(', ')}. Required: name, host, purpose` });
+    }
+
+    // Parse the date parameter (the date the visitors came in)
+    const visitDate = req.body.visit_date;
+    if (!visitDate) {
+      return res.status(400).json({ error: 'visit_date is required (the date visitors were checked in)' });
+    }
+
+    const results = { success: 0, errors: [] };
+
+    // Process each row
+    for (let i = 1; i < lines.length; i++) {
+      const values = parseCSVRow(lines[i]);
+      if (values.length === 0) continue;
+
+      const row = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index]?.trim() || '';
+      });
+
+      // Validate required fields
+      if (!row.name || !row.host || !row.purpose) {
+        results.errors.push({ row: i + 1, error: 'Missing required field (name, host, or purpose)', data: row.name || 'empty row' });
+        continue;
+      }
+
+      try {
+        const visitorId = await generateVisitorId();
+        const guestCode = await generateGuestCode();
+
+        // Build check-in/check-out times from date and optional time fields
+        const checkInTime = row.check_in_time
+          ? new Date(`${visitDate}T${row.check_in_time}`).toISOString()
+          : new Date(`${visitDate}T09:00:00`).toISOString();
+
+        const checkOutTime = row.check_out_time
+          ? new Date(`${visitDate}T${row.check_out_time}`).toISOString()
+          : null;
+
+        // Look up host details
+        const { data: hostData } = await supabase
+          .from('hosts')
+          .select('id, name, tenant_id, floor_number')
+          .eq('name', row.host)
+          .single();
+
+        const { error: insertError } = await supabase
+          .from('visitors')
+          .insert([{
+            visitor_id: visitorId,
+            guest_code: guestCode,
+            name: row.name,
+            email: row.email || null,
+            phone: row.phone || null,
+            company: row.company || null,
+            host_id: hostData?.id || null,
+            host_name: row.host,
+            tenant_id: hostData?.tenant_id || null,
+            floor_number: row.floor ? parseInt(row.floor) : (hostData?.floor_number || null),
+            purpose: row.purpose,
+            status: checkOutTime ? 'checked_out' : 'checked_in',
+            check_in_time: checkInTime,
+            check_out_time: checkOutTime,
+            consent_given: true,
+            consent_timestamp: checkInTime,
+            created_at: checkInTime
+          }]);
+
+        if (insertError) {
+          results.errors.push({ row: i + 1, error: insertError.message, data: row.name });
+        } else {
+          results.success++;
+        }
+      } catch (rowError) {
+        results.errors.push({ row: i + 1, error: rowError.message, data: row.name });
+      }
+    }
+
+    res.json({
+      message: `Bulk upload complete: ${results.success} visitors added successfully`,
+      success: results.success,
+      errors: results.errors,
+      total: lines.length - 1
+    });
+  } catch (error) {
+    console.error('Bulk upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Parse a single CSV row handling quoted fields
+function parseCSVRow(row) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < row.length; i++) {
+    const char = row[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  return result;
 }
 
 // Error handling middleware

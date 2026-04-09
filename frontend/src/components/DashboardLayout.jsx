@@ -27,7 +27,8 @@ import {
   Moon,
   CreditCard,
   Building2,
-  Package
+  Package,
+  Upload
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GvasLogo from './GvasLogo'
@@ -177,10 +178,12 @@ const DashboardLayout = ({ children }) => {
     if (profile?.role === 'admin') {
       items.push({ name: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, feature: 'admin' })
       items.push({ name: 'Deliveries', path: '/deliveries', icon: Package, feature: 'admin' })
+      items.push({ name: 'Bulk Upload', path: '/reception/bulk-upload', icon: Upload, feature: 'admin' })
       items.push({ name: 'User Management', path: '/user-management', icon: Users, feature: 'admin' })
     } else if (profile?.role === 'reception') {
       items.push({ name: 'Reception', path: '/reception', icon: UserCheck, feature: 'reception' })
       items.push({ name: 'Deliveries', path: '/deliveries', icon: Package, feature: 'reception' })
+      items.push({ name: 'Bulk Upload', path: '/reception/bulk-upload', icon: Upload, feature: 'reception' })
     } else if (profile?.role === 'host') {
       items.push({ name: 'Approvals', path: '/approvals', icon: Users, feature: 'approvals' })
       items.push({ name: 'Host Analytics', path: '/host/host-analytics', icon: TrendingUp, feature: 'host-analytics' })

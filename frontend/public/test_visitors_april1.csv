@@ -1,0 +1,11 @@
+name,host,purpose,email,phone,company,floor,check_in_time,check_out_time
+Adebayo Ogunleye,John Smith,Business Meeting,adebayo@techcorp.ng,08031234567,TechCorp Nigeria,3,08:45,12:30
+Funke Adeyemi,John Smith,Interview,,08052345678,,,09:15,11:00
+Chinedu Okeke,John Smith,Delivery,chinedu@logistix.com,07063456789,Logistix Ltd,3,10:00,10:30
+Amina Bello,John Smith,Personal Visit,amina.bello@gmail.com,09074567890,,,10:45,14:00
+Tunde Fashola,John Smith,Maintenance,,08085678901,QuickFix Services,3,11:00,16:00
+Ngozi Eze,John Smith,Business Meeting,ngozi@financeplus.com,07096789012,Finance Plus,3,11:30,13:45
+Ibrahim Musa,John Smith,Interview,ibrahim.m@outlook.com,08107890123,,,13:00,14:30
+Blessing Nwankwo,John Smith,Business Meeting,,09018901234,Zenith Solutions,3,13:30,16:00
+Emeka Uche,John Smith,Delivery,emeka@swiftdeliver.ng,08129012345,Swift Deliver,3,14:00,14:20
+Folake Balogun,John Smith,Personal Visit,folake.b@yahoo.com,07030123456,,,15:00,17:00

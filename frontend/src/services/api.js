@@ -1229,6 +1229,24 @@ class ApiService {
   async getTransactions() {
     return this.request('/super-admin/transactions');
   }
+
+  async bulkUploadVisitors(csvFile, visitDate) {
+    const formData = new FormData();
+    formData.append('csv', csvFile);
+    formData.append('visit_date', visitDate);
+
+    const response = await fetch(`${API_BASE}/bulk-upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Bulk upload failed');
+    }
+
+    return response.json();
+  }
 }
 
 export default new ApiService();

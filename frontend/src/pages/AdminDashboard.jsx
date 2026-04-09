@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
+import TimePicker from '../components/TimePicker'
 import ApiService from '../services/api'
 import showToast from '../utils/toast'
 import { useAuth } from '../contexts/AuthContext'
@@ -872,21 +873,11 @@ const AdminDashboard = () => {
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Visit Time
-                        </label>
-                        <DatePicker
-                          selected={newVisitor.visit_time ? new Date(`2000-01-01T${newVisitor.visit_time}`) : null}
-                          onChange={(date) => setNewVisitor({ ...newVisitor, visit_time: date.toTimeString().split(' ')[0].substring(0, 5) })}
-                          showTimeSelect
-                          showTimeSelectOnly
-                          timeIntervals={15}
-                          timeCaption="Time"
-                          dateFormat="h:mm aa"
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-transparent"
-                        />
-                      </div>
+                      <TimePicker
+                        label="Visit Time"
+                        value={newVisitor.visit_time}
+                        onChange={(val) => setNewVisitor({ ...newVisitor, visit_time: val })}
+                      />
                     </div>
 
                     <HostSelector
